@@ -13,7 +13,6 @@ export default function Home() {
       <HomeHeader username={selfAccount.general?.username} />
       <div className="h-full flex flex-row bg-slate-300 m-2 rounded-xl">
         <RoomList />
-
         <Outlet />
       </div>
     </div>

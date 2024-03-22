@@ -114,3 +114,20 @@ export async function fetchAddMessage(payload: {
   //return { success: true as const, isLogged: true as const, data };
   console.log(result);
 }
+
+export async function fetchLogin(payload: { email: string, password: string}) {
+  const response = await fetcher(serverRoute.auth.login, payload)
+  if (!response.payload.success) {
+    switch (response.status) {
+      case 401:
+        return { success: false as const, isAuthorized: false as const }
+      default:
+        return { success: false as const}
+    }
+  }
+  console.log(response.payload)
+  if (response.payload.code) {
+    return { success: true as const, isCodeNeeded: true as const}
+  }
+  return { success: true as const, isCodeNeeded: false as const}
+}

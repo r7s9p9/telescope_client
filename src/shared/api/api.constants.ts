@@ -29,6 +29,11 @@ export type ReadRoomInfoValues = (typeof roomInfoFields)[
 export const endpoint = "http://localhost:3000" as const;
 
 export const serverRoute = {
+  auth: {
+    register: endpoint + "/api/auth/register",
+    login: endpoint + "/api/auth/login",
+    code: endpoint + "/api/auth/code"
+  },
   account: {
     read: endpoint + "/api/account/read",
     update: endpoint + "/api/account/update",

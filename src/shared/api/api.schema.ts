@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { privacyRule } from "./api.constants";
 import { RoomId, UserId } from "../../types";
+import { env } from "../lib/env";
 
 const userIdSchema = z
   .string()
@@ -16,10 +17,24 @@ export const roomIdSchema = z
     return id as RoomId;
   });
 
-export const usernameSchema = z.string().min(6).max(24);
-export const nameSchema = z.string().min(6).max(24);
+export const emailSchema = z.string().email();
+export const usernameSchema = z.string().min(env.usernameRange.min).max(env.usernameRange.max);
+export const passwordSchema = z.string().min(env.passwordRange.min).max(env.passwordRange.max);
+
+export const nameSchema = z.string().min(1).max(24);
 export const bioSchema = z.string().min(1).max(80);
 export const lastSeenSchema = z.string();
+
+export const loginFormSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema
+})
+
+export const registerFormSchema = z.object({
+  email: emailSchema,
+  username: usernameSchema,
+  password: passwordSchema
+})
 
 const privacyRuleSchema = z.union([
   z.literal(privacyRule.everybody),

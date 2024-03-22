@@ -12,12 +12,13 @@ import "./index.css";
 import Welcome from "../pages/welcome.tsx";
 import {
   fetchAddMessage,
+  fetchLogin,
   fetchReadMessages,
   fetchRoomList,
   fetchSelfAccount,
 } from "../shared/api/api.account.ts";
 import { Room } from "../widgets/room-list/room.tsx";
-import { roomIdSchema } from "../shared/api/api.schema.ts";
+import { loginFormSchema, roomIdSchema } from "../shared/api/api.schema.ts";
 import { RoomId } from "../types.ts";
 
 const homeLoader = async () => {
@@ -25,6 +26,8 @@ const homeLoader = async () => {
   const roomList = await fetchRoomList({ min: "0", max: "10" });
   // TODO if (!result.success) <- show error component
   if (!account.isLogged || !roomList.isLogged) return redirect("/welcome");
+
+  console.log(account.data);
 
   return { selfAccount: account.data, roomList: roomList.data };
 };
@@ -66,6 +69,33 @@ const addMessageAction = async ({ request }: { request: Request }) => {
   return { ok: true as const };
 };
 
+const loginAction = async ({ request }: { request: Request }) => {
+  const formData = await request.formData();
+
+  const formParsed = loginFormSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+
+  if (!formParsed.success) {
+    const errors = formParsed.error.format();
+    return {
+      success: false as const,
+      formError: {
+        isEmail: !!errors.email,
+        isPassword: !!errors.password,
+      },
+    };
+  }
+
+  return await fetchLogin(formParsed.data);
+};
+
+const registerAction = async ({ request }: { request: Request }) => {
+  console.log(await request.formData());
+  return { ok: true as const };
+};
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -93,6 +123,16 @@ const router = createBrowserRouter([
     path: "/welcome",
     element: <Welcome />,
     errorElement: <Page404 />,
+    children: [
+      {
+        path: "/welcome/login",
+        action: loginAction,
+      },
+      {
+        path: "/welcome/register",
+        action: registerAction,
+      },
+    ],
   },
 ]);
 
