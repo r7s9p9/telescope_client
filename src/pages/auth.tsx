@@ -1,19 +1,32 @@
 import {
+  IconArrowBack,
   IconComet,
   IconKey,
   IconLogin,
   IconMail,
   IconPassword,
+  IconSend,
+  IconSend2,
   IconUser,
 } from "@tabler/icons-react";
 import { Dispatch, ReactNode, useEffect, useState } from "react";
-import { useFetcher } from "react-router-dom";
+import { useFetcher, useLocation, useNavigate } from "react-router-dom";
 
-export default function Welcome() {
+interface ShowItemState {
+  showItem: "login" | "register" | "code";
+  setShowItem: Dispatch<ShowItemState["showItem"]>;
+}
+
+interface EmailState {
+  email: string;
+  setEmail: Dispatch<EmailState["email"]>;
+}
+
+export default function Auth({ type }: { type: "login" | "register" }) {
   return (
     <Background>
       <Window>
-        <Auth />
+        <AuthContainer type={type} />
       </Window>
     </Background>
   );
@@ -44,16 +57,9 @@ function BackgroundWindow() {
 function Window({ children }: { children: ReactNode }) {
   return (
     <div className=" flex flex-col bg-slate-400 w-1/2 min-w-96 max-w-2xl h-1/2 min-h-96 p-1 rounded-xl border-2 border-slate-600 shadow-xl">
-      <div className="flex flex-row items-center ">
-        <div className="absolute flex flex-row justify-between w-16 mx-2 h-4">
-          <button className="rounded-full border-2 border-slate-500 hover:border-0 hover:bg-red-500 w-4"></button>
-          <button className="rounded-full border-2 border-slate-500 hover:border-0 hover:bg-yellow-500 w-4"></button>
-          <button className="rounded-full border-2 border-slate-500 hover:border-0 hover:bg-green-500 w-4"></button>
-        </div>
-        <p className="text-lg w-full text-center font-light tracking-widest uppercase select-none">
-          Telescope
-        </p>
-      </div>
+      <p className="text-lg w-full text-center font-light tracking-widest uppercase select-none">
+        Telescope
+      </p>
       <div className="flex justify-center items-center border-t-2 border-slate-500 bg-gray-100 w-full h-full mt-1 rounded-b-xl">
         {children}
       </div>
@@ -61,14 +67,25 @@ function Window({ children }: { children: ReactNode }) {
   );
 }
 
-function Auth() {
-  const [showItem, setShowItem] = useState<ShowItemState["showItem"]>("login");
+function AuthContainer({ type }: { type: "login" | "register" }) {
+  const [showItem, setShowItem] = useState<ShowItemState["showItem"]>(type);
+  const [email, setEmail] = useState<EmailState["email"]>("");
 
   return (
     <div className="overflow-hidden relative flex flex-row justify-center items-center w-full h-full select-none">
-      <LoginForm showItem={showItem} setShowItem={setShowItem} />
+      <LoginForm
+        showItem={showItem}
+        setShowItem={setShowItem}
+        email={email}
+        setEmail={setEmail}
+      />
+      <CodeForm
+        showItem={showItem}
+        setShowItem={setShowItem}
+        email={email}
+        setEmail={setEmail}
+      />
       <RegisterForm showItem={showItem} setShowItem={setShowItem} />
-      <CodeForm showItem={showItem} setShowItem={setShowItem} />
     </div>
   );
 }
@@ -147,7 +164,7 @@ function InputCode({ isDisabled }: { isDisabled: boolean }) {
   return (
     <div className="flex items-center justify-end">
       <input
-        className="w-32 outline-none invalid:focus:border-red-600 valid:border-green-600 bg-slate-100 border-2 border-slate-400 p-1 rounded-md focus:bg-slate-200 focus:border-slate-700"
+        className="w-full text-center outline-none invalid:focus:border-red-600 valid:border-green-600 bg-slate-100 border-2 border-slate-400 p-1 rounded-md focus:bg-slate-200 focus:border-slate-700"
         type="password"
         name="code"
         required
@@ -180,84 +197,139 @@ function ButtonSubmit({
   );
 }
 
-interface ShowItemState {
-  showItem: "login" | "register" | "code";
-  setShowItem: Dispatch<ShowItemState["showItem"]>;
+function ButtonCancel({
+  isDisabled,
+  handleClick,
+  children,
+}: {
+  isDisabled: boolean;
+  handleClick: ReturnType<typeof Function>;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      onClick={() => handleClick()}
+      type="button"
+      className="flex justify-center items-center gap-2 p-2 w-32 rounded-md border-2 border-slate-400 hover:bg-slate-200"
+      disabled={isDisabled}
+    >
+      {children}
+    </button>
+  );
 }
 
-function CodeForm({ showItem, setShowItem }: ShowItemState) {
+function CodeForm({
+  showItem,
+  setShowItem,
+  email,
+  setEmail,
+}: ShowItemState & EmailState) {
   const isShow = showItem === "code";
 
   const fetcher = useFetcher();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isShow && fetcher.data?.success) {
+      navigate("/");
+    }
+    if (isShow && !fetcher.data?.success) {
+      console.log("no success");
+    }
+  }, [fetcher]);
 
   function handleClick() {
-    if (isShow) setShowItem("login");
+    setEmail("");
+    setShowItem("login");
+    navigate("/login");
   }
 
   return (
     <div
-      className="absolute self-center w-3/5 min-w-80 h-3/5 min-h-48 flex justify-center items-center bg-gray-100 rounded-b-xl duration-500"
+      className="absolute self-center w-4/5 min-w-80 h-4/5 min-h-48 flex justify-center items-center bg-gray-100 rounded-b-xl duration-500"
       style={{
         transform: isShow ? `translateY(0%)` : `translateY(-150%)`,
       }}
     >
       <fetcher.Form
         method="post"
-        action="/welcome/code"
-        className="flex flex-col gap-2 p-4 w-full h-full border-2 border-slate-300 shadow-xl justify-between rounded-xl gap-2 items-center"
+        action="/login/code"
+        className="flex flex-col p-4 w-full h-full border-2 border-slate-300 shadow-xl justify-between rounded-xl gap-2 items-center"
       >
-        <p className="text-2xl">Almost done...</p>
-        <p className="text-sm text-center">
-          Please enter the confirmation code sent to the telescope on your other
-          device:
-        </p>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            className="text-sm rounded-md border-2 px-2 border-slate-400 hover:bg-slate-200"
-            onClick={() => handleClick()}
-            disabled={!isShow}
-          >
+        <div>
+          <p className="text-2xl text-center">Almost done...</p>
+          <p className="text-sm text-center">
+            Please enter the confirmation code sent to the telescope on your
+            other device:
+          </p>
+        </div>
+        <input type="hidden" name="email" value={email} />
+        <InputCode isDisabled={!isShow} />
+        <div className="w-full flex justify-between">
+          <ButtonCancel isDisabled={!isShow} handleClick={handleClick}>
+            <IconArrowBack className="text-slate-600" size={24} />
             Cancel
-          </button>
-          <InputCode isDisabled={!isShow} />
-          <button
-            className="text-sm rounded-md border-2 px-2 border-slate-400 hover:bg-slate-200"
-            type="submit"
-            disabled={!isShow}
-          >
+          </ButtonCancel>
+          <ButtonSubmit isDisabled={!isShow}>
+            <IconSend2 className="text-slate-600" size={18} />
             Send
-          </button>
+          </ButtonSubmit>
         </div>
       </fetcher.Form>
     </div>
   );
 }
 
-function LoginForm({ showItem, setShowItem }: ShowItemState) {
+function LoginForm({
+  showItem,
+  setShowItem,
+  email,
+  setEmail,
+}: ShowItemState & EmailState) {
   const isShow = showItem === "login";
   const isCode = showItem === "code";
 
   const fetcher = useFetcher();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  console.log(fetcher.data);
 
   useEffect(() => {
-    if (fetcher?.data?.isCodeNeeded) setShowItem("code");
+    if (location.pathname === "/login/code" && !isCode) {
+      navigate("/login");
+    }
+  }, [location]);
+
+  useEffect(() => {
+    if (fetcher.data?.success && isShow) {
+      if (fetcher.data?.isCodeNeeded) {
+        // Bug -> fetcher.data keep info -> if (true) after Cancel button in CodeForm
+        setEmail(fetcher.data.email);
+        setShowItem("code");
+        navigate("/login/code");
+      }
+      if (!fetcher.data?.isCodeNeeded) {
+        navigate("/");
+      }
+    }
   }, [fetcher]);
 
   function handleClick() {
-    if (isShow) setShowItem("register");
+    setShowItem("register");
+    navigate("/register");
   }
 
   return (
     <fetcher.Form
       method="post"
-      action="/welcome/login"
+      action="/login"
       style={{
         transform:
           isShow || isCode
             ? `translateX(50%) scale(1)`
             : `translateX(-150%) scale(0.75)`,
-        opacity: isShow ? "1" : "0",
+        opacity: isShow || isCode ? "1" : "0",
         filter: isCode ? `blur(4px)` : `blur(0px)`,
       }}
       className="h-full w-full flex flex-col justify-center gap-2 items-center duration-500"
@@ -292,15 +364,17 @@ function RegisterForm({ showItem, setShowItem }: ShowItemState) {
   const isCode = showItem === "code";
 
   const fetcher = useFetcher();
+  const navigate = useNavigate();
 
   function handleClick() {
-    if (isShow) setShowItem("login");
+    setShowItem("login");
+    navigate("/login");
   }
 
   return (
     <fetcher.Form
       method="post"
-      action="/welcome/register"
+      action="/register"
       style={{
         transform: isShow
           ? `translateX(-50%) scale(1)`

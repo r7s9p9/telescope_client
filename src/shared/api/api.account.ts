@@ -7,6 +7,7 @@ import {
 } from "./api.constants";
 import {
   accountReadSchema,
+  emailSchema,
   messageReadSchema,
   roomListSchema,
 } from "./api.schema";
@@ -125,9 +126,13 @@ export async function fetchLogin(payload: { email: string, password: string}) {
         return { success: false as const}
     }
   }
-  console.log(response.payload)
   if (response.payload.code) {
-    return { success: true as const, isCodeNeeded: true as const}
+    return { success: true as const, email: payload.email, isCodeNeeded: true as const}
   }
   return { success: true as const, isCodeNeeded: false as const}
+}
+
+export async function fetchCode(payload: { email: string, code: string }) {
+  const response = await fetcher(serverRoute.auth.code, payload)
+  return { success: response.payload.success }
 }

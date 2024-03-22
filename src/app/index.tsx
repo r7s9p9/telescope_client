@@ -9,23 +9,28 @@ import {
 import Page404 from "../pages/page-404.tsx";
 import Home from "../pages/home.tsx";
 import "./index.css";
-import Welcome from "../pages/welcome.tsx";
+import Auth from "../pages/auth.tsx";
 import {
   fetchAddMessage,
+  fetchCode,
   fetchLogin,
   fetchReadMessages,
   fetchRoomList,
   fetchSelfAccount,
 } from "../shared/api/api.account.ts";
 import { Room } from "../widgets/room-list/room.tsx";
-import { loginFormSchema, roomIdSchema } from "../shared/api/api.schema.ts";
+import {
+  codeFormSchema,
+  loginFormSchema,
+  roomIdSchema,
+} from "../shared/api/api.schema.ts";
 import { RoomId } from "../types.ts";
 
 const homeLoader = async () => {
   const account = await fetchSelfAccount();
   const roomList = await fetchRoomList({ min: "0", max: "10" });
   // TODO if (!result.success) <- show error component
-  if (!account.isLogged || !roomList.isLogged) return redirect("/welcome");
+  if (!account.isLogged || !roomList.isLogged) return redirect("/login");
 
   console.log(account.data);
 
@@ -91,6 +96,28 @@ const loginAction = async ({ request }: { request: Request }) => {
   return await fetchLogin(formParsed.data);
 };
 
+const codeAction = async ({ request }: { request: Request }) => {
+  const formData = await request.formData();
+
+  const formParsed = codeFormSchema.safeParse({
+    email: formData.get("email"),
+    code: formData.get("code"),
+  });
+
+  if (!formParsed.success) {
+    const errors = formParsed.error.format();
+    return {
+      success: false as const,
+      formError: {
+        isEmail: !!errors.email,
+        isCode: !!errors.code,
+      },
+    };
+  }
+
+  return await fetchCode(formParsed.data);
+};
+
 const registerAction = async ({ request }: { request: Request }) => {
   console.log(await request.formData());
   return { ok: true as const };
@@ -120,19 +147,22 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/welcome",
-    element: <Welcome />,
+    path: "/login",
+    element: <Auth type={"login"} />,
     errorElement: <Page404 />,
+    action: loginAction,
     children: [
       {
-        path: "/welcome/login",
-        action: loginAction,
-      },
-      {
-        path: "/welcome/register",
-        action: registerAction,
+        path: "/login/code",
+        action: codeAction,
       },
     ],
+  },
+  {
+    path: "/register",
+    element: <Auth type={"register"} />,
+    errorElement: <Page404 />,
+    action: registerAction,
   },
 ]);
 

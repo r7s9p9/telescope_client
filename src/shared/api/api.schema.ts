@@ -20,6 +20,7 @@ export const roomIdSchema = z
 export const emailSchema = z.string().email();
 export const usernameSchema = z.string().min(env.usernameRange.min).max(env.usernameRange.max);
 export const passwordSchema = z.string().min(env.passwordRange.min).max(env.passwordRange.max);
+export const codeSchema = z.string().min(6).max(6);
 
 export const nameSchema = z.string().min(1).max(24);
 export const bioSchema = z.string().min(1).max(80);
@@ -28,6 +29,11 @@ export const lastSeenSchema = z.string();
 export const loginFormSchema = z.object({
   email: emailSchema,
   password: passwordSchema
+})
+
+export const codeFormSchema = z.object({
+  email: emailSchema,
+  code: codeSchema
 })
 
 export const registerFormSchema = z.object({
