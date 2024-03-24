@@ -32,7 +32,6 @@ export const loginFormSchema = z.object({
 })
 
 export const codeFormSchema = z.object({
-  email: emailSchema,
   code: codeSchema
 })
 

@@ -17,7 +17,7 @@ import {
   fetchReadMessages,
   fetchRoomList,
   fetchSelfAccount,
-} from "../shared/api/api.account.ts";
+} from "../shared/api/api.ts";
 import { Room } from "../widgets/room-list/room.tsx";
 import {
   codeFormSchema,
@@ -119,8 +119,8 @@ const codeAction = async ({ request }: { request: Request }) => {
 };
 
 const registerAction = async ({ request }: { request: Request }) => {
-  console.log(await request.formData());
-  return { ok: true as const };
+  // console.log(await request.formData());
+  // return { ok: true as const };
 };
 
 const router = createBrowserRouter([

@@ -7,7 +7,6 @@ import {
 } from "./api.constants";
 import {
   accountReadSchema,
-  emailSchema,
   messageReadSchema,
   roomListSchema,
 } from "./api.schema";
@@ -118,14 +117,7 @@ export async function fetchAddMessage(payload: {
 
 export async function fetchLogin(payload: { email: string, password: string}) {
   const response = await fetcher(serverRoute.auth.login, payload)
-  if (!response.payload.success) {
-    switch (response.status) {
-      case 401:
-        return { success: false as const, isAuthorized: false as const }
-      default:
-        return { success: false as const}
-    }
-  }
+  if (!response.payload.success) return { success: false as const}
   if (response.payload.code) {
     return { success: true as const, email: payload.email, isCodeNeeded: true as const}
   }
@@ -134,5 +126,5 @@ export async function fetchLogin(payload: { email: string, password: string}) {
 
 export async function fetchCode(payload: { email: string, code: string }) {
   const response = await fetcher(serverRoute.auth.code, payload)
-  return { success: response.payload.success }
+  return { success: !!response.payload.success }
 }
