@@ -21,8 +21,12 @@ import {
   registerFormSchema,
 } from "../../shared/api/api.schema";
 import { fetchCode, fetchLogin, fetchRegister } from "../../shared/api/api";
+import { routes } from "../../constants";
 
 export function AuthContainer({ type }: { type: "login" | "register" }) {
+  const loggedOutMessage =
+    "You have successfully logged out of your account. See you soon!";
+
   const [showItem, setShowItem] = useState<ShowItemState["showItem"]>(type);
   const [notification, setNotification] = useState<
     NotificationState["notification"]
@@ -36,23 +40,32 @@ export function AuthContainer({ type }: { type: "login" | "register" }) {
   const location = useLocation();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (location.state?.isLoggedOut) {
+      setNotification({ isShow: true, type: "info", text: loggedOutMessage });
+      // remove state from location
+      navigate({ pathname: location.pathname });
+    }
+  }, [location.state]);
+
   // /login/code route protection
   useEffect(() => {
     if (location.pathname === "/login/code" && showItem !== "code") {
-      navigate("/login");
+      navigate({ pathname: routes.login.path });
     }
   }, [location]);
 
   function handleCodeRequired(email: string) {
     setShowItem("code");
-    navigate("/login/code");
+    navigate({ pathname: routes.code.path });
     setEmail(email);
   }
 
   function handleClick(toForm: "login" | "register") {
     setEmail("");
     setShowItem(toForm);
-    navigate(`/${toForm}`);
+    if (toForm === "login") navigate({ pathname: routes.login.path });
+    if (toForm === "register") navigate({ pathname: routes.register.path });
   }
 
   return (
@@ -195,7 +208,9 @@ function CodeForm({
     const { success } = await fetchCode({ ...data, email });
     if (!success)
       setNotification({ isShow: true, type: "error", text: codeError });
-    if (success) navigate("/");
+    if (success) {
+      navigate({ pathname: routes.home.path });
+    }
   };
 
   return (
@@ -302,8 +317,6 @@ function LoginForm({
   setNotification: NotificationState["setNotification"];
 }) {
   const authErrorMessage = "You entered an incorrect username or password";
-  const loggedOutMessage =
-    "You have successfully logged out of your account. See you soon!";
 
   const {
     register,
@@ -313,14 +326,6 @@ function LoginForm({
   } = useForm<IFormValues>({
     resolver: zodResolver(loginFormSchema),
   });
-
-  // Show notification when logout
-  const { state } = useLocation();
-  useEffect(() => {
-    if (state?.isLoggedOut) {
-      setNotification({ isShow: true, type: "info", text: loggedOutMessage });
-    }
-  }, [state]);
 
   const navigate = useNavigate();
 
@@ -332,7 +337,9 @@ function LoginForm({
       reset();
       handleCodeRequired(data.email);
     }
-    if (result.success && !result.isCodeNeeded) navigate("/");
+    if (result.success && !result.isCodeNeeded) {
+      navigate({ pathname: routes.code.path });
+    }
   };
 
   return (
@@ -421,7 +428,7 @@ function RegisterForm({
         text: "You have successfully registered! Please sign in",
       });
       reset();
-      navigate("/login");
+      navigate({ pathname: routes.login.path });
       handleClick("login");
     }
   };

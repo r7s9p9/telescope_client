@@ -12,19 +12,14 @@ import "./index.css";
 import Auth from "../pages/auth.tsx";
 import {
   fetchAddMessage,
-  fetchCode,
-  fetchLogin,
   fetchReadMessages,
   fetchRoomList,
   fetchSelfAccount,
 } from "../shared/api/api.ts";
 import { Room } from "../widgets/room-list/room.tsx";
-import {
-  codeFormSchema,
-  loginFormSchema,
-  roomIdSchema,
-} from "../shared/api/api.schema.ts";
+import { roomIdSchema } from "../shared/api/api.schema.ts";
 import { RoomId } from "../types.ts";
+import { routes } from "../constants.ts";
 
 const homeLoader = async () => {
   const account = await fetchSelfAccount();
@@ -39,14 +34,13 @@ const homeLoader = async () => {
 
 const roomLoader = async ({ params }: { params: Params<string> }) => {
   const roomId = roomIdSchema.safeParse(params.roomId);
-  if (!roomId.success) return redirect("/"); // bad params
+  if (!roomId.success) return redirect(routes.home.path); // bad params
 
   const result = await fetchReadMessages(params.roomId as RoomId, {
     minCreated: "1000000000000",
     maxCreated: Date.now().toString(),
   });
-  if (!result.success) return redirect("/"); // !validation
-  if (!result.isLogged) return redirect("/welcome");
+  if (!result.success || !result.isLogged) return redirect(routes.login.path); // !validation
 
   return { roomData: result.data };
 };
@@ -57,7 +51,7 @@ const addMessageAction = async ({ request }: { request: Request }) => {
   if (!formText) return { ok: false as const };
 
   const roomId = roomIdSchema.safeParse(formData.get("roomId"));
-  if (!roomId.success) return redirect("/"); // bad params
+  if (!roomId.success) return redirect(routes.home.path); // bad params
 
   const payload = {
     roomId: roomId.data,
@@ -74,68 +68,21 @@ const addMessageAction = async ({ request }: { request: Request }) => {
   return { ok: true as const };
 };
 
-const loginAction = async ({ request }: { request: Request }) => {
-  const formData = await request.formData();
-
-  const formParsed = loginFormSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
-
-  if (!formParsed.success) {
-    const errors = formParsed.error.format();
-    return {
-      success: false as const,
-      formError: {
-        isEmail: !!errors.email,
-        isPassword: !!errors.password,
-      },
-    };
-  }
-
-  return await fetchLogin(formParsed.data);
-};
-
-const codeAction = async ({ request }: { request: Request }) => {
-  const formData = await request.formData();
-
-  const formParsed = codeFormSchema.safeParse({
-    email: formData.get("email"),
-    code: formData.get("code"),
-  });
-
-  if (!formParsed.success) {
-    const errors = formParsed.error.format();
-    return {
-      success: false as const,
-      formError: {
-        isEmail: !!errors.email,
-        isCode: !!errors.code,
-      },
-    };
-  }
-
-  return await fetchCode(formParsed.data);
-};
-
-const registerAction = async ({ request }: { request: Request }) => {
-  // console.log(await request.formData());
-  // return { ok: true as const };
-};
+console.log(routes.room);
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: routes.home.path,
+    id: routes.home.id,
     element: <Home />,
     loader: homeLoader,
-    id: "home",
     errorElement: <Page404 />,
     children: [
       {
-        path: "/room/:roomId",
+        path: routes.room.path,
+        id: routes.room.id,
         element: <Room />,
         loader: roomLoader,
-        id: "room",
         children: [
           {
             path: "/room/:roomId/message/add",
@@ -147,22 +94,22 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/login",
+    path: routes.login.path,
+    id: routes.login.id,
     element: <Auth type={"login"} />,
     errorElement: <Page404 />,
-    action: loginAction,
     children: [
       {
-        path: "/login/code",
-        action: codeAction,
+        path: routes.code.path,
+        id: routes.code.id,
       },
     ],
   },
   {
-    path: "/register",
+    path: routes.register.path,
+    id: routes.register.id,
     element: <Auth type={"register"} />,
     errorElement: <Page404 />,
-    action: registerAction,
   },
 ]);
 
