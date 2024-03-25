@@ -26,7 +26,7 @@ import {
   loginFormSchema,
   registerFormSchema,
 } from "../shared/api/api.schema";
-import { fetchCode, fetchLogin } from "../shared/api/api";
+import { fetchCode, fetchLogin, fetchRegister } from "../shared/api/api";
 
 interface ShowItemState {
   showItem: "login" | "register" | "code";
@@ -155,6 +155,8 @@ function AuthContainer({ type }: { type: "login" | "register" }) {
       <RegisterForm
         isShow={showItem === "register"}
         handleClick={handleClick}
+        notification={notification}
+        setNotification={setNotification}
       />
       <Notification
         notification={notification}
@@ -436,6 +438,7 @@ function LoginForm({
 
   const {
     register,
+    reset,
     formState: { errors },
     handleSubmit,
   } = useForm<IFormValues>({
@@ -448,7 +451,10 @@ function LoginForm({
     const result = await fetchLogin(data);
     if (!result.success)
       setNotification({ isShow: true, type: "error", text: authError });
-    if (result.isCodeNeeded) handleCodeRequired(data.email);
+    if (result.isCodeNeeded) {
+      reset();
+      handleCodeRequired(data.email);
+    }
     if (result.success && !result.isCodeNeeded) navigate("/");
   };
 
@@ -486,22 +492,61 @@ function LoginForm({
 function RegisterForm({
   isShow,
   handleClick,
+  notification,
+  setNotification,
 }: {
   isShow: boolean;
   handleClick: ReturnType<typeof Function>;
+  notification: NotificationState["notification"];
+  setNotification: NotificationState["setNotification"];
 }) {
   const {
     register,
+    reset,
     formState: { errors },
     handleSubmit,
   } = useForm<IFormValues>({
     resolver: zodResolver(registerFormSchema),
   });
 
-  const onSubmit: SubmitHandler<IFormValues> = (data) => {
-    //const result = await fetchRegister(data);
-    //
-    //
+  const navigate = useNavigate();
+
+  const onSubmit: SubmitHandler<IFormValues> = async (data) => {
+    const result = await fetchRegister(data);
+    if (!result.success) {
+      switch (result.errorCode) {
+        case "EMAIL_ALREADY_EXISTS":
+          setNotification({
+            isShow: true,
+            type: "error",
+            text: "Email already exists",
+          });
+          break;
+        case "USERNAME_ALREADY_EXISTS":
+          setNotification({
+            isShow: true,
+            type: "error",
+            text: "Username already exists",
+          });
+          break;
+        default:
+          setNotification({
+            isShow: true,
+            type: "error",
+            text: "Server error",
+          });
+          break;
+      }
+    } else {
+      setNotification({
+        isShow: true,
+        type: "info",
+        text: "You have successfully registered! Please sign in",
+      });
+      reset();
+      navigate("/login");
+      handleClick("login");
+    }
   };
   return (
     <form

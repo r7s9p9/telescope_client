@@ -131,9 +131,11 @@ export async function fetchCode(payload: { email: string, code: string }) {
 
 export async function fetchRegister(payload: { email: string, username: string, password: string}) {
   const response = await fetcher(serverRoute.auth.register, payload)
-  if (!response.payload.success) return { success: false as const}
-  if (response.payload.code) {
-    return { success: true as const, email: payload.email, isCodeNeeded: true as const}
+  if (!response.payload.success) {
+    if (response.payload.errorCode) {
+      return { success: false as const, errorCode: response.payload.errorCode }
+    }
+    return { success: false as const }
   }
-  return { success: true as const, isCodeNeeded: false as const}
+  return { success: true as const }
 }
