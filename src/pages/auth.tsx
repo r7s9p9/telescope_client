@@ -92,7 +92,7 @@ function BackgroundWindow() {
 
 function Window({ children }: { children: ReactNode }) {
   return (
-    <div className=" flex flex-col bg-slate-400 w-1/2 min-w-fit max-w-2xl h-1/2 min-h-fit p-1 rounded-xl border-2 border-slate-600 shadow-xl">
+    <div className=" flex flex-col bg-slate-400 w-2/3 min-w-fit max-w-2xl h-1/2 min-h-fit p-1 rounded-xl border-2 border-slate-600 shadow-xl">
       <p className="text-lg w-full text-center font-light tracking-widest uppercase select-none">
         Telescope
       </p>

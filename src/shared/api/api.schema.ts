@@ -17,13 +17,13 @@ export const roomIdSchema = z
     return id as RoomId;
   });
 
-export const emailSchema = z.string().email();
+export const emailSchema = z.string().email().max(env.emailLengthMax);
 export const usernameSchema = z.string().min(env.usernameRange.min).max(env.usernameRange.max);
 export const passwordSchema = z.string().min(env.passwordRange.min).max(env.passwordRange.max);
-export const codeSchema = z.string().min(6).max(6);
+export const codeSchema = z.string().length(env.codeLength);
 
-export const nameSchema = z.string().min(1).max(24);
-export const bioSchema = z.string().min(1).max(80);
+export const nameSchema = z.string().max(env.nameLengthMax);
+export const bioSchema = z.string().max(env.bioLengthMax);
 export const lastSeenSchema = z.string();
 
 export const loginFormSchema = z.object({
