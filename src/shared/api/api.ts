@@ -116,6 +116,11 @@ export async function fetchAddMessage(payload: {
   console.log(result);
 }
 
+export async function fetchLogout() {
+  const response = await fetcher(serverRoute.session.remove, { sessionId: "self" as const})
+  return { success: !!response.payload.success }
+}
+
 export async function fetchLogin(payload: { email: string, password: string}) {
   const response = await fetcher(serverRoute.auth.login, payload)
   if (!response.payload.success) return { success: false as const}
