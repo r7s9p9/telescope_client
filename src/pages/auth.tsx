@@ -270,7 +270,7 @@ function ButtonSubmit({
     <button
       type="submit"
       className="flex justify-center items-center gap-2 p-2 w-32 rounded-md border-2 border-slate-400 hover:bg-slate-200"
-      formNoValidate={true} // disable html validation
+      formNoValidate={true} // disable stock html validation
       disabled={isDisabled}
     >
       {children}
@@ -369,6 +369,56 @@ function CodeForm({
   );
 }
 
+function FormBottomPart({
+  type,
+  isShow,
+  handleClick,
+}: {
+  type: "login" | "register";
+  isShow: boolean;
+  handleClick: ReturnType<typeof Function>;
+}) {
+  let switchButton;
+  let switchButtonHint;
+  if (type === "login") {
+    switchButton = (
+      <>
+        <IconComet className="text-slate-600" size={24} />
+        Sign-up
+      </>
+    );
+    switchButtonHint = "Need an account?";
+  }
+  if (type === "register") {
+    switchButton = (
+      <>
+        <IconLogin className="text-slate-600" size={24} />
+        Sign-in
+      </>
+    );
+    switchButtonHint = "Need to log in?";
+  }
+  return (
+    <div className="w-full outline-none flex flex-row gap-4 justify-between items-end">
+      <div className="flex flex-col items-start">
+        <p className="text-sm font-light">{switchButtonHint}</p>
+        <button
+          type="button"
+          onClick={() => handleClick(type === "login" ? "register" : "login")}
+          className="flex justify-center items-center gap-2 p-2 w-32 rounded-md border-2 border-slate-400 hover:bg-slate-200"
+          disabled={!isShow}
+        >
+          {switchButton}
+        </button>
+      </div>
+      <ButtonSubmit isDisabled={!isShow}>
+        <IconKey className="text-slate-600" size={24} />
+        <p className="capitalize">{type}</p>
+      </ButtonSubmit>
+    </div>
+  );
+}
+
 function LoginForm({
   isShow,
   handleCodeRequired,
@@ -404,13 +454,12 @@ function LoginForm({
 
   return (
     <form
-      className="h-full w-full flex flex-col justify-center gap-2 duration-500"
+      className="absolute h-3/4 max-h-96 w-3/4 max-w-96 flex flex-col justify-center gap-2 duration-500"
       style={{
         transform: isShow
-          ? `translateX(50%) scale(1)`
-          : `translateX(-150%) scale(0.5)`,
+          ? `translateX(0%) scale(1)`
+          : `translateX(-100%) scale(0.75)`,
         opacity: isShow ? "1" : "0",
-        filter: isShow ? `blur(0px)` : `blur(4px)`,
       }}
       onSubmit={handleSubmit(onSubmit)}
     >
@@ -429,24 +478,7 @@ function LoginForm({
         isDisabled={!isShow}
         errors={errors}
       />
-      <div className="w-full outline-none flex flex-row gap-4 justify-between items-end">
-        <div className="flex flex-col items-start">
-          <p className="text-sm font-light">Need an account?</p>
-          <button
-            type="button"
-            onClick={() => handleClick("register")}
-            className="flex justify-center items-center gap-2 p-2 w-32 rounded-md border-2 border-slate-400 hover:bg-slate-200"
-            disabled={!isShow}
-          >
-            <IconComet className="text-slate-600" size={24} />
-            Sign-up
-          </button>
-        </div>
-        <ButtonSubmit isDisabled={!isShow}>
-          <IconKey className="text-slate-600" size={24} />
-          Login
-        </ButtonSubmit>
-      </div>
+      <FormBottomPart type="login" isShow={isShow} handleClick={handleClick} />
     </form>
   );
 }
@@ -475,12 +507,11 @@ function RegisterForm({
     <form
       style={{
         transform: isShow
-          ? `translateX(-50%) scale(1)`
-          : `translateX(150%) scale(0.5)`,
+          ? `translateX(0%) scale(1)`
+          : `translateX(100%) scale(0.75)`,
         opacity: isShow ? "1" : "0",
-        filter: isShow ? `blur(0px)` : `blur(4px)`,
       }}
-      className="h-full w-full flex flex-col justify-center gap-2 duration-500"
+      className="absolute h-3/4 max-h-96 w-3/4 max-w-96 flex flex-col justify-center gap-2 duration-500"
       onSubmit={handleSubmit(onSubmit)}
     >
       <p className="w-full text-center text-2xl">Create an account</p>
@@ -505,24 +536,11 @@ function RegisterForm({
         isDisabled={!isShow}
         errors={errors}
       />
-      <div className="w-full outline-none flex flex-row gap-4 justify-between items-end py-2">
-        <div className="flex flex-col items-start">
-          <p className="text-sm font-light">Need to log in?</p>
-          <button
-            type="button"
-            onClick={() => handleClick("login")}
-            className="flex justify-center items-center gap-2 p-2 w-32 rounded-md border-2 border-slate-400 hover:bg-slate-200"
-            disabled={!isShow}
-          >
-            <IconLogin className="text-slate-600" size={24} />
-            Sign-in
-          </button>
-        </div>
-        <ButtonSubmit isDisabled={!isShow}>
-          <IconKey className="text-slate-600" size={24} />
-          Register
-        </ButtonSubmit>
-      </div>
+      <FormBottomPart
+        type="register"
+        isShow={isShow}
+        handleClick={handleClick}
+      />
     </form>
   );
 }
