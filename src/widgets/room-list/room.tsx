@@ -32,7 +32,7 @@ function ChatContainer({
   roomData: RoomDataType;
 }) {
   return (
-    <div className="flex flex-col justify-between w-full bg-gray-100 rounded-2xl p-2 m-2">
+    <div className="flex flex-col justify-between w-full rounded-2xl">
       <ChatTopPanel roomData={roomData} />
       <div className="flex flex-col w-full  gap-4">
         <ul className="flex flex-col gap-4">{messageArr}</ul>
@@ -139,13 +139,13 @@ function SendMessage({ roomId }: { roomId: string }) {
     <fetcher.Form
       method="post"
       action="/room/:roomId/message/add"
-      className="flex right-0 focus:outline-none rtl:left-0 rtl:right-auto"
+      className="flex focus:outline-none"
     >
       <input
         type="text"
         name="text"
         placeholder="Send message..."
-        className="block w-full py-1 text-gray-700 placeholder-gray-400/70 bg-white border border-gray-200 rounded-xl pl-5 pr-11 rtl:pr-5 rtl:pl-11 focus:border-blue-400  focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+        className="w-full text-gray-700 placeholder-gray-400/70 bg-white border border-gray-200 px-4 py-2 focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
       />
       <input type="hidden" name="roomId" value={roomId}></input>
       <button type="submit">

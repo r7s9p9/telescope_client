@@ -13,12 +13,12 @@ export function RoomList() {
   if (data.isEmpty || !data.roomDataArr) return <div>You have no rooms</div>;
 
   const roomArr = data.roomDataArr.map((roomData) => (
-    <li className="px-2 py-1 " key={roomData.roomId}>
+    <li className="px-2 py-1" key={roomData.roomId}>
       <Room openedRoomId={roomId} data={roomData} />
     </li>
   ));
   return (
-    <div className="flex-row bg-gray-100 rounded-2xl m-2">
+    <div className="flex-row border-r-2 border-slate-300">
       <Search />
       <ul>{roomArr}</ul>
     </div>

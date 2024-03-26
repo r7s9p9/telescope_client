@@ -27,8 +27,6 @@ const homeLoader = async () => {
   // TODO if (!result.success) <- show error component
   if (!account.isLogged || !roomList.isLogged) return redirect("/login");
 
-  console.log(account.data);
-
   return { selfAccount: account.data, roomList: roomList.data };
 };
 
@@ -51,7 +49,7 @@ const addMessageAction = async ({ request }: { request: Request }) => {
   if (!formText) return { ok: false as const };
 
   const roomId = roomIdSchema.safeParse(formData.get("roomId"));
-  if (!roomId.success) return redirect(routes.home.path); // bad params
+  if (!roomId.success) return redirect("/"); // bad params
 
   const payload = {
     roomId: roomId.data,

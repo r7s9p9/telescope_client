@@ -1,5 +1,4 @@
 import { ReactNode, useEffect, useState } from "react";
-import { Notification } from "../notification/notification";
 import { NotificationState } from "../notification/types";
 import { EmailState, IFormValues, InputProps, ShowItemState } from "./types";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -22,19 +21,15 @@ import {
 } from "../../shared/api/api.schema";
 import { fetchCode, fetchLogin, fetchRegister } from "../../shared/api/api";
 import { routes } from "../../constants";
+import { ShowType, useNotification } from "../notification/notification";
 
 export function AuthContainer({ type }: { type: "login" | "register" }) {
+  const notify = useNotification();
+
   const loggedOutMessage =
     "You have successfully logged out of your account. See you soon!";
 
   const [showItem, setShowItem] = useState<ShowItemState["showItem"]>(type);
-  const [notification, setNotification] = useState<
-    NotificationState["notification"]
-  >({
-    isShow: false,
-    type: "info",
-    text: "",
-  });
   const [email, setEmail] = useState<EmailState["email"]>("");
 
   const location = useLocation();
@@ -42,7 +37,7 @@ export function AuthContainer({ type }: { type: "login" | "register" }) {
 
   useEffect(() => {
     if (location.state?.isLoggedOut) {
-      setNotification({ isShow: true, type: "info", text: loggedOutMessage });
+      notify("info", loggedOutMessage);
       // remove state from location
       navigate({ pathname: location.pathname });
     }
@@ -74,25 +69,18 @@ export function AuthContainer({ type }: { type: "login" | "register" }) {
         isShow={showItem === "login"}
         handleCodeRequired={handleCodeRequired}
         handleClick={handleClick}
-        notification={notification}
-        setNotification={setNotification}
+        notify={notify}
       />
       <CodeForm
         isShow={showItem === "code"}
         email={email}
         handleClick={handleClick}
-        notification={notification}
-        setNotification={setNotification}
+        notify={notify}
       />
       <RegisterForm
         isShow={showItem === "register"}
         handleClick={handleClick}
-        notification={notification}
-        setNotification={setNotification}
-      />
-      <Notification
-        notification={notification}
-        setNotification={setNotification}
+        notify={notify}
       />
     </div>
   );
@@ -185,14 +173,12 @@ function CodeForm({
   isShow,
   email,
   handleClick,
-  notification,
-  setNotification,
+  notify,
 }: {
   isShow: boolean;
   email: string;
   handleClick: ReturnType<typeof Function>;
-  notification: NotificationState["notification"];
-  setNotification: NotificationState["setNotification"];
+  notify: ShowType;
 }) {
   const codeError = "You entered an incorrect code";
 
@@ -206,8 +192,7 @@ function CodeForm({
 
   const onSubmit: SubmitHandler<IFormValues> = async (data) => {
     const { success } = await fetchCode({ ...data, email });
-    if (!success)
-      setNotification({ isShow: true, type: "error", text: codeError });
+    if (!success) notify("error", codeError);
     if (success) {
       navigate({ pathname: routes.home.path });
     }
@@ -307,14 +292,12 @@ function LoginForm({
   isShow,
   handleCodeRequired,
   handleClick,
-  notification,
-  setNotification,
+  notify,
 }: {
   isShow: boolean;
   handleCodeRequired: ReturnType<typeof Function>;
   handleClick: ReturnType<typeof Function>;
-  notification: NotificationState["notification"];
-  setNotification: NotificationState["setNotification"];
+  notify: ShowType;
 }) {
   const authErrorMessage = "You entered an incorrect username or password";
 
@@ -331,8 +314,7 @@ function LoginForm({
 
   const onSubmit: SubmitHandler<IFormValues> = async (data) => {
     const result = await fetchLogin(data);
-    if (!result.success)
-      setNotification({ isShow: true, type: "error", text: authErrorMessage });
+    if (!result.success) notify("error", authErrorMessage);
     if (result.isCodeNeeded) {
       reset();
       handleCodeRequired(data.email);
@@ -376,13 +358,11 @@ function LoginForm({
 function RegisterForm({
   isShow,
   handleClick,
-  notification,
-  setNotification,
+  notify,
 }: {
   isShow: boolean;
   handleClick: ReturnType<typeof Function>;
-  notification: NotificationState["notification"];
-  setNotification: NotificationState["setNotification"];
+  notify: ShowType;
 }) {
   const {
     register,
@@ -400,33 +380,17 @@ function RegisterForm({
     if (!result.success) {
       switch (result.errorCode) {
         case "EMAIL_ALREADY_EXISTS":
-          setNotification({
-            isShow: true,
-            type: "error",
-            text: "Email already exists",
-          });
+          notify("error", "Email already exists");
           break;
         case "USERNAME_ALREADY_EXISTS":
-          setNotification({
-            isShow: true,
-            type: "error",
-            text: "Username already exists",
-          });
+          notify("error", "Username already exists");
           break;
         default:
-          setNotification({
-            isShow: true,
-            type: "error",
-            text: "Server error",
-          });
+          notify("error", "Server error");
           break;
       }
     } else {
-      setNotification({
-        isShow: true,
-        type: "info",
-        text: "You have successfully registered! Please sign in",
-      });
+      notify("info", "You have successfully registered! Please sign in");
       reset();
       navigate({ pathname: routes.login.path });
       handleClick("login");

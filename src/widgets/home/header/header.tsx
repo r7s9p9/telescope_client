@@ -1,14 +1,13 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useRouteLoaderData } from "react-router-dom";
 import { fetchLogout } from "../../../shared/api/api";
-import { Notification } from "../../notification/notification";
-import { NotificationState } from "../../notification/types";
-import { useState } from "react";
 import { routes } from "../../../constants";
+import { AccountReadType } from "../../../shared/api/api.schema";
 
-export const HomeHeader = ({ username }: { username?: string }) => {
-  const [notification, setNotification] = useState<
-    NotificationState["notification"]
-  >({ isShow: false, type: "info", text: "" });
+export const HomeHeader = () => {
+  const { selfAccount } = useRouteLoaderData(routes.home.id) as {
+    selfAccount: AccountReadType;
+  };
+
   const navigate = useNavigate();
 
   async function logoutHandler() {
@@ -22,22 +21,18 @@ export const HomeHeader = ({ username }: { username?: string }) => {
   }
 
   return (
-    <div className="relative w-full flex justify-center items-center">
-      <Notification
-        notification={notification}
-        setNotification={setNotification}
-      />
-      <div className="w-full flex flex-row items-center justify-between px-4 py-2 text-slate-800 bg-slate-400 cursor-default select-none">
-        <p className="text-2xl font-light tracking-widest uppercase ">
+    <div className="relative w-full flex justify-center items-center border-b-2 border-slate-400 bg-slate-200">
+      <div className="w-full flex flex-row items-center justify-between px-4 py-2 cursor-default select-none">
+        <p className="text-xl font-light tracking-widest uppercase ">
           Telescope
         </p>
-        <div className="flex flex-col items-center">
-          <p className="text-md font-light">Logged in as:</p>
-          <p className="text-xs">{username}</p>
+        <div className="flex flex-col items-center font-light">
+          <p className="text-xs ">Logged in as:</p>
+          <p className="text-xs">{selfAccount.general?.username}</p>
         </div>
         <button
           onClick={() => logoutHandler()}
-          className="text-lg p-1 font-light hover:text-black hover:bg-slate-300 rounded-lg cursor-pointer transition-colors duration-200"
+          className="text-md p-1 font-light hover:text-black hover:bg-slate-300 rounded-lg cursor-pointer transition-colors duration-200"
         >
           Logout
         </button>
