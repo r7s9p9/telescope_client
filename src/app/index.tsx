@@ -20,6 +20,7 @@ import { Room } from "../widgets/room-list/room.tsx";
 import { roomIdSchema } from "../shared/api/api.schema.ts";
 import { RoomId } from "../types.ts";
 import { routes } from "../constants.ts";
+import { NotifyProvider } from "../widgets/notification/notification.tsx";
 
 const homeLoader = async () => {
   const account = await fetchSelfAccount();
@@ -113,6 +114,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <NotifyProvider>
+      <RouterProvider router={router} />
+    </NotifyProvider>
   </React.StrictMode>,
 );

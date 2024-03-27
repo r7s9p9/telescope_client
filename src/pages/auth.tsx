@@ -1,15 +1,14 @@
 import { ReactNode } from "react";
 import { AuthContainer } from "../widgets/auth-container/auth-container";
-import { NotificationStack } from "../widgets/notification/notification";
+import { NotifyStack } from "../widgets/notification/notification";
 
 export default function Auth({ type }: { type: "login" | "register" }) {
   return (
     <Background>
-      <NotificationStack>
-        <Window>
-          <AuthContainer type={type} />
-        </Window>
-      </NotificationStack>
+      <NotifyStack />
+      <Window>
+        <AuthContainer type={type} />
+      </Window>
     </Background>
   );
 }

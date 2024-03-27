@@ -1,5 +1,4 @@
 import { ReactNode, useEffect, useState } from "react";
-import { NotificationState } from "../notification/types";
 import { EmailState, IFormValues, InputProps, ShowItemState } from "./types";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -12,7 +11,7 @@ import {
   IconSend2,
   IconUser,
 } from "@tabler/icons-react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, UseFormReset, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   codeFormSchema,
@@ -21,23 +20,26 @@ import {
 } from "../../shared/api/api.schema";
 import { fetchCode, fetchLogin, fetchRegister } from "../../shared/api/api";
 import { routes } from "../../constants";
-import { ShowType, useNotification } from "../notification/notification";
+import { useNotify } from "../notification/notification";
+import { NotifyType } from "../notification/types";
+import { message } from "./constants";
+
+const useResetForm = (isShow: boolean, reset: UseFormReset<IFormValues>) =>
+  useEffect(() => {
+    if (isShow) reset();
+  }, [isShow]);
 
 export function AuthContainer({ type }: { type: "login" | "register" }) {
-  const notify = useNotification();
-
-  const loggedOutMessage =
-    "You have successfully logged out of your account. See you soon!";
-
   const [showItem, setShowItem] = useState<ShowItemState["showItem"]>(type);
   const [email, setEmail] = useState<EmailState["email"]>("");
 
+  const notify = useNotify();
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (location.state?.isLoggedOut) {
-      notify("info", loggedOutMessage);
+      notify.show.info(message.loggedOut);
       // remove state from location
       navigate({ pathname: location.pathname });
     }
@@ -45,7 +47,7 @@ export function AuthContainer({ type }: { type: "login" | "register" }) {
 
   // /login/code route protection
   useEffect(() => {
-    if (location.pathname === "/login/code" && showItem !== "code") {
+    if (location.pathname === routes.code.path && showItem !== "code") {
       navigate({ pathname: routes.login.path });
     }
   }, [location]);
@@ -56,30 +58,36 @@ export function AuthContainer({ type }: { type: "login" | "register" }) {
     setEmail(email);
   }
 
-  function handleClick(toForm: "login" | "register") {
-    setEmail("");
-    setShowItem(toForm);
-    if (toForm === "login") navigate({ pathname: routes.login.path });
-    if (toForm === "register") navigate({ pathname: routes.register.path });
-  }
+  const switchForm = {
+    toLogin: () => {
+      setEmail("");
+      setShowItem("login");
+      navigate({ pathname: routes.login.path });
+    },
+    toRegister: () => {
+      setEmail("");
+      setShowItem("register");
+      navigate({ pathname: routes.register.path });
+    },
+  };
 
   return (
     <div className="overflow-hidden relative flex flex-row justify-center items-center w-full h-full select-none">
       <LoginForm
         isShow={showItem === "login"}
         handleCodeRequired={handleCodeRequired}
-        handleClick={handleClick}
+        switchForm={switchForm}
         notify={notify}
       />
       <CodeForm
         isShow={showItem === "code"}
         email={email}
-        handleClick={handleClick}
+        switchForm={switchForm}
         notify={notify}
       />
       <RegisterForm
         isShow={showItem === "register"}
-        handleClick={handleClick}
+        switchForm={switchForm}
         notify={notify}
       />
     </div>
@@ -87,41 +95,38 @@ export function AuthContainer({ type }: { type: "login" | "register" }) {
 }
 
 function Input({ type, register, required, isDisabled, errors }: InputProps) {
-  let inputType;
-  let Icon;
-  switch (type) {
-    case "email":
-      Icon = <IconMail size={24} className="absolute m-2 text-slate-400" />;
-      inputType = "email";
-      break;
-    case "username":
-      Icon = <IconUser size={24} className="absolute m-2 text-slate-400" />;
-      inputType = "text";
-      break;
-    case "password":
-    case "code":
-      Icon = <IconPassword size={24} className="absolute m-2 text-slate-400" />;
-      inputType = "password";
-      break;
+  let inputType: "email" | "text" | "password" | undefined;
+  let Icon: JSX.Element | undefined;
+  if (type === "email") {
+    Icon = <IconMail size={24} className="absolute mx-2 text-slate-400" />;
+    inputType = "email";
+  }
+  if (type === "username") {
+    Icon = <IconUser size={24} className="absolute mx-2 text-slate-400" />;
+    inputType = "text";
+  }
+  if (type === "password" || type === "code") {
+    Icon = <IconPassword size={24} className="absolute mx-2 text-slate-400" />;
+    inputType = "password";
   }
 
   return (
     <div className="w-full">
-      <div className="flex w-full justify-between items-center">
-        <label className="uppercase text-sm">{type}</label>
-        {errors[type] && (
-          <p className="text-sm text-red-600">{errors[type]?.message}</p>
-        )}
+      <div className="flex w-full justify-between items-end">
+        <label className="font-light text-lg tracking-widest uppercase">
+          {type}
+        </label>
+        <p className="pb-0.5 text-sm text-red-600">{errors[type]?.message}</p>
       </div>
-      <div className="flex w-full items-center justify-end ">
+      <div className="flex w-full items-center justify-end">
         <input
-          className={`${type === "code" ? "text-center" : ""} w-full outline-none bg-slate-100 border-2 border-slate-400 p-1 rounded-md focus:bg-slate-200 focus:border-slate-700`}
+          className={`${type === "code" ? "text-center" : ""} text-lg font-medium w-full duration-300 ease-out appearance-none shadow-md shadow-slate-200 ring-slate-300 focus:shadow-slate-400 hover:ring-4 focus:ring-2 outline-none bg-slate-100 border-2 border-slate-400 p-1.5 rounded-xl focus:bg-slate-50 focus:border-slate-50`}
           type={inputType}
           spellCheck={false}
           multiple={false}
-          {...register(type, { required })}
           aria-invalid={errors[type] ? "true" : "false"}
           disabled={isDisabled}
+          {...register(type, { required })}
         />
         {Icon}
       </div>
@@ -129,39 +134,27 @@ function Input({ type, register, required, isDisabled, errors }: InputProps) {
   );
 }
 
-function ButtonSubmit({
-  isDisabled,
-  children,
-}: {
-  isDisabled: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="submit"
-      className="flex justify-center items-center gap-2 p-2 w-32 rounded-md border-2 border-slate-400 hover:bg-slate-200"
-      formNoValidate={true} // disable stock html validation
-      disabled={isDisabled}
-    >
-      {children}
-    </button>
-  );
-}
-
-function ButtonCodeCancel({
+function Button({
+  type,
   isDisabled,
   handleClick,
   children,
 }: {
+  type: "submit" | "button";
   isDisabled: boolean;
-  handleClick: ReturnType<typeof Function>;
+  handleClick?: ReturnType<typeof Function>;
   children: ReactNode;
 }) {
   return (
     <button
-      onClick={() => handleClick("login")}
-      type="button"
-      className="flex justify-center items-center gap-2 p-2 w-32 rounded-md border-2 border-slate-400 hover:bg-slate-200"
+      type={type}
+      onClick={
+        typeof handleClick === "function"
+          ? () => handleClick()
+          : () => undefined
+      }
+      className="font-light text-lg flex justify-center items-center gap-2 px-2 py-2 w-32 bg-slate-100 outline-none shadow shadow-slate-200 ring-slate-300 border-slate-300 focus:ring-2 focus:shadow-slate-800 focus:bg-slate-50 focus:border-slate-50 active:ring-0 border-2 shadow-sm shadow-slate-400 border-slate-400 rounded-xl hover:ring-4 active:shadow-inner active:shadow-slate-700 active:bg-slate-200 active:border-slate-400 duration-300 ease-out"
+      formNoValidate={true} // disable stock html validation
       disabled={isDisabled}
     >
       {children}
@@ -172,27 +165,31 @@ function ButtonCodeCancel({
 function CodeForm({
   isShow,
   email,
-  handleClick,
+  switchForm,
   notify,
 }: {
   isShow: boolean;
   email: string;
-  handleClick: ReturnType<typeof Function>;
-  notify: ShowType;
+  switchForm: {
+    toLogin: () => void;
+    toRegister: () => void;
+  };
+  notify: NotifyType;
 }) {
-  const codeError = "You entered an incorrect code";
-
   const {
     register,
+    reset,
     formState: { errors },
     handleSubmit,
   } = useForm<IFormValues>({ resolver: zodResolver(codeFormSchema) });
+
+  useResetForm(isShow, reset);
 
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<IFormValues> = async (data) => {
     const { success } = await fetchCode({ ...data, email });
-    if (!success) notify("error", codeError);
+    if (!success) notify.show.error(message.badCode);
     if (success) {
       navigate({ pathname: routes.home.path });
     }
@@ -210,7 +207,9 @@ function CodeForm({
         onSubmit={handleSubmit(onSubmit)}
       >
         <div className="flex flex-col gap-2">
-          <p className="text-2xl text-center">Almost done...</p>
+          <p className="text-center tracking-widest font-light text-3xl">
+            Almost done...
+          </p>
           <p className="text-sm text-center">
             Please enter the verification code sent to your telescope account{" "}
             <b className="text-green-600">{email}</b> on another device:
@@ -223,16 +222,7 @@ function CodeForm({
           isDisabled={!isShow}
           errors={errors}
         />
-        <div className="w-full flex gap-4 justify-between">
-          <ButtonCodeCancel isDisabled={!isShow} handleClick={handleClick}>
-            <IconArrowBack className="text-slate-600" size={24} />
-            Cancel
-          </ButtonCodeCancel>
-          <ButtonSubmit isDisabled={!isShow}>
-            <IconSend2 className="text-slate-600" size={18} />
-            Send
-          </ButtonSubmit>
-        </div>
+        <FormBottomPart type={"code"} isShow={isShow} switchForm={switchForm} />
       </form>
     </div>
   );
@@ -241,49 +231,83 @@ function CodeForm({
 function FormBottomPart({
   type,
   isShow,
-  handleClick,
+  switchForm,
 }: {
-  type: "login" | "register";
+  type: "login" | "register" | "code";
   isShow: boolean;
-  handleClick: ReturnType<typeof Function>;
+  switchForm: {
+    toLogin: () => void;
+    toRegister: () => void;
+  };
 }) {
-  let switchButton;
-  let switchButtonHint;
+  let switchButtonHint: JSX.Element | undefined;
+  let switchButtonContent: JSX.Element | undefined;
+  let submitButtonContent: JSX.Element | undefined;
+
   if (type === "login") {
-    switchButton = (
+    switchButtonHint = <p className="text-sm font-light">Need an account?</p>;
+    switchButtonContent = (
       <>
         <IconComet className="text-slate-600" size={24} />
         Sign-up
       </>
     );
-    switchButtonHint = "Need an account?";
+    submitButtonContent = (
+      <>
+        <IconKey className="text-slate-600" size={24} />
+        <p>Login</p>
+      </>
+    );
   }
+
   if (type === "register") {
-    switchButton = (
+    switchButtonHint = <p className="text-sm font-light">Need to log in?</p>;
+    switchButtonContent = (
       <>
         <IconLogin className="text-slate-600" size={24} />
         Sign-in
       </>
     );
-    switchButtonHint = "Need to log in?";
-  }
-  return (
-    <div className="w-full outline-none flex flex-row gap-4 justify-between items-end">
-      <div className="flex flex-col items-start">
-        <p className="text-sm font-light">{switchButtonHint}</p>
-        <button
-          type="button"
-          onClick={() => handleClick(type === "login" ? "register" : "login")}
-          className="flex justify-center items-center gap-2 p-2 w-32 rounded-md border-2 border-slate-400 hover:bg-slate-200"
-          disabled={!isShow}
-        >
-          {switchButton}
-        </button>
-      </div>
-      <ButtonSubmit isDisabled={!isShow}>
+    submitButtonContent = (
+      <>
         <IconKey className="text-slate-600" size={24} />
-        <p className="capitalize">{type}</p>
-      </ButtonSubmit>
+        <p>Register</p>
+      </>
+    );
+  }
+
+  if (type === "code") {
+    switchButtonContent = (
+      <>
+        <IconArrowBack className="text-slate-600" size={24} />
+        Cancel
+      </>
+    );
+    submitButtonContent = (
+      <>
+        <IconSend2 className="text-slate-600" size={18} />
+        Send
+      </>
+    );
+  }
+
+  function handleClick() {
+    if (type === "login") switchForm.toRegister();
+    if (type === "register") switchForm.toLogin();
+    if (type === "code") switchForm.toLogin();
+  }
+
+  return (
+    <div className="w-full outline-none flex flex-col justify-between">
+      {type !== "code" ? switchButtonHint : ""}
+      <div className="w-full flex flex-row gap-2 justify-between items-center mt-0.5">
+        <Button type={"button"} isDisabled={!isShow} handleClick={handleClick}>
+          {switchButtonContent}
+        </Button>
+        <Button type={"submit"} isDisabled={!isShow}>
+          {submitButtonContent}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -291,16 +315,17 @@ function FormBottomPart({
 function LoginForm({
   isShow,
   handleCodeRequired,
-  handleClick,
+  switchForm,
   notify,
 }: {
   isShow: boolean;
   handleCodeRequired: ReturnType<typeof Function>;
-  handleClick: ReturnType<typeof Function>;
-  notify: ShowType;
+  switchForm: {
+    toLogin: () => void;
+    toRegister: () => void;
+  };
+  notify: NotifyType;
 }) {
-  const authErrorMessage = "You entered an incorrect username or password";
-
   const {
     register,
     reset,
@@ -310,13 +335,14 @@ function LoginForm({
     resolver: zodResolver(loginFormSchema),
   });
 
+  useResetForm(isShow, reset);
+
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<IFormValues> = async (data) => {
     const result = await fetchLogin(data);
-    if (!result.success) notify("error", authErrorMessage);
+    if (!result.success) notify.show.error(message.badAuth);
     if (result.isCodeNeeded) {
-      reset();
       handleCodeRequired(data.email);
     }
     if (result.success && !result.isCodeNeeded) {
@@ -335,7 +361,9 @@ function LoginForm({
       }}
       onSubmit={handleSubmit(onSubmit)}
     >
-      <p className="text-center text-2xl">Welcome back!</p>
+      <p className="text-center tracking-widest font-light text-3xl">
+        Welcome back!
+      </p>
       <Input
         type="email"
         register={register}
@@ -350,19 +378,22 @@ function LoginForm({
         isDisabled={!isShow}
         errors={errors}
       />
-      <FormBottomPart type="login" isShow={isShow} handleClick={handleClick} />
+      <FormBottomPart type="login" isShow={isShow} switchForm={switchForm} />
     </form>
   );
 }
 
 function RegisterForm({
   isShow,
-  handleClick,
+  switchForm,
   notify,
 }: {
   isShow: boolean;
-  handleClick: ReturnType<typeof Function>;
-  notify: ShowType;
+  switchForm: {
+    toLogin: () => void;
+    toRegister: () => void;
+  };
+  notify: NotifyType;
 }) {
   const {
     register,
@@ -373,6 +404,8 @@ function RegisterForm({
     resolver: zodResolver(registerFormSchema),
   });
 
+  useResetForm(isShow, reset);
+
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<IFormValues> = async (data) => {
@@ -380,20 +413,20 @@ function RegisterForm({
     if (!result.success) {
       switch (result.errorCode) {
         case "EMAIL_ALREADY_EXISTS":
-          notify("error", "Email already exists");
+          notify.show.error(message.badRegisterEmailExists);
           break;
         case "USERNAME_ALREADY_EXISTS":
-          notify("error", "Username already exists");
+          notify.show.error(message.badRegisterUsernameExists);
           break;
         default:
-          notify("error", "Server error");
+          notify.show.error(message.badServer);
           break;
       }
     } else {
-      notify("info", "You have successfully registered! Please sign in");
+      notify.show.info(message.goodRegister);
       reset();
       navigate({ pathname: routes.login.path });
-      handleClick("login");
+      switchForm.toLogin();
     }
   };
   return (
@@ -407,7 +440,9 @@ function RegisterForm({
       className="absolute h-3/4 max-h-96 w-3/4 max-w-96 flex flex-col justify-center gap-2 duration-500"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <p className="w-full text-center text-2xl">Create an account</p>
+      <p className="text-center tracking-widest font-light text-3xl">
+        Create an account
+      </p>
       <Input
         type="email"
         register={register}
@@ -429,11 +464,7 @@ function RegisterForm({
         isDisabled={!isShow}
         errors={errors}
       />
-      <FormBottomPart
-        type="register"
-        isShow={isShow}
-        handleClick={handleClick}
-      />
+      <FormBottomPart type="register" isShow={isShow} switchForm={switchForm} />
     </form>
   );
 }
