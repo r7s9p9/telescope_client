@@ -162,156 +162,6 @@ function Button({
   );
 }
 
-function CodeForm({
-  isShow,
-  email,
-  switchForm,
-  notify,
-}: {
-  isShow: boolean;
-  email: string;
-  switchForm: {
-    toLogin: () => void;
-    toRegister: () => void;
-  };
-  notify: NotifyType;
-}) {
-  const {
-    register,
-    reset,
-    formState: { errors },
-    handleSubmit,
-  } = useForm<IFormValues>({ resolver: zodResolver(codeFormSchema) });
-
-  useResetForm(isShow, reset);
-
-  const navigate = useNavigate();
-
-  const onSubmit: SubmitHandler<IFormValues> = async (data) => {
-    const { success } = await fetchCode({ ...data, email });
-    if (!success) notify.show.error(message.badCode);
-    if (success) {
-      navigate({ pathname: routes.home.path });
-    }
-  };
-
-  return (
-    <div
-      className="absolute self-center w-5/6 h-2/3 flex justify-center items-center bg-gray-100 rounded-b-xl duration-500"
-      style={{
-        transform: isShow ? `translateY(0%)` : `translateY(-150%)`,
-      }}
-    >
-      <form
-        className="flex flex-col p-4 w-full h-full border-2 border-slate-300 shadow-xl justify-between rounded-xl gap-2 items-center"
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <div className="flex flex-col gap-2">
-          <p className="text-center tracking-widest font-light text-3xl">
-            Almost done...
-          </p>
-          <p className="text-sm text-center">
-            Please enter the verification code sent to your telescope account{" "}
-            <b className="text-green-600">{email}</b> on another device:
-          </p>
-        </div>
-        <Input
-          type="code"
-          register={register}
-          required
-          isDisabled={!isShow}
-          errors={errors}
-        />
-        <FormBottomPart type={"code"} isShow={isShow} switchForm={switchForm} />
-      </form>
-    </div>
-  );
-}
-
-function FormBottomPart({
-  type,
-  isShow,
-  switchForm,
-}: {
-  type: "login" | "register" | "code";
-  isShow: boolean;
-  switchForm: {
-    toLogin: () => void;
-    toRegister: () => void;
-  };
-}) {
-  let switchButtonHint: JSX.Element | undefined;
-  let switchButtonContent: JSX.Element | undefined;
-  let submitButtonContent: JSX.Element | undefined;
-
-  if (type === "login") {
-    switchButtonHint = <p className="text-sm font-light">Need an account?</p>;
-    switchButtonContent = (
-      <>
-        <IconComet className="text-slate-600" size={24} />
-        Sign-up
-      </>
-    );
-    submitButtonContent = (
-      <>
-        <IconKey className="text-slate-600" size={24} />
-        <p>Login</p>
-      </>
-    );
-  }
-
-  if (type === "register") {
-    switchButtonHint = <p className="text-sm font-light">Need to log in?</p>;
-    switchButtonContent = (
-      <>
-        <IconLogin className="text-slate-600" size={24} />
-        Sign-in
-      </>
-    );
-    submitButtonContent = (
-      <>
-        <IconKey className="text-slate-600" size={24} />
-        <p>Register</p>
-      </>
-    );
-  }
-
-  if (type === "code") {
-    switchButtonContent = (
-      <>
-        <IconArrowBack className="text-slate-600" size={24} />
-        Cancel
-      </>
-    );
-    submitButtonContent = (
-      <>
-        <IconSend2 className="text-slate-600" size={18} />
-        Send
-      </>
-    );
-  }
-
-  function handleClick() {
-    if (type === "login") switchForm.toRegister();
-    if (type === "register") switchForm.toLogin();
-    if (type === "code") switchForm.toLogin();
-  }
-
-  return (
-    <div className="w-full outline-none flex flex-col justify-between">
-      {type !== "code" ? switchButtonHint : ""}
-      <div className="w-full flex flex-row gap-2 justify-between items-center mt-0.5">
-        <Button type={"button"} isDisabled={!isShow} handleClick={handleClick}>
-          {switchButtonContent}
-        </Button>
-        <Button type={"submit"} isDisabled={!isShow}>
-          {submitButtonContent}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 function LoginForm({
   isShow,
   handleCodeRequired,
@@ -351,34 +201,139 @@ function LoginForm({
   };
 
   return (
+    <>
+      <div
+        className="absolute min-w-96 min-h-96 w-2/5 h-2/5 rounded-2xl bg-slate-50 border-2 shadow-2xl border-slate-400 duration-700 delay-100 ease-in-out"
+        style={{
+          transform: isShow
+            ? `translateX(0%) rotate(0deg)`
+            : `translateX(-100%) rotate(30deg)`,
+          opacity: isShow ? `1` : `0`,
+        }}
+      ></div>
+      <form
+        className="absolute rounded-full h-3/4 max-h-80 w-3/4 max-w-80 flex flex-col justify-center gap-2 duration-500 ease-in-out"
+        style={{
+          transform: isShow
+            ? `translateX(0%) scale(1)`
+            : `translateX(-200%) scale(0.75)`,
+          opacity: isShow ? "1" : "0",
+        }}
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <p className="text-center tracking-widest font-light text-3xl">
+          Welcome back!
+        </p>
+        <Input
+          type="email"
+          register={register}
+          required
+          isDisabled={!isShow}
+          errors={errors}
+        />
+        <Input
+          type="password"
+          register={register}
+          required
+          isDisabled={!isShow}
+          errors={errors}
+        />
+        <div className="w-full outline-none flex flex-col justify-between">
+          <p className="text-sm font-light">Need an account?</p>
+          <div className="w-full flex flex-row gap-2 justify-between items-center mt-0.5">
+            <Button
+              type={"button"}
+              isDisabled={!isShow}
+              handleClick={() => switchForm.toRegister()}
+            >
+              <IconComet className="text-slate-600" size={24} />
+              Sign-up
+            </Button>
+            <Button type={"submit"} isDisabled={!isShow}>
+              <IconKey className="text-slate-600" size={24} />
+              <p>Login</p>
+            </Button>
+          </div>
+        </div>
+      </form>
+    </>
+  );
+}
+
+function CodeForm({
+  isShow,
+  email,
+  switchForm,
+  notify,
+}: {
+  isShow: boolean;
+  email: string;
+  switchForm: {
+    toLogin: () => void;
+    toRegister: () => void;
+  };
+  notify: NotifyType;
+}) {
+  const {
+    register,
+    reset,
+    formState: { errors },
+    handleSubmit,
+  } = useForm<IFormValues>({ resolver: zodResolver(codeFormSchema) });
+
+  useResetForm(isShow, reset);
+
+  const navigate = useNavigate();
+
+  const onSubmit: SubmitHandler<IFormValues> = async (data) => {
+    const { success } = await fetchCode({ ...data, email });
+    if (!success) notify.show.error(message.badCode);
+    if (success) {
+      navigate({ pathname: routes.home.path });
+    }
+  };
+
+  return (
     <form
-      className="absolute h-3/4 max-h-96 w-3/4 max-w-96 flex flex-col justify-center gap-2 duration-500"
+      className="absolute h-3/4 max-h-80 w-3/4 max-w-80 flex flex-col justify-center gap-2 duration-500 ease-in-out"
+      onSubmit={handleSubmit(onSubmit)}
       style={{
         transform: isShow
           ? `translateX(0%) scale(1)`
-          : `translateX(-100%) scale(0.75)`,
+          : `translateX(100%) scale(0.75)`,
         opacity: isShow ? "1" : "0",
       }}
-      onSubmit={handleSubmit(onSubmit)}
     >
-      <p className="text-center tracking-widest font-light text-3xl">
-        Welcome back!
-      </p>
+      <div className="flex flex-col gap-2">
+        <p className="text-center tracking-widest font-light text-3xl">
+          Almost done
+        </p>
+        <p className="text-lg font-light text-center">
+          Please enter the verification code sent to your telescope account{" "}
+          <b className="text-green-600">{email}</b> on another device
+        </p>
+      </div>
       <Input
-        type="email"
+        type="code"
         register={register}
         required
         isDisabled={!isShow}
         errors={errors}
       />
-      <Input
-        type="password"
-        register={register}
-        required
-        isDisabled={!isShow}
-        errors={errors}
-      />
-      <FormBottomPart type="login" isShow={isShow} switchForm={switchForm} />
+      <div className="w-full flex flex-row gap-2 justify-between items-center mt-0.5 outline-none">
+        <Button
+          type={"button"}
+          isDisabled={!isShow}
+          handleClick={() => switchForm.toLogin()}
+        >
+          <IconArrowBack className="text-slate-600" size={24} />
+          Cancel
+        </Button>
+        <Button type={"submit"} isDisabled={!isShow}>
+          <IconSend2 className="text-slate-600" size={18} />
+          Send
+        </Button>
+      </div>
     </form>
   );
 }
@@ -430,41 +385,68 @@ function RegisterForm({
     }
   };
   return (
-    <form
-      style={{
-        transform: isShow
-          ? `translateX(0%) scale(1)`
-          : `translateX(100%) scale(0.75)`,
-        opacity: isShow ? "1" : "0",
-      }}
-      className="absolute h-3/4 max-h-96 w-3/4 max-w-96 flex flex-col justify-center gap-2 duration-500"
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <p className="text-center tracking-widest font-light text-3xl">
-        Create an account
-      </p>
-      <Input
-        type="email"
-        register={register}
-        required
-        isDisabled={!isShow}
-        errors={errors}
-      />
-      <Input
-        type="username"
-        register={register}
-        required
-        isDisabled={!isShow}
-        errors={errors}
-      />
-      <Input
-        type="password"
-        register={register}
-        required
-        isDisabled={!isShow}
-        errors={errors}
-      />
-      <FormBottomPart type="register" isShow={isShow} switchForm={switchForm} />
-    </form>
+    <>
+      <div
+        className="absolute min-w-96 min-h-96 w-2/5 h-2/5 border-2 shadow-2xl rounded-2xl bg-slate-50 border-slate-400 duration-700 delay-100 ease-in-out"
+        style={{
+          transform: isShow
+            ? `translateX(0%) rotate(0deg)`
+            : `translateX(100%) rotate(-30deg)`,
+          opacity: isShow ? `1` : `0`,
+        }}
+      ></div>
+      <form
+        style={{
+          transform: isShow
+            ? `translateX(0%) scale(1)`
+            : `translateX(200%) scale(0.75)`,
+          opacity: isShow ? "1" : "0",
+        }}
+        className="absolute h-3/4 max-h-80 w-3/4 max-w-80 flex flex-col justify-center gap-2 duration-500 ease-in-out"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <p className="text-center tracking-widest font-light text-3xl">
+          Create an account
+        </p>
+        <Input
+          type="email"
+          register={register}
+          required
+          isDisabled={!isShow}
+          errors={errors}
+        />
+        <Input
+          type="username"
+          register={register}
+          required
+          isDisabled={!isShow}
+          errors={errors}
+        />
+        <Input
+          type="password"
+          register={register}
+          required
+          isDisabled={!isShow}
+          errors={errors}
+        />
+        <div className="w-full outline-none flex flex-col justify-between">
+          <p className="text-sm font-light">Need to log in?</p>
+          <div className="w-full flex flex-row gap-2 justify-between items-center mt-0.5">
+            <Button
+              type={"button"}
+              isDisabled={!isShow}
+              handleClick={() => switchForm.toLogin()}
+            >
+              <IconLogin className="text-slate-600" size={24} />
+              Sign-in
+            </Button>
+            <Button type={"submit"} isDisabled={!isShow}>
+              <IconKey className="text-slate-600" size={24} />
+              <p>Register</p>
+            </Button>
+          </div>
+        </div>
+      </form>
+    </>
   );
 }
