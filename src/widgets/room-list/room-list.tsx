@@ -17,8 +17,14 @@ export function RoomList() {
       <Room openedRoomId={roomId} data={roomData} />
     </li>
   ));
+
+  //
+  //
+  //
+  //
+
   return (
-    <div className="flex-row border-r-2 border-slate-300">
+    <div className="flex-row border-r-2 border-slate-400">
       <Search />
       <ul>{roomArr}</ul>
     </div>
@@ -27,10 +33,7 @@ export function RoomList() {
 
 function Search() {
   return (
-    <div className="relative flex items-center p-2">
-      <button className="absolute right-0 focus:outline-none rtl:left-0 rtl:right-auto">
-        <IconSearch className="w-6 h-6 mx-4 text-gray-400 transition-colors duration-300 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400"></IconSearch>
-      </button>
+    <div className="flex w-full items-center p-2">
       <input
         type="search"
         placeholder="Find room..."
@@ -59,7 +62,7 @@ function Room({
     return (
       <Link to={roomLink}>
         {data.roomId === openedRoomId ? (
-          <button className="shadow-md hover:bg-slate-300 rounded-xl bg-slate-300 ">
+          <button className="shadow-md hover:bg-slate-300 rounded-xl bg-slate-200 ">
             {children}
           </button>
         ) : (
@@ -75,13 +78,13 @@ function Room({
     if (data.unreadCount !== 0) {
       if (data.unreadCount > 9) {
         return (
-          <p className="text-xs text-blue-600 bg-slate-200 text-center px-1 rounded-lg">
+          <p className="text-xs text-blue-600 bg-slate-50 text-center px-1 rounded-lg">
             {"9+"}
           </p>
         );
       }
       return (
-        <p className="text-xs text-blue-600 bg-slate-200 text-center px-1 rounded-lg">
+        <p className="text-xs text-blue-600 bg-slate-50 text-center px-1 rounded-lg">
           {data.unreadCount}
         </p>
       );
@@ -92,7 +95,7 @@ function Room({
   return (
     <RoomContainer>
       <div className="flex flex-row items-center">
-        <div className="flex flex-row items-center justify-center w-12 h-12 bg-slate-200 rounded-xl ">
+        <div className="flex flex-row items-center justify-center w-12 h-12 bg-slate-50 border-2 rounded-xl rounded-xl ">
           <p className="text-xl text-blue-600">
             {data.roomInfo.name.charAt(0)}
           </p>

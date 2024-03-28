@@ -13,8 +13,8 @@ import {
 } from "./api.schema";
 
 const fetcher = async (
-  route: (typeof serverRoute)["account"]["read" | "update"],
-  body: object,
+  route: string,
+  body: any,
 ) => {
   const result = await fetch(route, {
     method: "POST",
@@ -26,6 +26,20 @@ const fetcher = async (
   });
   return { status: result.status, payload: await result.json() };
 };
+
+function useQuery() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const run = async (route: string,
+  body: any) => {
+    setIsLoading(true);
+    const response = await fetcher(route, body);
+    setIsLoading(false);
+    return {response, request: { route, body }};
+  }
+
+  return { isLoading, run }
+}
 
 function isAuth(status: number) {
   switch (status) {
@@ -121,27 +135,40 @@ export async function fetchLogout() {
   return { success: !!response.payload.success }
 }
 
-export async function fetchLogin(payload: { email: string, password: string}) {
-  const response = await fetcher(serverRoute.auth.login, payload)
-  if (!response.payload.success) return { success: false as const}
-  if (response.payload.code) {
-    return { success: true as const, email: payload.email, isCodeNeeded: true as const}
+export function useQueryLogin() {
+  const query = useQuery();
+
+  const run = async (payload: { email: string, password: string}) => {
+    const { response } = await query.run(serverRoute.auth.login, payload)
+    if (!response.payload.success) return { success: false as const, isCodeNeeded: false as const }
+    if (response.payload.code) return { success: true as const, isCodeNeeded: true as const }
+    return { success: true as const, isCodeNeeded: false as const }
   }
-  return { success: true as const, isCodeNeeded: false as const}
+
+  return { run, isLoading: query.isLoading }
 }
 
-export async function fetchCode(payload: { email: string, code: string }) {
-  const response = await fetcher(serverRoute.auth.code, payload)
-  return { success: !!response.payload.success }
+export function useQueryCode() {
+  const query = useQuery();
+  const run = async (payload: { email: string, code: string }) => {
+    const { response } = await query.run(serverRoute.auth.code, payload)
+    return { success: !!response.payload.success }
+    // Without !! no work
+  }
+  return { run, isLoading: query.isLoading}
 }
 
-export async function fetchRegister(payload: { email: string, username: string, password: string}) {
-  const response = await fetcher(serverRoute.auth.register, payload)
-  if (!response.payload.success) {
-    if (response.payload.errorCode) {
-      return { success: false as const, errorCode: response.payload.errorCode }
+export function useQueryRegister() {
+  const query = useQuery();
+  const run = async (payload: { email: string, username: string, password: string}) => {
+    const { response } = await query.run(serverRoute.auth.register, payload)
+    if (!response.payload.success) {
+      if (response.payload.errorCode) {
+        return { success: false as const, errorCode: response.payload.errorCode }
+      }
+      return { success: false as const }
     }
-    return { success: false as const }
+    return { success: true as const }
   }
-  return { success: true as const }
+  return { run, isLoading: query.isLoading }
 }

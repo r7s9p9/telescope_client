@@ -1,5 +1,5 @@
 import { useNavigate, useRouteLoaderData } from "react-router-dom";
-import { fetchLogout } from "../../../shared/api/api";
+import { fetchLogout, fetchSelfAccount } from "../../../shared/api/api";
 import { routes } from "../../../constants";
 import { AccountReadType } from "../../../shared/api/api.schema";
 
@@ -21,7 +21,7 @@ export const HomeHeader = () => {
   }
 
   return (
-    <div className="relative w-full flex justify-center items-center border-b-2 border-slate-400 bg-slate-200">
+    <div className="w-full flex justify-center items-center border-b-2 border-slate-400">
       <div className="w-full flex flex-row items-center justify-between px-4 py-2 cursor-default select-none">
         <p className="text-xl font-light tracking-widest uppercase ">
           Telescope
