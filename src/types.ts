@@ -1,2 +1,4 @@
-export type RoomId = `${string}-${string}-${string}-${string}-${string}`;
-export type UserId = `${string}-${string}-${string}-${string}-${string}`;
+import { UUID } from "crypto";
+
+export type RoomId = UUID;
+export type UserId = UUID;

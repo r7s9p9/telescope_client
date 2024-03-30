@@ -11,6 +11,8 @@ import {
   messageReadSchema,
   roomListSchema,
 } from "./api.schema";
+import { useNavigate } from "react-router-dom";
+import { routes } from "../../constants";
 
 const fetcher = async (
   route: string,
@@ -37,7 +39,6 @@ function useQuery() {
     setIsLoading(false);
     return {response, request: { route, body }};
   }
-
   return { isLoading, run }
 }
 
@@ -57,19 +58,6 @@ function accountDataValidator(payload: object) {
   return { success: true as const, data: result.data };
 }
 
-export async function fetchSelfAccount() {
-  const result = await fetcher(
-    serverRoute.account.read,
-    readAccountBody("self"),
-  );
-  const isLogged = isAuth(result.status);
-  if (!isLogged) return { success: true as const, isLogged: false as const };
-
-  const { success, data } = accountDataValidator(result.payload);
-  if (!success) return { success: false as const, isLogged: true as const };
-  return { success: true as const, isLogged: true as const, data };
-}
-
 function roomListDataValidator(payload: object) {
   const result = roomListSchema.safeParse(payload);
 
@@ -77,25 +65,66 @@ function roomListDataValidator(payload: object) {
   return { success: true as const, data: result.data };
 }
 
-export async function fetchRoomList(range: { min: string; max: string }) {
-  const result = await fetcher(
-    serverRoute.room.getRoomList,
-    readRoomList(range),
-  );
-
-  const isLogged = isAuth(result.status);
-  if (!isLogged) return { success: true as const, isLogged: false as const };
-  const { success, data } = roomListDataValidator(result.payload);
-
-  if (!success) return { success: false as const, isLogged: true as const };
-  return { success: true as const, isLogged: true as const, data };
-}
-
 function messagesValidator(payload: object) {
   const result = messageReadSchema.safeParse(payload);
 
   if (!result.success) return { success: false as const, error: result.error };
   return { success: true as const, data: result.data };
+}
+
+export function useQuerySelfAccount() {
+  const query = useQuery();
+  const navigate = useNavigate();
+
+  const run = async () => {
+    const { response } = await query.run(serverRoute.account.read, readAccountBody("self"))
+    const isLogged = isAuth(response.status);
+    if (!isLogged) {
+      navigate(
+      { pathname: routes.login.path },
+      // { state: { isLoggedOut: true } }, // need other value for !isLogged
+    );}
+    
+    const { success, data } = accountDataValidator(response.payload);
+   
+    if (!success) return { success: false as const};
+    return { success: true as const, data };
+  }
+
+  return { run, isLoading: query.isLoading }
+}
+
+export function useQueryLogout() {
+  const query = useQuery();
+
+  const run = async (sessionId: string | "self") => {
+    const { response } = await query.run(serverRoute.session.remove, { sessionId: sessionId })
+    return { success: !!response.payload.success }
+  }
+
+  return { run, isLoading: query.isLoading }
+}
+
+export function useQueryRoomList() {
+  const query = useQuery();
+  const navigate = useNavigate();
+
+  const run = async (range: { min: string; max: string }) => {
+    const { response } = await query.run(serverRoute.room.getRoomList, readRoomList(range))
+
+    const isLogged = isAuth(response.status);
+    if (!isLogged) {
+      navigate(
+      { pathname: routes.login.path },
+      // { state: { isLoggedOut: true } }, // need other value for !isLogged
+    );}
+
+    const { success, data } = roomListDataValidator(response.payload);
+    if (!success) return { success: false as const };
+    return { success: true as const, data };
+  }
+ 
+  return { run, isLoading: query.isLoading }
 }
 
 export async function fetchReadMessages(
@@ -128,11 +157,6 @@ export async function fetchAddMessage(payload: {
   //if (!success) return { success: false as const, isLogged: true as const };
   //return { success: true as const, isLogged: true as const, data };
   console.log(result);
-}
-
-export async function fetchLogout() {
-  const response = await fetcher(serverRoute.session.remove, { sessionId: "self" as const})
-  return { success: !!response.payload.success }
 }
 
 export function useQueryLogin() {

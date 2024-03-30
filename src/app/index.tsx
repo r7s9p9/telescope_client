@@ -13,7 +13,6 @@ import Auth from "../pages/auth.tsx";
 import {
   fetchAddMessage,
   fetchReadMessages,
-  fetchRoomList,
   fetchSelfAccount,
 } from "../shared/api/api.ts";
 import { Room } from "../widgets/room-list/room.tsx";
@@ -22,14 +21,14 @@ import { RoomId } from "../types.ts";
 import { routes } from "../constants.ts";
 import { NotifyProvider } from "../widgets/notification/notification.tsx";
 
-const homeLoader = async () => {
-  const account = await fetchSelfAccount();
-  const roomList = await fetchRoomList({ min: "0", max: "10" });
-  // TODO if (!result.success) <- show error component
-  if (!account.isLogged || !roomList.isLogged) return redirect("/login");
+// const homeLoader = async () => {
+//   const account = await fetchSelfAccount();
+//   const roomList = await fetchRoomList({ min: "0", max: "10" });
+//   // TODO if (!result.success) <- show error component
+//   if (!account.isLogged || !roomList.isLogged) return redirect("/login");
 
-  return { selfAccount: account.data, roomList: roomList.data };
-};
+//   return { selfAccount: account.data, roomList: roomList.data };
+// };
 
 const roomLoader = async ({ params }: { params: Params<string> }) => {
   const roomId = roomIdSchema.safeParse(params.roomId);
@@ -74,7 +73,6 @@ const router = createBrowserRouter([
     path: routes.home.path,
     id: routes.home.id,
     element: <Home />,
-    loader: homeLoader,
     errorElement: <Page404 />,
     children: [
       {

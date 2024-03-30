@@ -1,116 +1,151 @@
-import { Link, useParams, useRouteLoaderData } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { RoomInListType, RoomListType } from "../../shared/api/api.schema";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { formatDate } from "../../shared/lib/date";
-import { IconSearch } from "@tabler/icons-react";
+import { useNotify } from "../notification/notification";
+import { useQueryRoomList } from "../../shared/api/api";
+import { getRandomInt } from "../../shared/lib/random";
+import { checkRoomId } from "../../shared/lib/uuid";
+import { routes } from "../../constants";
+import { RoomId } from "../../types";
 
 export function RoomList() {
-  const { roomList } = useRouteLoaderData("home") as { roomList: RoomListType };
+  const notify = useNotify();
+  const navigate = useNavigate();
+  const query = useQueryRoomList();
+
   const { roomId } = useParams();
 
-  const [data, setData] = useState(roomList);
+  const [roomList, setRoomList] = useState<RoomListType>();
 
-  if (data.isEmpty || !data.roomDataArr) return <div>You have no rooms</div>;
+  useEffect(() => {
+    if (!checkRoomId(roomId)) navigate(routes.home.path);
 
-  const roomArr = data.roomDataArr.map((roomData) => (
-    <li className="px-2 py-1" key={roomData.roomId}>
-      <Room openedRoomId={roomId} data={roomData} />
+    const queryAction = async () => {
+      const { success, data } = await query.run({
+        min: "0",
+        max: "10",
+      });
+      if (!success) notify.show.error("ROOM LIST NO SUCCESS");
+      if (success) setRoomList(data);
+    };
+    queryAction();
+  }, []);
+
+  return (
+    <Rooms
+      isLoading={query.isLoading}
+      isEmpty={!!roomList?.isEmpty}
+      data={roomList}
+      openedRoomId={roomId as RoomId}
+    />
+  );
+}
+
+function Skeleton() {
+  const nameWidth = getRandomInt(2, 6) * 32;
+  const contentWidth = getRandomInt(2, 6) * 48;
+
+  return (
+    <div className="w-full h-14 p-2 mb-2 flex flex-col justify-between bg-slate-100 shadow-md rounded-md">
+      <div className="w-full flex justify-between animate-pulse">
+        <div
+          style={{ width: `${nameWidth}px` }}
+          className="rounded-md h-4 bg-slate-200"
+        ></div>
+        <div className="w-16 rounded-md h-4 bg-slate-200"></div>
+      </div>
+      <div className="w-full flex justify-between animate-pulse">
+        <div
+          style={{ width: `${contentWidth}px` }}
+          className="h-4 rounded-md bg-slate-200"
+        ></div>
+      </div>
+    </div>
+  );
+}
+
+function RoomsSkeleton() {
+  const count = getRandomInt(2, 8);
+
+  return (
+    <Container>
+      {Array(count)
+        .fill(1)
+        .map((_, i) => (
+          <li key={i}>
+            <Skeleton />
+          </li>
+        ))}
+    </Container>
+  );
+}
+
+function UnreadCount({ count }: { count: number }) {
+  if (count !== 0) {
+    return (
+      <p className="text-xs text-blue-600 bg-slate-50 text-center px-1 rounded-xl">
+        {count > 9 ? "9+" : count}
+      </p>
+    );
+  }
+}
+
+function Container({ children }: { children: ReactNode }) {
+  return (
+    <ul className="w-1/3 min-w-40 h-full border-r-2 p-2 border-slate-400">
+      {children}
+    </ul>
+  );
+}
+
+function Rooms({
+  isLoading,
+  isEmpty,
+  data,
+  openedRoomId,
+}: {
+  isLoading: boolean;
+  isEmpty: boolean;
+  data?: RoomListType;
+  openedRoomId?: RoomId;
+}) {
+  if (isLoading) return <RoomsSkeleton />;
+  if (isEmpty || !data?.roomDataArr)
+    return <Container>You have no rooms</Container>;
+
+  const rooms = data.roomDataArr.map((roomData) => (
+    <li key={roomData.roomId}>
+      <Room isOpened={openedRoomId === roomData.roomId} data={roomData} />
     </li>
   ));
 
-  //
-  //
-  //
-  //
-
-  return (
-    <div className="flex-row border-r-2 border-slate-400">
-      <Search />
-      <ul>{roomArr}</ul>
-    </div>
-  );
+  return <Container>{rooms}</Container>;
 }
 
-function Search() {
-  return (
-    <div className="flex w-full items-center p-2">
-      <input
-        type="search"
-        placeholder="Find room..."
-        className="block w-full py-1 text-gray-700 placeholder-gray-400/70 bg-white border border-gray-200 rounded-xl pl-5 pr-11 rtl:pr-5 rtl:pl-11 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-      />
-    </div>
-  );
-}
-
-function Room({
-  openedRoomId,
-  data,
-}: {
-  openedRoomId?: string;
-  data: RoomInListType;
-}) {
+function Room({ isOpened, data }: { isOpened: boolean; data: RoomInListType }) {
   const date = data.lastMessage
     ? formatDate().roomList(data.lastMessage.created)
     : formatDate().roomList(data.roomInfo.created);
 
-  const noMessage = "There is no messages" as const;
-  const message = data.lastMessage ? data.lastMessage.content.text : noMessage;
-  const roomLink = "/room/" + data.roomId;
-
-  function RoomContainer({ children }: { children: ReactNode }) {
-    return (
-      <Link to={roomLink}>
-        {data.roomId === openedRoomId ? (
-          <button className="shadow-md hover:bg-slate-300 rounded-xl bg-slate-200 ">
-            {children}
-          </button>
-        ) : (
-          <button className="shadow-md hover:bg-slate-200 rounded-xl bg-slate-100 ">
-            {children}
-          </button>
-        )}
-      </Link>
-    );
-  }
-
-  const showCount = () => {
-    if (data.unreadCount !== 0) {
-      if (data.unreadCount > 9) {
-        return (
-          <p className="text-xs text-blue-600 bg-slate-50 text-center px-1 rounded-lg">
-            {"9+"}
-          </p>
-        );
-      }
-      return (
-        <p className="text-xs text-blue-600 bg-slate-50 text-center px-1 rounded-lg">
-          {data.unreadCount}
-        </p>
-      );
-    }
-    return <></>;
-  };
+  const lastMessage = data.lastMessage
+    ? data.lastMessage.content.text
+    : "There is no messages";
 
   return (
-    <RoomContainer>
-      <div className="flex flex-row items-center">
-        <div className="flex flex-row items-center justify-center w-12 h-12 bg-slate-50 border-2 rounded-xl rounded-xl ">
-          <p className="text-xl text-blue-600">
-            {data.roomInfo.name.charAt(0)}
-          </p>
+    <Link to={"/room/" + data.roomId}>
+      <button
+        className={`${isOpened ? "bg-slate-200" : "bg-slate-100"} w-full flex flex-col p-2 justify-between items-center shadow-md rounded-md hover:bg-slate-200`}
+      >
+        <div className="w-full flex flex-row justify-between items-center gap-2">
+          <p className="text-sm text-blue-600">{data.roomInfo.name}</p>
+          <p className="text-xs text-gray-800">{date}</p>
         </div>
-        <div className="w-72 h-8 flex flex-col px-2 justify-between ">
-          <div className="flex justify-between items-center">
-            <p className="text-sm text-blue-600">{data.roomInfo.name}</p>
-            <p className="text-xs text-gray-800">{date}</p>
-          </div>
-          <div className="flex flex-row justify-between items-center gap-4">
-            <p className="text-xs truncate text-black">{message}</p>
-            {showCount()}
-          </div>
+        <div className="w-full flex flex-row justify-between items-center">
+          <p className="w-full text-xs truncate text-black">{lastMessage}</p>
+          <UnreadCount count={data.unreadCount} />
         </div>
-      </div>
-    </RoomContainer>
+      </button>
+    </Link>
   );
 }

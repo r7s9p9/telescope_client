@@ -168,6 +168,16 @@ function Button({
   );
 }
 
+export function Spinner({ size }: { size: number }) {
+  return (
+    <div className="relative flex justify-center items-center animate-spin">
+      <div
+        className={`p-${size} absolute rounded-full border-slate-300 border-x-2`}
+      ></div>
+    </div>
+  );
+}
+
 function LoginForm({
   isShow,
   handleCodeRequired,
@@ -199,16 +209,16 @@ function LoginForm({
     const { success, isCodeNeeded } = await query.run(data);
 
     if (!query.isLoading) {
-      if (!success) notify.show.error(message.badAuth);
-      if (isCodeNeeded) handleCodeRequired(data.email);
-      if (success) navigate({ pathname: routes.home.path });
+      if (!success && !isCodeNeeded) notify.show.error(message.badAuth);
+      if (success && isCodeNeeded) handleCodeRequired(data.email);
+      if (success && !isCodeNeeded) navigate({ pathname: routes.home.path });
     }
   };
 
   return (
     <>
       <div
-        className="absolute max-w-lg min-w-80 min-h-80 w-3/4 h-2/5 rounded-3xl bg-slate-50 border-4 shadow-2xl border-slate-400 duration-1000 ease-out transform-gpu"
+        className="absolute max-w-lg min-w-80 min-h-80 w-3/4 h-2/5 rounded-3xl bg-slate-50 border-4 shadow-2xl border-slate-400 duration-1000 ease-in-out transform-gpu"
         style={{
           transform: isShow ? "" : "translateX(-200%) scale(0.25)",
           opacity: isShow ? "1" : "0",
@@ -220,7 +230,7 @@ function LoginForm({
         </p>
       </div>
       <form
-        className="absolute w-2/3 min-w-72 max-w-md flex flex-col justify-center gap-2 duration-1000 ease-in-out transform-gpu"
+        className="absolute w-2/3 min-w-72 max-w-md flex flex-col justify-center gap-2 duration-700 transform-gpu"
         style={{
           transform: isShow ? "" : "translateX(-250%)",
           opacity: isShow ? "1" : "0",
@@ -252,7 +262,7 @@ function LoginForm({
               <IconComet className="text-slate-600" size={24} />
               Sign-up
             </Button>
-            {query.isLoading && <Spinner />}
+            {query.isLoading && <Spinner size={6} />}
             <Button type={"submit"} isDisabled={!isShow || query.isLoading}>
               <IconKey className="text-slate-600" size={24} />
               <p>Login</p>
@@ -261,15 +271,6 @@ function LoginForm({
         </div>
       </form>
     </>
-  );
-}
-
-function Spinner() {
-  return (
-    <div className="relative flex justify-center items-center">
-      <IconWifi size={24} className="text-slate-400 animate-pulse" />
-      <div className="absolute rounded-full border-slate-300 border-l-2 border-r-2 p-6 animate-spin"></div>
-    </div>
   );
 }
 
@@ -311,7 +312,7 @@ function CodeForm({
   return (
     <>
       <div
-        className="absolute max-w-lg min-w-80 min-h-96 w-3/4 h-2/5 rounded-3xl bg-slate-50 border-4 shadow-2xl border-slate-400 duration-1000 ease-out transform-gpu"
+        className="absolute max-w-lg min-w-80 min-h-96 w-3/4 h-2/5 rounded-3xl bg-slate-50 border-4 shadow-2xl border-slate-400 duration-1000 ease-in-out transform-gpu"
         style={{
           transform: isShow ? "" : "translateX(200%) scale(0.25)",
           opacity: isShow ? "1" : "0",
@@ -327,7 +328,7 @@ function CodeForm({
         </p>
       </div>
       <form
-        className="absolute w-2/3 min-w-72 max-w-md flex flex-col justify-around gap-4 duration-1000 ease-in-out transform-gpu"
+        className="absolute w-2/3 min-w-72 max-w-md flex flex-col justify-around gap-4 duration-700 transform-gpu"
         onSubmit={handleSubmit(onSubmit)}
         style={{
           transform: isShow ? "" : "translateX(250%)",
@@ -350,7 +351,7 @@ function CodeForm({
             <IconArrowBack className="text-slate-600" size={24} />
             Cancel
           </Button>
-          {query.isLoading && <Spinner />}
+          {query.isLoading && <Spinner size={6} />}
           <Button type={"submit"} isDisabled={!isShow}>
             <IconSend2 className="text-slate-600" size={18} />
             Send
@@ -411,7 +412,7 @@ function RegisterForm({
   return (
     <>
       <div
-        className="absolute max-w-lg min-w-80 min-h-96 w-3/4 h-1/2 rounded-3xl bg-slate-50 border-4 shadow-2xl border-slate-400 duration-1000 ease-out transform-gpu"
+        className="absolute max-w-lg min-w-80 min-h-96 w-3/4 h-1/2 rounded-3xl bg-slate-50 border-4 shadow-2xl border-slate-400 duration-1000 ease-in-out transform-gpu"
         style={{
           transform: isShow ? "" : "translateX(200%) scale(0.25)",
           opacity: isShow ? "1" : "0",
@@ -427,7 +428,7 @@ function RegisterForm({
           transform: isShow ? "" : "translateX(250%)",
           opacity: isShow ? "1" : "0",
         }}
-        className="absolute w-2/3 min-w-72 max-w-md flex flex-col justify-center gap-2 duration-1000 ease-in-out transform-gpu"
+        className="absolute w-2/3 min-w-72 max-w-md flex flex-col justify-center gap-2 duration-700 ease-in-out transform-gpu"
         onSubmit={handleSubmit(onSubmit)}
       >
         <Input
@@ -462,7 +463,7 @@ function RegisterForm({
               <IconLogin className="text-slate-600" size={24} />
               Sign-in
             </Button>
-            {query.isLoading && <Spinner />}
+            {query.isLoading && <Spinner size={6} />}
             <Button type={"submit"} isDisabled={!isShow || query.isLoading}>
               <IconKey className="text-slate-600" size={24} />
               <p>Register</p>

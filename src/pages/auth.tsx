@@ -13,7 +13,7 @@ export default function Auth({ type }: { type: "login" | "register" }) {
 
 function Background({ children }: { children: ReactNode }) {
   return (
-    <div className="w-screen h-screen flex justify-center bg-slate-300">
+    <div className="w-full h-full flex justify-center bg-slate-300">
       {children}
     </div>
   );
