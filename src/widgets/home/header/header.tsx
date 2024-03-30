@@ -36,29 +36,25 @@ export const HomeHeader = () => {
   }
 
   return (
-    <div className="w-full flex justify-center items-center border-b-2 border-slate-400">
-      <div className="w-full flex flex-row items-center justify-between px-2 py-1 cursor-default select-none">
-        <p className="text-xl font-light tracking-widest uppercase ">
-          Telescope
-        </p>
-        <div className="flex flex-col items-center font-light">
-          {query.isLoading ? (
-            <Spinner size={4} />
-          ) : (
-            <>
-              <p className="text-xs ">Logged in as:</p>
-              <p className="text-xs">{selfAccount?.general?.username}</p>
-            </>
-          )}
-        </div>
-        <button
-          disabled={queryLogout.isLoading}
-          onClick={() => logoutHandler()}
-          className="text-md p-1 font-light hover:text-black hover:bg-slate-300 rounded-lg cursor-pointer transition-colors duration-200"
-        >
-          Logout
-        </button>
+    <div className="w-full flex flex-row items-center justify-between px-2 py-1 border-b-2 border-slate-400 cursor-default select-none">
+      <p className="text-xl font-light tracking-widest uppercase ">Telescope</p>
+      <div className="flex flex-col items-center font-light">
+        {query.isLoading ? (
+          <Spinner size={4} />
+        ) : (
+          <>
+            <p className="text-xs ">Logged in as:</p>
+            <p className="text-xs">{selfAccount?.general?.username}</p>
+          </>
+        )}
       </div>
+      <button
+        disabled={queryLogout.isLoading}
+        onClick={() => logoutHandler()}
+        className="text-md p-1 font-light hover:text-black hover:bg-slate-300 rounded-lg cursor-pointer transition-colors duration-200"
+      >
+        Logout
+      </button>
     </div>
   );
 };

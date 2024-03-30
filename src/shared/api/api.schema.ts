@@ -124,7 +124,7 @@ export const roomListSchema = z.object({
     })
     .optional(),
   roomDataArr: z.array(roomInListSchema).optional(),
-  isEmpty: z.boolean(),
+  allCount: z.number(),
   success: z.boolean(),
 });
 

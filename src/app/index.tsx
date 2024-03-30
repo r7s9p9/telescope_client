@@ -10,12 +10,8 @@ import Page404 from "../pages/page-404.tsx";
 import Home from "../pages/home.tsx";
 import "./index.css";
 import Auth from "../pages/auth.tsx";
-import {
-  fetchAddMessage,
-  fetchReadMessages,
-  fetchSelfAccount,
-} from "../shared/api/api.ts";
-import { Room } from "../widgets/room-list/room.tsx";
+import { fetchAddMessage, fetchReadMessages } from "../shared/api/api.ts";
+import { Room } from "../widgets/home/room.tsx";
 import { roomIdSchema } from "../shared/api/api.schema.ts";
 import { RoomId } from "../types.ts";
 import { routes } from "../constants.ts";
@@ -30,18 +26,18 @@ import { NotifyProvider } from "../widgets/notification/notification.tsx";
 //   return { selfAccount: account.data, roomList: roomList.data };
 // };
 
-const roomLoader = async ({ params }: { params: Params<string> }) => {
-  const roomId = roomIdSchema.safeParse(params.roomId);
-  if (!roomId.success) return redirect(routes.home.path); // bad params
+// const roomLoader = async ({ params }: { params: Params<string> }) => {
+//   const roomId = roomIdSchema.safeParse(params.roomId);
+//   if (!roomId.success) return redirect(routes.home.path); // bad params
 
-  const result = await fetchReadMessages(params.roomId as RoomId, {
-    minCreated: "1000000000000",
-    maxCreated: Date.now().toString(),
-  });
-  if (!result.success || !result.isLogged) return redirect(routes.login.path); // !validation
+//   const result = await fetchReadMessages(params.roomId as RoomId, {
+//     minCreated: "1000000000000",
+//     maxCreated: Date.now().toString(),
+//   });
+//   if (!result.success || !result.isLogged) return redirect(routes.login.path); // !validation
 
-  return { roomData: result.data };
-};
+//   return { roomData: result.data };
+// };
 
 const addMessageAction = async ({ request }: { request: Request }) => {
   const formData = await request.formData();
@@ -66,8 +62,6 @@ const addMessageAction = async ({ request }: { request: Request }) => {
   return { ok: true as const };
 };
 
-console.log(routes.room);
-
 const router = createBrowserRouter([
   {
     path: routes.home.path,
@@ -79,7 +73,7 @@ const router = createBrowserRouter([
         path: routes.room.path,
         id: routes.room.id,
         element: <Room />,
-        loader: roomLoader,
+        // loader: roomLoader,
         children: [
           {
             path: "/room/:roomId/message/add",
