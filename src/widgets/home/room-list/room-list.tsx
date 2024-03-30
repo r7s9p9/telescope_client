@@ -12,143 +12,111 @@ import { RoomId } from "../../../types";
 type ListType = HTMLUListElement;
 type ListRef = React.RefObject<ListType>;
 
-type RoomType = HTMLAnchorElement;
-type RoomRef = React.RefObject<RoomType>;
+type ItemType = HTMLLIElement;
+type ItemRef = React.RefObject<ItemType>;
 
 export function RoomList() {
   const notify = useNotify();
   const navigate = useNavigate();
 
-  const initialQuery = useQueryRoomList();
-  const additionalQuery = useQueryRoomList();
+  const query = useQueryRoomList();
 
   const { roomId } = useParams();
 
   const [listData, setListData] = useState<RoomListType>();
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const [additionalLoad, setAdditionalLoad] = useState({
-    toLoad: false,
-    min: 0,
-    max: 0,
-  });
+  const listRef = useRef<ListType>(null);
+  const itemRef = useRef<ItemType>(null);
 
   // Initial check and load data
   useEffect(() => {
-    if (!checkRoomId(roomId)) navigate(routes.home.path);
-
-    const queryAction = async () => {
-      const { success, data } = await initialQuery.run({
+    const queryAction = async (count: number) => {
+      const { success, data } = await query.run({
         min: "0",
-        max: "8",
+        max: count.toString(),
       });
       if (!success) notify.show.error("ROOM LIST NO SUCCESS");
-      if (success) setListData(data);
-    };
-    queryAction();
-  }, []);
-
-  const listRef = useRef<ListType>(null);
-  const roomRef = useRef<RoomType>(null);
-
-  // check for additional load
-  useEffect(() => {
-    const isLoaded = !!(
-      !initialQuery.isLoading &&
-      listData &&
-      listRef.current &&
-      roomRef.current &&
-      !additionalLoad.toLoad
-    );
-
-    if (isLoaded) {
-      const itemsCapacity = Math.ceil(
-        listRef.current?.offsetHeight / roomRef.current?.offsetHeight,
-      );
-      const itemsLoadedCount = listData.roomDataArr?.length;
-      const isNeedToLoadMore = !!(
-        itemsLoadedCount &&
-        itemsCapacity > itemsLoadedCount &&
-        itemsLoadedCount < listData.allCount
-      );
-      if (isNeedToLoadMore) {
-        setAdditionalLoad({
-          toLoad: true,
-          min: itemsLoadedCount,
-          max: itemsCapacity,
-        });
+      if (success) {
+        setListData(data);
+        setIsLoaded(true);
       }
-    }
-  }, [initialQuery.isLoading]);
+    };
 
-  useEffect(() => {
-    if (additionalLoad.toLoad) {
-      const queryAction = async () => {
-        const { success, data } = await additionalQuery.run({
-          min: additionalLoad.min.toString(),
-          max: additionalLoad.max.toString(),
-        });
-        console.log(data?.roomDataArr?.length);
-        if (!success) notify.show.error("ROOM LIST ADDITIONAL NO SUCCESS");
-        if (success && listData?.roomDataArr && data.roomDataArr) {
-          setListData({
-            ...listData,
-            roomDataArr: listData.roomDataArr.concat(data.roomDataArr),
-          });
-          setAdditionalLoad({ ...additionalLoad, toLoad: false });
-        }
-      };
-      queryAction();
+    if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
+    if (!isLoaded && listRef.current && itemRef.current) {
+      console.log(listRef.current?.offsetHeight, itemRef.current?.offsetHeight);
+      const count = Math.ceil(
+        listRef.current?.offsetHeight / itemRef.current?.offsetHeight,
+      );
+      queryAction(count);
     }
-  }, [additionalLoad]);
+  });
 
   return (
     <Rooms
-      isLoading={initialQuery.isLoading}
+      isLoading={!isLoaded}
       isEmpty={listData?.allCount === 0}
       data={listData}
       openedRoomId={roomId as RoomId}
       listRef={listRef}
-      roomRef={roomRef}
+      itemRef={itemRef}
     />
   );
 }
 
-function Skeleton() {
+function List({ children }: { children: ReactNode }) {
+  return (
+    <ul className="overflow-y-scroll overscroll-none scroll-smooth h-full p-2 w-1/3 min-w-40 flex flex-col border-r-2 border-slate-400">
+      {children}
+    </ul>
+  );
+}
+
+function ListSkeleton({
+  itemRef,
+  listRef,
+}: {
+  itemRef: ItemRef;
+  listRef: ListRef;
+}) {
+  const count = getRandomInt(2, 8);
+  return (
+    <ul
+      className="overflow-y-scroll overscroll-none scroll-smooth h-full p-2 w-1/3 min-w-40 flex flex-col border-r-2 border-slate-400"
+      ref={listRef}
+    >
+      {Array(count)
+        .fill(1)
+        .map((_, i) => (
+          <li key={i} ref={itemRef}>
+            <ItemSkeleton />
+          </li>
+        ))}
+    </ul>
+  );
+}
+
+function ItemSkeleton() {
   const nameWidth = getRandomInt(2, 6) * 32;
   const contentWidth = getRandomInt(2, 6) * 48;
 
   return (
-    <div className="w-full h-14 p-2 mb-2 flex flex-col justify-between bg-slate-100 shadow-md rounded-md">
-      <div className="w-full flex justify-between animate-pulse">
+    <div className="w-full h-14 mb-2 flex flex-col justify-between bg-slate-100 shadow-md rounded-md">
+      <div className="flex mx-2 mt-2 justify-between animate-pulse">
         <div
           style={{ width: `${nameWidth}px` }}
           className="rounded-md h-4 bg-slate-200"
         ></div>
         <div className="w-16 rounded-md h-4 bg-slate-200"></div>
       </div>
-      <div className="w-full flex justify-between animate-pulse">
+      <div className="flex mx-2 mb-2 justify-between animate-pulse">
         <div
           style={{ width: `${contentWidth}px` }}
           className="h-4 rounded-md bg-slate-200"
         ></div>
       </div>
     </div>
-  );
-}
-
-function RoomsSkeleton({ listRef }: { listRef: ListRef }) {
-  const count = getRandomInt(2, 8);
-
-  return (
-    <Container listRef={listRef}>
-      {Array(count)
-        .fill(1)
-        .map((_, i) => (
-          <li key={i}>
-            <Skeleton />
-          </li>
-        ))}
-    </Container>
   );
 }
 
@@ -162,64 +130,39 @@ function UnreadCount({ count }: { count: number }) {
   }
 }
 
-function Container({
-  listRef,
-  children,
-}: {
-  listRef: ListRef;
-  children: ReactNode;
-}) {
-  return (
-    <ul
-      ref={listRef}
-      className="overflow-y-scroll overscroll-none scroll-smooth h-full w-1/3 min-w-40 flex flex-col border-r-2 border-slate-400"
-    >
-      {children}
-    </ul>
-  );
-}
-
 function Rooms({
   isLoading,
   isEmpty,
   data,
   openedRoomId,
   listRef,
-  roomRef,
+  itemRef,
 }: {
   isLoading: boolean;
   isEmpty: boolean;
   data?: RoomListType;
   openedRoomId?: RoomId;
   listRef: ListRef;
-  roomRef: RoomRef;
+  itemRef: ItemRef;
 }) {
-  if (isLoading) return <RoomsSkeleton listRef={listRef} />;
-  if (isEmpty || !data?.roomDataArr)
-    return <Container listRef={listRef}>You have no rooms</Container>;
+  if (isLoading) {
+    return <ListSkeleton listRef={listRef} itemRef={itemRef} />;
+  }
 
-  const rooms = data.roomDataArr.map((roomData) => (
+  if (isEmpty || !data?.roomDataArr) {
+    return <List>You have no rooms</List>;
+  }
+
+  const items = data.roomDataArr.map((roomData) => (
     <li key={roomData.roomId}>
-      <Room
-        isOpened={openedRoomId === roomData.roomId}
-        data={roomData}
-        roomRef={roomRef}
-      />
+      <Item isOpened={openedRoomId === roomData.roomId} data={roomData} />
     </li>
   ));
 
-  return <Container listRef={listRef}>{rooms}</Container>;
+  return <List>{items}</List>;
 }
 
-function Room({
-  isOpened,
-  data,
-  roomRef,
-}: {
-  isOpened: boolean;
-  data: RoomInListType;
-  roomRef: RoomRef;
-}) {
+function Item({ isOpened, data }: { isOpened: boolean; data: RoomInListType }) {
   const date = data.lastMessage
     ? formatDate().roomList(data.lastMessage.created)
     : formatDate().roomList(data.roomInfo.created);
@@ -229,13 +172,9 @@ function Room({
     : "There is no messages";
 
   return (
-    <Link
-      to={"/room/" + data.roomId}
-      className="w-full py-1 px-2 flex"
-      ref={roomRef}
-    >
+    <Link to={"/room/" + data.roomId}>
       <button
-        className={`${isOpened ? "bg-slate-200" : "bg-slate-100"} w-full flex flex-col p-2 justify-between items-center shadow-md rounded-md hover:bg-slate-200`}
+        className={`${isOpened ? "bg-slate-200" : "bg-slate-100"} w-full flex h-14 mb-2 flex-col p-2 justify-between items-center shadow-md rounded-md hover:bg-slate-200`}
       >
         <div className="w-full flex flex-row justify-between items-center gap-2">
           <p className="text-sm text-blue-600">{data.roomInfo.name}</p>
