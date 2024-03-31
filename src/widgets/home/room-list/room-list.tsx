@@ -12,8 +12,7 @@ import { RoomId } from "../../../types";
 type ListType = HTMLUListElement;
 type ListRef = React.RefObject<ListType>;
 
-type ItemType = HTMLLIElement;
-type ItemRef = React.RefObject<ItemType>;
+const itemHeight = 64 as const;
 
 export function RoomList() {
   const notify = useNotify();
@@ -27,9 +26,8 @@ export function RoomList() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   const listRef = useRef<ListType>(null);
-  const itemRef = useRef<ItemType>(null);
 
-  // Initial check and load data
+  // Initial load data
   useEffect(() => {
     const queryAction = async (count: number) => {
       const { success, data } = await query.run({
@@ -44,11 +42,8 @@ export function RoomList() {
     };
 
     if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
-    if (!isLoaded && listRef.current && itemRef.current) {
-      console.log(listRef.current?.offsetHeight, itemRef.current?.offsetHeight);
-      const count = Math.ceil(
-        listRef.current?.offsetHeight / itemRef.current?.offsetHeight,
-      );
+    if (!isLoaded && listRef.current) {
+      const count = Math.ceil(listRef.current?.offsetHeight / itemHeight);
       queryAction(count);
     }
   });
@@ -60,7 +55,6 @@ export function RoomList() {
       data={listData}
       openedRoomId={roomId as RoomId}
       listRef={listRef}
-      itemRef={itemRef}
     />
   );
 }
@@ -73,13 +67,7 @@ function List({ children }: { children: ReactNode }) {
   );
 }
 
-function ListSkeleton({
-  itemRef,
-  listRef,
-}: {
-  itemRef: ItemRef;
-  listRef: ListRef;
-}) {
+function ListSkeleton({ listRef }: { listRef: ListRef }) {
   const count = getRandomInt(2, 8);
   return (
     <ul
@@ -89,7 +77,7 @@ function ListSkeleton({
       {Array(count)
         .fill(1)
         .map((_, i) => (
-          <li key={i} ref={itemRef}>
+          <li key={i}>
             <ItemSkeleton />
           </li>
         ))}
@@ -102,7 +90,10 @@ function ItemSkeleton() {
   const contentWidth = getRandomInt(2, 6) * 48;
 
   return (
-    <div className="w-full h-14 mb-2 flex flex-col justify-between bg-slate-100 shadow-md rounded-md">
+    <div
+      style={{ height: itemHeight + "px" }}
+      className="w-full h-14 mb-2 flex flex-col justify-between bg-slate-100 shadow-md rounded-md"
+    >
       <div className="flex mx-2 mt-2 justify-between animate-pulse">
         <div
           style={{ width: `${nameWidth}px` }}
@@ -136,17 +127,15 @@ function Rooms({
   data,
   openedRoomId,
   listRef,
-  itemRef,
 }: {
   isLoading: boolean;
   isEmpty: boolean;
   data?: RoomListType;
   openedRoomId?: RoomId;
   listRef: ListRef;
-  itemRef: ItemRef;
 }) {
   if (isLoading) {
-    return <ListSkeleton listRef={listRef} itemRef={itemRef} />;
+    return <ListSkeleton listRef={listRef} />;
   }
 
   if (isEmpty || !data?.roomDataArr) {
@@ -172,7 +161,7 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomInListType }) {
     : "There is no messages";
 
   return (
-    <Link to={"/room/" + data.roomId}>
+    <Link to={"/room/" + data.roomId} style={{ height: itemHeight + "px" }}>
       <button
         className={`${isOpened ? "bg-slate-200" : "bg-slate-100"} w-full flex h-14 mb-2 flex-col p-2 justify-between items-center shadow-md rounded-md hover:bg-slate-200`}
       >
