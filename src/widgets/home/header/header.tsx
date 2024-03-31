@@ -36,8 +36,8 @@ export const HomeHeader = () => {
   }
 
   return (
-    <div className="w-full flex flex-row items-center justify-between px-2 py-1 border-b-2 border-slate-400 cursor-default select-none">
-      <p className="text-xl font-light tracking-widest uppercase ">Telescope</p>
+    <div className="w-full h-12 flex flex-row items-center justify-between px-4 py-1 border-b-2 border-slate-400 cursor-default select-none">
+      <p className="text-xl font-light tracking-widest uppercase">Telescope</p>
       <div className="flex flex-col items-center font-light">
         {query.isLoading ? (
           <Spinner size={4} />

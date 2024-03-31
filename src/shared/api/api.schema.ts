@@ -117,6 +117,8 @@ const roomInListSchema = z.object({
 });
 
 export const roomListSchema = z.object({
+  success: z.boolean(),
+  allCount: z.number(),
   dev: z
     .object({
       message: z.array(z.string()).optional(),
@@ -124,9 +126,7 @@ export const roomListSchema = z.object({
     })
     .optional(),
   roomDataArr: z.array(roomInListSchema).optional(),
-  allCount: z.number(),
-  success: z.boolean(),
-});
+})
 
 export type RoomInListType = z.infer<typeof roomInListSchema>;
 export type RoomListType = z.infer<typeof roomListSchema>;
