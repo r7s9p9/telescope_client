@@ -74,7 +74,7 @@ export function RoomList() {
       const count = Math.ceil(listRef.current?.offsetHeight / itemHeight);
       queryInitialAction(count);
     }
-  });
+  }, []);
 
   // Second+ load data
   useEffect(() => {
@@ -87,7 +87,6 @@ export function RoomList() {
             : 0;
           const max = min + 4;
           queryAction(min, max);
-          console.log(`To load: ${max}`);
         }
       });
 
@@ -97,7 +96,7 @@ export function RoomList() {
         if (loaderRef.current) observer.unobserve(loaderRef.current);
       };
     }
-  }, [isInitialLoading, query.isLoading]);
+  }, [query.isLoading]);
 
   return (
     <Rooms
@@ -172,7 +171,7 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomInListType }) {
     </Link>
   );
 }
-
+//////////////////
 function List({
   children,
   isAllLoaded,
@@ -196,6 +195,7 @@ function List({
 
 function ListSkeleton({ listRef }: { listRef: ListRef }) {
   const count = getRandomInt(4, 12);
+
   return (
     <ul
       className="overflow-y-scroll overscroll-none scroll-smooth h-full w-1/3 min-w-40 flex flex-col border-r-2 border-slate-200"
@@ -213,27 +213,25 @@ function ListSkeleton({ listRef }: { listRef: ListRef }) {
 }
 
 function ItemSkeleton() {
-  const nameWidth = getRandomInt(2, 6) * 32;
-  const contentWidth = getRandomInt(2, 6) * 48;
+  const nameWidth = getRandomInt(1, 4) * 20;
+  const contentWidth = getRandomInt(1, 5) * 20;
 
   return (
     <div
       style={{ height: itemHeight + "px" }}
-      className="w-full flex flex-col justify-between bg-slate-100 border-b-2"
+      className="w-full flex flex-col px-4 py-2 justify-between bg-slate-50 border-b-2 border-slate-200"
     >
-      <div className="flex mx-2 mt-2 justify-between animate-pulse">
+      <div className="flex justify-between animate-pulse">
         <div
-          style={{ width: `${nameWidth}px` }}
+          style={{ width: `${nameWidth}%` }}
           className="rounded-md h-4 bg-slate-200"
         ></div>
         <div className="w-16 rounded-md h-4 bg-slate-200"></div>
       </div>
-      <div className="flex mx-2 mb-2 justify-between animate-pulse">
-        <div
-          style={{ width: `${contentWidth}px` }}
-          className="h-4 rounded-md bg-slate-200"
-        ></div>
-      </div>
+      <div
+        style={{ width: `${contentWidth}%` }}
+        className="h-4 rounded-md bg-slate-200 animate-pulse"
+      ></div>
     </div>
   );
 }
