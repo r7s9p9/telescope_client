@@ -8,16 +8,17 @@ import { getRandomInt } from "../../../shared/lib/random";
 import { checkRoomId } from "../../../shared/lib/uuid";
 import { routes } from "../../../constants";
 import throttle from "../../../shared/lib/throttle";
+import { debounce } from "../../../shared/lib/debounce";
 
 type ListType = HTMLUListElement;
 type ListRef = React.RefObject<ListType>;
 
 const itemHeight = 64 as const; // for skeleton & item
 
-const overscreenItemCountForInitialLoading = 0 as const;
-const overscreenItemCountToTriggerFurtherLoading = 1 as const;
-const overscreenItemCountForFurtherLoading = 1 as const;
-const throttleScrollDelay = 100 as const;
+const overscreenItemCountForInitialLoading = 6 as const;
+const overscreenItemCountToTriggerFurtherLoading = 4 as const;
+const overscreenItemCountForFurtherLoading = 6 as const;
+const debounceScrollDelay = 200 as const;
 
 export function RoomList() {
   const notify = useNotify();
@@ -41,7 +42,11 @@ export function RoomList() {
     if (!success) notify.show.error("ROOM LIST NO SUCCESS");
     if (success) {
       if (isInitialLoading) setListData(data);
-      if (listData?.roomDataArr && data.roomDataArr) {
+      if (
+        listData?.roomDataArr &&
+        data.roomDataArr &&
+        max > data.roomDataArr.length
+      ) {
         setListData({
           ...listData,
           allCount: data.allCount,
@@ -52,6 +57,12 @@ export function RoomList() {
     }
   };
 
+  function debouncedQueryAction(min: number, max: number, delay: number) {
+    debounce(() => {
+      queryAction(min, max);
+    }, delay);
+  }
+
   // Initial load data
   useEffect(() => {
     // wrong roomId protection
@@ -60,11 +71,12 @@ export function RoomList() {
       const onscreenItemCount = Math.ceil(
         listRef.current.offsetHeight / itemHeight,
       );
-      queryAction(0, onscreenItemCount + overscreenItemCountForInitialLoading);
+      const stopItem = onscreenItemCount + overscreenItemCountForInitialLoading;
+      queryAction(0, stopItem);
     }
   }, []);
 
-  const throttledHandleScroll = throttle(() => {
+  const debouncedHandleScroll = debounce(() => {
     if (
       !isInitialLoading &&
       !isAllLoaded &&
@@ -76,29 +88,37 @@ export function RoomList() {
         (listRef.current.scrollTop + listRef.current.offsetHeight) / itemHeight,
       );
       const lastLoadedIndex = listData.roomDataArr.length;
-      const isNeedToLoad =
+      const isNeedToLoad = !!(
         lastLoadedIndex - lastVisibleIndex <
-        overscreenItemCountToTriggerFurtherLoading;
+        overscreenItemCountToTriggerFurtherLoading
+      );
 
       if (isNeedToLoad) {
         const startItem = lastLoadedIndex;
-        const stopItem =
-          startItem + overscreenItemCountForFurtherLoading < listData.allCount
-            ? startItem + overscreenItemCountForFurtherLoading
-            : listData.allCount;
-        queryAction(startItem, stopItem);
+        if (
+          lastLoadedIndex + overscreenItemCountForFurtherLoading >
+          listData.allCount
+        ) {
+          queryAction(lastLoadedIndex, listData.allCount);
+        }
+        if (lastVisibleIndex > lastLoadedIndex) {
+          const stopItem =
+            lastVisibleIndex + overscreenItemCountForFurtherLoading;
+          stopItem > listData.allCount
+            ? queryAction(startItem, listData.allCount)
+            : queryAction(startItem, stopItem);
+        } else {
+          const stopItem = startItem + overscreenItemCountForFurtherLoading;
+          queryAction(startItem, stopItem);
+        }
       }
     }
-  }, throttleScrollDelay);
+  }, debounceScrollDelay);
 
-  if (isZeroItemCount) {
-    return <ListEmpty listRef={listRef} />;
-  }
+  if (isZeroItemCount) return <ListEmpty listRef={listRef} />;
 
-  if (!listData?.roomDataArr || isInitialLoading) {
-    ///
+  if (!listData?.roomDataArr || isInitialLoading)
     return <ListSkeleton listRef={listRef} />;
-  }
 
   const items = listData.roomDataArr.map((itemData) => (
     <li key={itemData.roomId}>
@@ -121,7 +141,7 @@ export function RoomList() {
   };
 
   return (
-    <ListWrapper listRef={listRef} handleScroll={throttledHandleScroll}>
+    <ListWrapper listRef={listRef} handleScroll={debouncedHandleScroll}>
       {isAllLoaded ? items : skeletonAdder()}
     </ListWrapper>
   );
@@ -143,6 +163,7 @@ function ListWrapper({
   return (
     <ul
       onScroll={() => onScroll()}
+      onClick={() => onScroll()}
       className="overflow-y-scroll overscroll-none scroll-smooth w-full h-full flex flex-col bg-slate-50"
       ref={listRef}
     >
