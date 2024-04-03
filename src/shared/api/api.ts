@@ -127,6 +127,30 @@ export function useQueryRoomList() {
   return { run, isLoading: query.isLoading }
 }
 
+export async function useQueryReadMessageList() {
+  const query = useQuery();
+  const navigate = useNavigate();
+
+  const run = async (roomId: RoomId,
+    range: { minCreated: string; maxCreated: string },) => {
+    const { response } = await query.run(serverRoute.message.read,
+      readMessages(roomId, range),)
+
+    const isLogged = isAuth(response.status);
+    if (!isLogged) {
+      navigate(
+      { pathname: routes.login.path },
+      // { state: { isLoggedOut: true } }, // need other value for !isLogged
+    );}
+
+    const { success, data } = messagesValidator(response.payload);
+    if (!success) return { success: false as const };
+    return { success: true as const, data };
+  }
+ 
+  return { run, isLoading: query.isLoading }
+}
+
 export async function fetchReadMessages(
   roomId: RoomId,
   range: { minCreated: string; maxCreated: string },

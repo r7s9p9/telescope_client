@@ -7,56 +7,41 @@ import { useQueryRoomList } from "../../../shared/api/api";
 import { getRandomInt } from "../../../shared/lib/random";
 import { checkRoomId } from "../../../shared/lib/uuid";
 import { routes } from "../../../constants";
-import { RoomId } from "../../../types";
+import throttle from "../../../shared/lib/throttle";
 
 type ListType = HTMLUListElement;
 type ListRef = React.RefObject<ListType>;
 
-type LoaderType = HTMLLIElement;
-type LoaderRef = React.RefObject<LoaderType>;
-
 const itemHeight = 64 as const; // for skeleton & item
+
+const overscreenItemCountForInitialLoading = 0 as const;
+const overscreenItemCountToTriggerFurtherLoading = 1 as const;
+const overscreenItemCountForFurtherLoading = 1 as const;
+const throttleScrollDelay = 100 as const;
 
 export function RoomList() {
   const notify = useNotify();
   const navigate = useNavigate();
-
   const query = useQueryRoomList();
-
   const { roomId } = useParams();
-
+  const listRef = useRef<ListType>(null);
   const [listData, setListData] = useState<RoomListType>();
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
+  const isInitialLoading = !listData?.roomDataArr;
+  const isZeroItemCount = listData?.allCount === 0;
   const isAllLoaded = !!(
-    listData &&
-    (listData.allCount === 0 ||
-      listData.allCount === listData.roomDataArr?.length)
+    listData && listData.allCount === listData.roomDataArr?.length
   );
 
-  const listRef = useRef<ListType>(null);
-  const loaderRef = useRef<LoaderType>(null);
-
-  const queryInitialAction = async (count: number) => {
+  const queryAction = async (min: number, max: number) => {
     const { success, data } = await query.run({
-      min: "0",
-      max: count.toString(),
+      min: min.toString(),
+      max: max.toString(),
     });
     if (!success) notify.show.error("ROOM LIST NO SUCCESS");
     if (success) {
-      setListData(data);
-      setIsInitialLoading(false);
-    }
-  };
-
-  const queryAction = async (min: number, max: number) => {
-    if (!isAllLoaded && listData?.roomDataArr) {
-      const { success, data } = await query.run({
-        min: min.toString(),
-        max: max.toString(),
-      });
-      if (!success) notify.show.error("ROOM LIST NO SUCCESS");
-      if (success && data.roomDataArr) {
+      if (isInitialLoading) setListData(data);
+      if (listData?.roomDataArr && data.roomDataArr) {
         setListData({
           ...listData,
           allCount: data.allCount,
@@ -69,78 +54,143 @@ export function RoomList() {
 
   // Initial load data
   useEffect(() => {
+    // wrong roomId protection
     if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
-    if (isInitialLoading && listRef.current) {
-      const count = Math.ceil(listRef.current?.offsetHeight / itemHeight);
-      queryInitialAction(count);
+    if (!listData && listRef.current) {
+      const onscreenItemCount = Math.ceil(
+        listRef.current.offsetHeight / itemHeight,
+      );
+      queryAction(0, onscreenItemCount + overscreenItemCountForInitialLoading);
     }
   }, []);
 
-  // Second+ load data
-  useEffect(() => {
-    if (!query.isLoading && !isAllLoaded) {
-      const observer = new IntersectionObserver((entries) => {
-        const target = entries[0];
-        if (target.isIntersecting) {
-          const min = listData?.roomDataArr?.length
-            ? listData.roomDataArr.length
-            : 0;
-          const max = min + 4;
-          queryAction(min, max);
-        }
-      });
+  const throttledHandleScroll = throttle(() => {
+    if (
+      !isInitialLoading &&
+      !isAllLoaded &&
+      !isZeroItemCount &&
+      listRef.current &&
+      listData?.roomDataArr
+    ) {
+      const lastVisibleIndex = Math.ceil(
+        (listRef.current.scrollTop + listRef.current.offsetHeight) / itemHeight,
+      );
+      const lastLoadedIndex = listData.roomDataArr.length;
+      const isNeedToLoad =
+        lastLoadedIndex - lastVisibleIndex <
+        overscreenItemCountToTriggerFurtherLoading;
 
-      if (loaderRef.current) observer.observe(loaderRef.current);
-
-      return () => {
-        if (loaderRef.current) observer.unobserve(loaderRef.current);
-      };
+      if (isNeedToLoad) {
+        const startItem = lastLoadedIndex;
+        const stopItem =
+          startItem + overscreenItemCountForFurtherLoading < listData.allCount
+            ? startItem + overscreenItemCountForFurtherLoading
+            : listData.allCount;
+        queryAction(startItem, stopItem);
+      }
     }
-  }, [query.isLoading]);
+  }, throttleScrollDelay);
 
-  return (
-    <Rooms
-      isLoading={isInitialLoading}
-      isAllLoaded={isAllLoaded}
-      data={listData}
-      openedRoomId={roomId as RoomId}
-      listRef={listRef}
-      loaderRef={loaderRef}
-    />
-  );
-}
+  if (isZeroItemCount) {
+    return <ListEmpty listRef={listRef} />;
+  }
 
-function Rooms({
-  isLoading,
-  isAllLoaded,
-  data,
-  openedRoomId,
-  listRef,
-  loaderRef,
-}: {
-  isLoading: boolean;
-  isAllLoaded: boolean;
-  data?: RoomListType;
-  openedRoomId?: RoomId;
-  listRef: ListRef;
-  loaderRef: LoaderRef;
-}) {
-  if (data?.allCount === 0) {
-    return <div>You have no rooms</div>;
-  } else if (!data?.roomDataArr || isLoading) {
+  if (!listData?.roomDataArr || isInitialLoading) {
+    ///
     return <ListSkeleton listRef={listRef} />;
   }
 
-  const items = data.roomDataArr.map((roomData) => (
-    <li key={roomData.roomId}>
-      <Item isOpened={openedRoomId === roomData.roomId} data={roomData} />
+  const items = listData.roomDataArr.map((itemData) => (
+    <li key={itemData.roomId}>
+      <Item isOpened={roomId === itemData.roomId} data={itemData} />
     </li>
   ));
 
+  const skeletonAdder = () => {
+    if (listData.roomDataArr) {
+      const count = listData.allCount - listData.roomDataArr.length;
+      const skeletonItems = Array(count)
+        .fill(1)
+        .map((_, i) => (
+          <li key={i}>
+            <ItemSkeleton />
+          </li>
+        ));
+      return items.concat(skeletonItems);
+    }
+  };
+
   return (
-    <List isAllLoaded={isAllLoaded} loaderRef={loaderRef}>
-      {items}
-    </List>
+    <ListWrapper listRef={listRef} handleScroll={throttledHandleScroll}>
+      {isAllLoaded ? items : skeletonAdder()}
+    </ListWrapper>
+  );
+}
+
+function ListWrapper({
+  children,
+  listRef,
+  handleScroll,
+}: {
+  children: ReactNode;
+  listRef: ListRef;
+  handleScroll?: ReturnType<typeof Function>;
+}) {
+  function onScroll() {
+    if (handleScroll) handleScroll();
+  }
+
+  return (
+    <ul
+      onScroll={() => onScroll()}
+      className="overflow-y-scroll overscroll-none scroll-smooth w-full h-full flex flex-col bg-slate-50"
+      ref={listRef}
+    >
+      {children}
+    </ul>
+  );
+}
+
+function ListEmpty({ listRef }: { listRef: ListRef }) {
+  return (
+    <ListWrapper listRef={listRef}>
+      <p
+        style={{ height: itemHeight + "px" }}
+        className="w-full text-center p-4 font-thin text-xl bg-slate-100"
+      >
+        You have no rooms
+      </p>
+    </ListWrapper>
+  );
+}
+
+function ListSkeleton({ listRef }: { listRef: ListRef }) {
+  const count = getRandomInt(4, 12);
+  return (
+    <ListWrapper listRef={listRef}>
+      {Array(count)
+        .fill(1)
+        .map((_, i) => (
+          <li key={i}>
+            <ItemSkeleton />
+          </li>
+        ))}
+    </ListWrapper>
+  );
+}
+
+function ItemSkeleton() {
+  return (
+    <div
+      style={{ height: itemHeight + "px" }}
+      className="w-full flex flex-col px-4 py-2 justify-between bg-slate-50 border-b-2 border-slate-200"
+    >
+      <div className="flex justify-between animate-pulse">
+        <div className="rounded-md h-4 w-2/5 bg-slate-200"></div>
+        <div className="w-16 rounded-md h-4 w-1/5 bg-slate-200"></div>
+      </div>
+      <div className="h-4 w-3/5 rounded-md bg-slate-200 animate-pulse"></div>
+    </div>
   );
 }
 
@@ -156,12 +206,12 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomInListType }) {
   return (
     <Link to={"/room/" + data.roomId}>
       <button
-        style={{ height: 64 + "px" }}
+        style={{ height: itemHeight + "px" }}
         className={`${isOpened ? "bg-slate-200 hover:bg-slate-200 cursor-default" : "bg-slate-50 hover:bg-slate-200"} w-full flex flex-col py-1 px-4 justify-between items-center border-b-2 border-slate-200 duration-300 ease-out`}
       >
         <div className="w-full flex flex-row justify-between items-center gap-2">
-          <p className="text-md text-green-600">{data.roomInfo.name}</p>
-          <p className="text-md font-light">{date}</p>
+          <p className="text-sm text-green-600">{data.roomInfo.name}</p>
+          <p className="text-sm text-slate-600">{date}</p>
         </div>
         <div className="w-full flex flex-row justify-between items-center">
           <p className="w-full text-sm text-left truncate">{lastMessage}</p>
@@ -169,70 +219,6 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomInListType }) {
         </div>
       </button>
     </Link>
-  );
-}
-//////////////////
-function List({
-  children,
-  isAllLoaded,
-  loaderRef,
-}: {
-  children: ReactNode;
-  isAllLoaded: boolean;
-  loaderRef: LoaderRef;
-}) {
-  return (
-    <ul className="overflow-y-scroll overscroll-none scroll-smooth h-full w-1/3 min-w-40 flex flex-col border-r-2 border-slate-400">
-      {children}
-      {!isAllLoaded && (
-        <li key="loader" ref={loaderRef}>
-          <ItemSkeleton />
-        </li>
-      )}
-    </ul>
-  );
-}
-
-function ListSkeleton({ listRef }: { listRef: ListRef }) {
-  const count = getRandomInt(4, 12);
-
-  return (
-    <ul
-      className="overflow-y-scroll overscroll-none scroll-smooth h-full w-1/3 min-w-40 flex flex-col border-r-2 border-slate-200"
-      ref={listRef}
-    >
-      {Array(count)
-        .fill(1)
-        .map((_, i) => (
-          <li key={i}>
-            <ItemSkeleton />
-          </li>
-        ))}
-    </ul>
-  );
-}
-
-function ItemSkeleton() {
-  const nameWidth = getRandomInt(1, 4) * 20;
-  const contentWidth = getRandomInt(1, 5) * 20;
-
-  return (
-    <div
-      style={{ height: itemHeight + "px" }}
-      className="w-full flex flex-col px-4 py-2 justify-between bg-slate-50 border-b-2 border-slate-200"
-    >
-      <div className="flex justify-between animate-pulse">
-        <div
-          style={{ width: `${nameWidth}%` }}
-          className="rounded-md h-4 bg-slate-200"
-        ></div>
-        <div className="w-16 rounded-md h-4 bg-slate-200"></div>
-      </div>
-      <div
-        style={{ width: `${contentWidth}%` }}
-        className="h-4 rounded-md bg-slate-200 animate-pulse"
-      ></div>
-    </div>
   );
 }
 
