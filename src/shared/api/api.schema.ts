@@ -100,20 +100,9 @@ export type MessageType = z.infer<typeof messageSchema>;
 
 const roomInListSchema = z.object({
   roomId: roomIdSchema,
-  roomInfo: z.object({
-    name: z.string(),
-    type: z.union([
-      z.literal("service").optional(),
-      z.literal("private").optional(),
-      z.literal("public").optional(),
-      z.literal("single").optional(),
-    ]),
-    about: z.string(),
-    creatorId: userIdSchema.or(z.literal("service")),
-    created: z.string(),
-  }),
+  roomName: z.string(),
   unreadCount: z.number(),
-  lastMessage: messageSchema.optional(),
+  lastMessage: messageSchema,
 });
 
 export const roomListSchema = z.object({

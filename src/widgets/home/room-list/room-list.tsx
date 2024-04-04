@@ -222,9 +222,7 @@ function ItemSkeleton() {
 }
 
 function Item({ isOpened, data }: { isOpened: boolean; data: RoomInListType }) {
-  const date = data.lastMessage
-    ? formatDate().roomList(data.lastMessage.created)
-    : formatDate().roomList(data.roomInfo.created);
+  const date = formatDate().roomList(data.lastMessage.created);
 
   const lastMessage = data.lastMessage
     ? data.lastMessage.content.text
@@ -237,7 +235,7 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomInListType }) {
         className={`${isOpened ? "bg-slate-200 hover:bg-slate-200 cursor-default" : "bg-slate-50 hover:bg-slate-200"} w-full flex flex-col py-1 px-4 justify-between items-center border-b-2 border-slate-200 duration-300 ease-out`}
       >
         <div className="w-full flex flex-row justify-between items-center gap-2">
-          <p className="text-sm text-green-600">{data.roomInfo.name}</p>
+          <p className="text-sm text-green-600">{data.roomName}</p>
           <p className="text-sm text-slate-600">{date}</p>
         </div>
         <div className="w-full flex flex-row justify-between items-center">
