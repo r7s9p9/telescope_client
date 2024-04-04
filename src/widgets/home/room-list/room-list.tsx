@@ -17,6 +17,8 @@ const overscreenItemCountToTriggerFurtherLoading = 5 as const;
 const overscreenItemCountForFurtherLoading = 10 as const;
 const debounceScrollDelay = 100 as const;
 
+const reloadingInterval = 10000 as const;
+
 const SkeletonList = React.memo(({ count }: { count: number }) => {
   if (count > 0) {
     const skeletonItems = Array(count)
@@ -52,12 +54,28 @@ export function RoomList() {
       });
       if (!success) notify.show.error("ROOM LIST NO SUCCESS");
       if (success) {
-        if (isInitialLoading) setListData(data);
-        if (
-          listData?.roomDataArr &&
-          data.roomDataArr &&
-          max > data.roomDataArr.length
-        ) {
+        if (isInitialLoading || min === 0) {
+          setListData(data);
+          return;
+        }
+        if (listData?.roomDataArr && data.roomDataArr) {
+          if (min !== 0) {
+            if (listData.allCount !== data.allCount) {
+              queryAction(0, max);
+              return;
+            } else {
+              for (let i = 0; i < listData.allCount; i++) {
+                if (
+                  listData.roomDataArr[i + min] &&
+                  listData.roomDataArr[i + min].roomId !==
+                    data.roomDataArr[i].roomId
+                ) {
+                  queryAction(0, max);
+                  return;
+                }
+              }
+            }
+          }
           setListData({
             ...listData,
             allCount: data.allCount,
@@ -70,9 +88,7 @@ export function RoomList() {
     [query],
   );
 
-  //
-  const revalidateInterval = 10000 as const;
-
+  // Reloading
   useEffect(() => {
     const interval = setInterval(() => {
       console.log(listData?.roomDataArr?.length);
@@ -80,7 +96,7 @@ export function RoomList() {
         const max = listData.roomDataArr.length;
         queryAction(0, max);
       }
-    }, revalidateInterval);
+    }, reloadingInterval);
     return () => clearInterval(interval);
   }, [listData]);
 
@@ -110,7 +126,6 @@ export function RoomList() {
           lastLoadedIndex - lastVisibleIndex <
           overscreenItemCountToTriggerFurtherLoading
         );
-
         if (isNeedToLoad) {
           const startItem = lastLoadedIndex;
           if (
