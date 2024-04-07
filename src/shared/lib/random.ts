@@ -1,7 +1,5 @@
 export function getRandomInt(min: number, max: number) {
-    const minCeiled = Math.ceil(min);
-    const maxFloored = Math.floor(max);
-    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
+    return Math.ceil(Math.random() * (max - min) + min * 1/2) * 2
   }
 
 export function getRandomBoolean() {

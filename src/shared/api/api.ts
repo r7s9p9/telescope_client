@@ -127,12 +127,12 @@ export function useQueryRoomList() {
   return { run, isLoading: query.isLoading }
 }
 
-export async function useQueryReadMessageList() {
+export function useQueryReadMessageList() {
   const query = useQuery();
   const navigate = useNavigate();
 
   const run = async (roomId: RoomId,
-    range: { minCreated: string; maxCreated: string },) => {
+    range: { min: number; max: number },) => {
     const { response } = await query.run(serverRoute.message.read,
       readMessages(roomId, range),)
 
@@ -151,22 +151,22 @@ export async function useQueryReadMessageList() {
   return { run, isLoading: query.isLoading }
 }
 
-export async function fetchReadMessages(
-  roomId: RoomId,
-  range: { minCreated: string; maxCreated: string },
-) {
-  const result = await fetcher(
-    serverRoute.message.read,
-    readMessages(roomId, range),
-  );
+// export async function fetchReadMessages(
+//   roomId: RoomId,
+//   range: { minCreated: string; maxCreated: string },
+// ) {
+//   const result = await fetcher(
+//     serverRoute.message.read,
+//     readMessages(roomId, range),
+//   );
 
-  const isLogged = isAuth(result.status);
-  if (!isLogged) return { success: true as const, isLogged: false as const };
-  const { success, data } = messagesValidator(result.payload);
+//   const isLogged = isAuth(result.status);
+//   if (!isLogged) return { success: true as const, isLogged: false as const };
+//   const { success, data } = messagesValidator(result.payload);
 
-  if (!success) return { success: false as const, isLogged: true as const };
-  return { success: true as const, isLogged: true as const, data };
-}
+//   if (!success) return { success: false as const, isLogged: true as const };
+//   return { success: true as const, isLogged: true as const, data };
+// }
 
 export async function fetchAddMessage(payload: {
   roomId: RoomId;

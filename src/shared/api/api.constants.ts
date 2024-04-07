@@ -76,7 +76,7 @@ export const readRoomInfo = (
 
 export const readMessages = (
   roomId: RoomId,
-  range: { minCreated: string; maxCreated: string },
+  range: { min: number; max: number },
 ) => {
   return {
     roomId: roomId,

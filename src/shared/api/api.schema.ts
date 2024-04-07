@@ -80,7 +80,7 @@ export const accountReadSchema = z.object({
 export type AccountReadType = z.infer<typeof accountReadSchema>;
 
 const messageContent = z.object({ text: z.string().min(1) });
-const messageAuthorId = userIdSchema.or(z.literal("service"));
+const messageAuthorId = userIdSchema.or(z.literal("service")).or(z.literal("self"));
 const messageReplyTo = userIdSchema.optional();
 const messageTargetId = userIdSchema.optional(); // For Service Message
 const messageCreated = z.string();
@@ -132,4 +132,4 @@ export const messageReadSchema = z.object({
   success: z.boolean(),
 });
 
-export type RoomDataType = z.infer<typeof messageReadSchema>;
+export type MessageListType = z.infer<typeof messageReadSchema>;

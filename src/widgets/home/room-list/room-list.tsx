@@ -9,6 +9,7 @@ import { checkRoomId } from "../../../shared/lib/uuid";
 import { routes } from "../../../constants";
 import { debounce } from "../../../shared/lib/debounce";
 import React from "react";
+import { IconCirclePlus, IconSearch } from "@tabler/icons-react";
 
 const itemHeight = 64 as const; // for skeleton & item
 
@@ -46,7 +47,19 @@ export function RoomList() {
     listData && listData.allCount === listData.roomDataArr?.length
   );
 
-  const queryAction = useCallback(
+  const queryAtFirst = useCallback(
+    async (max: number) => {
+      const { success, data } = await query.run({
+        min: "0",
+        max: max.toString(),
+      });
+      if (!success) notify.show.error("ROOM LIST NO SUCCESS");
+      if (success) setListData(data);
+    },
+    [query],
+  );
+
+  const queryRange = useCallback(
     async (min: number, max: number) => {
       const { success, data } = await query.run({
         min: min.toString(),
@@ -54,25 +67,23 @@ export function RoomList() {
       });
       if (!success) notify.show.error("ROOM LIST NO SUCCESS");
       if (success) {
-        if (isInitialLoading || min === 0) {
+        if (!listData) {
           setListData(data);
           return;
         }
-        if (listData?.roomDataArr && data.roomDataArr) {
-          if (min !== 0) {
-            if (listData.allCount !== data.allCount) {
-              queryAction(0, max);
-              return;
-            } else {
-              for (let i = 0; i < listData.allCount; i++) {
-                if (
-                  listData.roomDataArr[i + min] &&
-                  listData.roomDataArr[i + min].roomId !==
-                    data.roomDataArr[i].roomId
-                ) {
-                  queryAction(0, max);
-                  return;
-                }
+        if (listData.roomDataArr && data.roomDataArr) {
+          if (listData.allCount !== data.allCount) {
+            queryAtFirst(max);
+            return;
+          } else {
+            for (let i = 0; i < listData.allCount; i++) {
+              if (
+                listData.roomDataArr[i + min] &&
+                listData.roomDataArr[i + min].roomId !==
+                  data.roomDataArr[i].roomId
+              ) {
+                queryAtFirst(max);
+                return;
               }
             }
           }
@@ -88,26 +99,26 @@ export function RoomList() {
     [query],
   );
 
+  // Initial load data
+  useEffect(() => {
+    // wrong roomId protection
+    if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
+    if (!listData) {
+      queryAtFirst(itemCountForInitialLoading);
+    }
+  }, []);
+
   // Reloading
   useEffect(() => {
     const interval = setInterval(() => {
       console.log(listData?.roomDataArr?.length);
       if (listData?.roomDataArr) {
         const max = listData.roomDataArr.length;
-        queryAction(0, max);
+        queryAtFirst(max);
       }
     }, reloadingInterval);
     return () => clearInterval(interval);
   }, [listData]);
-
-  // Initial load data
-  useEffect(() => {
-    // wrong roomId protection
-    if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
-    if (!listData) {
-      queryAction(0, itemCountForInitialLoading);
-    }
-  }, []);
 
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLElement>) => {
@@ -132,17 +143,17 @@ export function RoomList() {
             lastLoadedIndex + overscreenItemCountForFurtherLoading >
             listData.allCount
           ) {
-            queryAction(lastLoadedIndex, listData.allCount);
+            queryRange(lastLoadedIndex, listData.allCount);
           }
           if (lastVisibleIndex > lastLoadedIndex) {
             const stopItem =
               lastVisibleIndex + overscreenItemCountForFurtherLoading;
             stopItem > listData.allCount
-              ? queryAction(startItem, listData.allCount)
-              : queryAction(startItem, stopItem);
+              ? queryRange(startItem, listData.allCount)
+              : queryRange(startItem, stopItem);
           } else {
             const stopItem = startItem + overscreenItemCountForFurtherLoading;
-            queryAction(startItem, stopItem);
+            queryRange(startItem, stopItem);
           }
         }
       }
@@ -153,7 +164,7 @@ export function RoomList() {
       isZeroItemCount,
       listData?.allCount,
       listData?.roomDataArr,
-      queryAction,
+      queryRange,
     ],
   );
 
@@ -162,14 +173,21 @@ export function RoomList() {
     [handleScroll],
   );
 
-  if (isZeroItemCount) return <ListEmpty />;
+  if (isZeroItemCount)
+    return (
+      <RootWrapper>
+        <ListEmpty />
+      </RootWrapper>
+    );
 
-  const count = getRandomInt(4, 12);
+  const skeletonCount = getRandomInt(4, 12);
   if (!listData?.roomDataArr || isInitialLoading) {
     return (
-      <ListWrapper>
-        <SkeletonList count={count} />
-      </ListWrapper>
+      <RootWrapper>
+        <ListWrapper>
+          <SkeletonList count={skeletonCount} />
+        </ListWrapper>
+      </RootWrapper>
     );
   }
 
@@ -180,12 +198,43 @@ export function RoomList() {
   ));
 
   return (
-    <ListWrapper onScroll={debouncedHandleScroll}>
-      {items}
-      {!isAllLoaded && (
-        <SkeletonList count={listData.allCount - listData.roomDataArr.length} />
-      )}
-    </ListWrapper>
+    <RootWrapper>
+      <ListWrapper onScroll={debouncedHandleScroll}>
+        {items}
+        {!isAllLoaded && (
+          <SkeletonList
+            count={listData.allCount - listData.roomDataArr.length}
+          />
+        )}
+      </ListWrapper>
+    </RootWrapper>
+  );
+}
+
+function RootWrapper({ children }: { children: ReactNode }) {
+  return (
+    <div className="h-full flex flex-col w-1/2 min-w-52 max-w-xs">
+      <div className="pb-4 px-4 flex flex-col items-center flex-col">
+        <Title />
+        <Search />
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function Title() {
+  return (
+    <div className="h-16 py-2 w-full flex justify-between items-center">
+      <p className="font-thin tracking-widest uppercase text-3xl">Rooms</p>
+      <Link
+        to={routes.createRoom.path}
+        title="Create new room"
+        className="size-12 rounded-full hover:bg-slate-200 duration-200 justify-self-end flex justify-center items-center"
+      >
+        <IconCirclePlus strokeWidth="1" className="text-slate-400" size={32} />
+      </Link>
+    </div>
   );
 }
 
@@ -225,7 +274,7 @@ function ItemSkeleton() {
   return (
     <div
       style={itemHeightStyle}
-      className="w-full flex flex-col px-4 py-2 justify-between bg-slate-50 border-b-2 border-slate-200"
+      className="w-full flex flex-col px-4 py-2 justify-between bg-slate-50"
     >
       <div className="flex justify-between animate-pulse">
         <div className="rounded-md h-4 w-2/5 bg-slate-200"></div>
@@ -243,21 +292,34 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomInListType }) {
     ? data.lastMessage.content.text
     : "There is no messages";
 
+  let lastUsername: string | false = false;
+  if (data.lastMessage.authorId === "self") {
+    lastUsername = "You" as const;
+  } else if (data.lastMessage.username) {
+    lastUsername = data.lastMessage.username;
+  }
+
   return (
-    <Link to={"/room/" + data.roomId}>
-      <button
-        style={itemHeightStyle}
-        className={`${isOpened ? "bg-slate-200 hover:bg-slate-200 cursor-default" : "bg-slate-50 hover:bg-slate-200"} w-full flex flex-col py-1 px-4 justify-between items-center border-b-2 border-slate-200 duration-300 ease-out`}
-      >
-        <div className="w-full flex flex-row justify-between items-center gap-2">
-          <p className="text-sm text-green-600">{data.roomName}</p>
-          <p className="text-sm text-slate-600">{date}</p>
-        </div>
-        <div className="w-full flex flex-row justify-between items-center">
-          <p className="w-full text-sm text-left truncate">{lastMessage}</p>
-          <UnreadCount count={data.unreadCount} />
-        </div>
-      </button>
+    <Link
+      to={routes.rooms.path + data.roomId}
+      style={itemHeightStyle}
+      className={`${isOpened ? "bg-slate-200 cursor-default" : "bg-slate-50"} w-full flex flex-col px-4 py-2 justify-between items-center hover:bg-slate-200 duration-300 ease-out`}
+    >
+      <div className="w-full flex flex-row justify-between items-center gap-2">
+        <p className="text-md text-green-600 font-light">{data.roomName}</p>
+        <p className="text-sm text-slate-600 font-light lowercase">{date}</p>
+      </div>
+      <div className="w-full flex flex-row gap-2 items-center">
+        {lastUsername && (
+          <p className="text-sm shrink-0 text-blue-600 truncate">
+            {lastUsername}:
+          </p>
+        )}
+        <p className="text-sm grow font-light text-left truncate">
+          {lastMessage}
+        </p>
+        <UnreadCount count={data.unreadCount} />
+      </div>
     </Link>
   );
 }
@@ -265,9 +327,23 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomInListType }) {
 function UnreadCount({ count }: { count: number }) {
   if (count !== 0) {
     return (
-      <p className="text-xs text-blue-600 bg-slate-50 text-center px-1 rounded-xl">
+      <p className="shrink-0 size-6 flex justify-center items-center text-sm text-light text-slate-50 bg-slate-400 text-center rounded-full">
         {count > 9 ? "9+" : count}
       </p>
     );
   }
+}
+
+function Search() {
+  return (
+    <div className="shrink-0 relative h-12 w-full flex items-center">
+      <input
+        placeholder="Search..."
+        className="h-full w-full pl-4 pr-16 outline-none font-light text-gray-800 text-xl bg-slate-100 ring-2 ring-slate-200 rounded-xl focus:ring-slate-300 focus:bg-slate-50 duration-300 ease-in-out"
+      ></input>
+      <div className="absolute right-4 flex items-center">
+        <IconSearch className="text-slate-400" size={18} />
+      </div>
+    </div>
+  );
 }
