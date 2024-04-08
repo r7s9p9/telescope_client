@@ -1,42 +1,39 @@
 import { IconSend2 } from "@tabler/icons-react";
 import { useNotify } from "../../notification/notification";
 import { useNavigate, useParams } from "react-router-dom";
-import { useQueryReadMessageList } from "../../../shared/api/api";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { ReactNode, useEffect } from "react";
 import { checkRoomId } from "../../../shared/lib/uuid";
-import { MessageListType, MessageType } from "../../../shared/api/api.schema";
+import { MessageType } from "../../../shared/api/api.schema";
 import { RoomId } from "../../../types";
 import { routes } from "../../../constants";
 import { formatDate, isSameDay } from "../../../shared/lib/date";
+import { useChat } from "../../../shared/store/store";
+import { useStore } from "../../../shared/store/StoreProvider";
 
 export function Chat() {
   const notify = useNotify();
   const navigate = useNavigate();
 
-  const queryRead = useQueryReadMessageList();
-
   const { roomId } = useParams();
-  const [listData, setListData] = useState<MessageListType>();
+  const { queryReadAction } = useChat();
+  const { store } = useStore();
 
-  const queryAction = useCallback(async () => {
-    const { success, data } = await queryRead.run(roomId as RoomId, {
-      min: 0,
-      max: 100,
-    });
-    if (!success) notify.show.error("MESSAGES NO SUCCESS");
-    if (success && data) {
-      setListData(data);
-    }
-  }, [queryRead]);
+  const chat = store?.chats?.[roomId as RoomId];
 
-  // Initial load data
+  // Initial load data if no chat in store
   useEffect(() => {
-    // wrong roomId protection
-    if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
-    queryAction();
+    const action = async () => {
+      // wrong roomId protection
+      if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
+      await queryReadAction(roomId as RoomId, { min: 0, max: 100 });
+      if (chat && !chat.success && chat.error) {
+        notify.show.error(chat.error);
+      }
+    };
+    if (!chat) action();
   }, [roomId]);
 
-  if (!listData?.messageArr || roomId !== listData.roomId) {
+  if (!chat || !chat.data?.messageArr) {
     return (
       <Wrapper>
         <Bar />
@@ -49,31 +46,31 @@ export function Chat() {
   const messages: JSX.Element[] = [];
   let prevMessageCreated;
   let prevMessageAuthorId;
-  for (let i = listData.messageArr.length - 1; i >= 0; i--) {
+  for (let i = chat.data.messageArr.length - 1; i >= 0; i--) {
     const isSameCreatedDay =
       prevMessageCreated &&
-      isSameDay(listData.messageArr[i].created, prevMessageCreated);
+      isSameDay(chat.data.messageArr[i].created, prevMessageCreated);
     if (!isSameCreatedDay) {
-      prevMessageCreated = listData.messageArr[i].created;
+      prevMessageCreated = chat.data.messageArr[i].created;
       messages.push(
         <DateBubble
-          key={`date-${listData.messageArr[i].created}`}
-          date={listData.messageArr[i].created}
+          key={`date-${chat.data.messageArr[i].created}`}
+          date={chat.data.messageArr[i].created}
         />,
       );
     }
     let isAvatar = false;
     if (
-      listData.messageArr[i].authorId !== "service" &&
-      prevMessageAuthorId !== listData.messageArr[i].authorId
+      chat.data.messageArr[i].authorId !== "service" &&
+      prevMessageAuthorId !== chat.data.messageArr[i].authorId
     ) {
-      prevMessageAuthorId = listData.messageArr[i].authorId;
+      prevMessageAuthorId = chat.data.messageArr[i].authorId;
       isAvatar = true;
     }
     messages.push(
       <Message
-        key={`message-${listData.messageArr[i].created}`}
-        message={listData.messageArr[i]}
+        key={`message-${chat.data.messageArr[i].created}`}
+        message={chat.data.messageArr[i]}
         isAvatar={isAvatar}
       />,
     );
@@ -90,14 +87,14 @@ export function Chat() {
 
 function Wrapper({ children }: { children: ReactNode }) {
   return (
-    <div className="w-full h-full flex flex-col bg-slate-50">{children}</div>
+    <div className="w-full h-full flex flex-col bg-slate-200">{children}</div>
   );
 }
 
 function Spinner() {
   return (
     <div className="relative grow flex justify-center items-center ">
-      <div className="p-32 absolute rounded-full border-slate-300 border-x-2 animate-spin"></div>
+      <div className="p-32 absolute rounded-full border-slate-50 border-x-2 animate-spin"></div>
     </div>
   );
 }
@@ -169,7 +166,7 @@ function Bar() {
 
 function Send() {
   return (
-    <div className="shrink-0 relative p-4 w-full flex items-center border-x-2 border-slate-100">
+    <div className="shrink-0 relative p-4 w-full flex items-center border-x-2 border-slate-100 bg-slate-50">
       <input
         placeholder="Send message..."
         className="h-12 grow pl-4 pr-1 outline-none font-light text-gray-800 text-xl bg-slate-100 ring-2 ring-slate-200 rounded-xl focus:ring-slate-300 focus:bg-slate-50 duration-300 ease-in-out"

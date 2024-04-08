@@ -9,6 +9,7 @@ import { routes } from "../constants.ts";
 import { NotifyProvider } from "../widgets/notification/notification.tsx";
 import { Chat } from "../widgets/home/chat/chat.tsx";
 import { RoomList } from "../widgets/home/room-list/room-list.tsx";
+import { StoreProvider } from "../shared/store/StoreProvider.tsx";
 
 const router = createBrowserRouter([
   {
@@ -76,8 +77,10 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <NotifyProvider>
-      <RouterProvider router={router} />
-    </NotifyProvider>
+    <StoreProvider>
+      <NotifyProvider>
+        <RouterProvider router={router} />
+      </NotifyProvider>
+    </StoreProvider>
   </React.StrictMode>,
 );
