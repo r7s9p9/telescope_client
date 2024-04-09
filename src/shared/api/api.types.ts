@@ -11,17 +11,15 @@ export type AccountPrivacyRule =
 
 export type StoreType = {
   rooms?: {
-    [key: RoomId]: {
-      success: boolean, 
-      data?: RoomListType,
-      error?: string 
-    },
-  },
+    success: boolean;
+    data?: RoomListType;
+    error?: string;
+  };
   chats?: {
-    [key: RoomId]:  {
-      success: boolean, 
-      data?: MessageListType,
-      error?: string
-    }
-  }
-}
+    [key: RoomId]: {
+      success: boolean;
+      data?: MessageListType;
+      error?: string;
+    };
+  };
+};

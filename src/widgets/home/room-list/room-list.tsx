@@ -1,24 +1,22 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { RoomInListType, RoomListType } from "../../../shared/api/api.schema";
+import { RoomInListType } from "../../../shared/api/api.schema";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { formatDate } from "../../../shared/lib/date";
 import { useNotify } from "../../notification/notification";
-import { useQueryRoomList } from "../../../shared/api/api";
 import { getRandomInt } from "../../../shared/lib/random";
 import { checkRoomId } from "../../../shared/lib/uuid";
 import { routes } from "../../../constants";
 import { debounce } from "../../../shared/lib/debounce";
 import React from "react";
 import { IconCirclePlus, IconSearch } from "@tabler/icons-react";
+import { useStore } from "../../../shared/store/StoreProvider";
+import { useRooms } from "../../../shared/store/store";
 
 const itemHeight = 64 as const; // for skeleton & item
 
-const itemCountForInitialLoading = 20 as const;
 const overscreenItemCountToTriggerFurtherLoading = 5 as const;
 const overscreenItemCountForFurtherLoading = 10 as const;
 const debounceScrollDelay = 100 as const;
-
-const reloadingInterval = 10000 as const;
 
 const SkeletonList = React.memo(({ count }: { count: number }) => {
   if (count > 0) {
@@ -37,102 +35,41 @@ const SkeletonList = React.memo(({ count }: { count: number }) => {
 export function RoomList() {
   const notify = useNotify();
   const navigate = useNavigate();
-  const query = useQueryRoomList();
   const { roomId } = useParams();
-  const [listData, setListData] = useState<RoomListType>();
 
-  const isInitialLoading = !listData?.roomDataArr;
-  const isZeroItemCount = listData?.allCount === 0;
-  const isAllLoaded = !!(
-    listData && listData.allCount === listData.roomDataArr?.length
-  );
+  const { queryRange } = useRooms();
+  const { store } = useStore();
+  const rooms = store.rooms?.data;
 
-  const queryAtFirst = useCallback(
-    async (max: number) => {
-      const { success, data } = await query.run({
-        min: "0",
-        max: max.toString(),
-      });
-      if (!success) notify.show.error("ROOM LIST NO SUCCESS");
-      if (success) setListData(data);
-    },
-    [query],
-  );
+  const isInitialLoading = !rooms?.roomDataArr;
+  const isZeroItemCount = rooms?.allCount === 0;
+  const isAllLoaded = !!(rooms && rooms.allCount === rooms.roomDataArr?.length);
 
-  const queryRange = useCallback(
-    async (min: number, max: number) => {
-      const { success, data } = await query.run({
-        min: min.toString(),
-        max: max.toString(),
-      });
-      if (!success) notify.show.error("ROOM LIST NO SUCCESS");
-      if (success) {
-        if (!listData) {
-          setListData(data);
-          return;
-        }
-        if (listData.roomDataArr && data.roomDataArr) {
-          if (listData.allCount !== data.allCount) {
-            queryAtFirst(max);
-            return;
-          } else {
-            for (let i = 0; i < listData.allCount; i++) {
-              if (
-                listData.roomDataArr[i + min] &&
-                listData.roomDataArr[i + min].roomId !==
-                  data.roomDataArr[i].roomId
-              ) {
-                queryAtFirst(max);
-                return;
-              }
-            }
-          }
-          setListData({
-            ...listData,
-            allCount: data.allCount,
-            dev: data.dev,
-            roomDataArr: listData.roomDataArr.concat(data.roomDataArr),
-          });
-        }
-      }
-    },
-    [query],
-  );
-
-  // Initial load data
   useEffect(() => {
     // wrong roomId protection
     if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
-    if (!listData) {
-      queryAtFirst(itemCountForInitialLoading);
-    }
-  }, []);
-
-  // Reloading
-  useEffect(() => {
-    const interval = setInterval(() => {
-      console.log(listData?.roomDataArr?.length);
-      if (listData?.roomDataArr) {
-        const max = listData.roomDataArr.length;
-        queryAtFirst(max);
+    // show errors
+    const action = async () => {
+      if (store.rooms?.error) {
+        notify.show.error(store.rooms.error);
       }
-    }, reloadingInterval);
-    return () => clearInterval(interval);
-  }, [listData]);
+    };
+    action();
+  }, [rooms]);
 
   const handleScroll = useCallback(
-    (e: React.UIEvent<HTMLElement>) => {
+    async (e: React.UIEvent<HTMLElement>) => {
       if (
         !isInitialLoading &&
         !isAllLoaded &&
         !isZeroItemCount &&
-        listData?.roomDataArr
+        rooms?.roomDataArr
       ) {
         const target = e.nativeEvent.target as HTMLElement;
         const lastVisibleIndex = Math.ceil(
           (target.scrollTop + target.offsetHeight) / itemHeight,
         );
-        const lastLoadedIndex = listData.roomDataArr.length;
+        const lastLoadedIndex = rooms.roomDataArr.length;
         const isNeedToLoad = !!(
           lastLoadedIndex - lastVisibleIndex <
           overscreenItemCountToTriggerFurtherLoading
@@ -141,19 +78,19 @@ export function RoomList() {
           const startItem = lastLoadedIndex;
           if (
             lastLoadedIndex + overscreenItemCountForFurtherLoading >
-            listData.allCount
+            rooms.allCount
           ) {
-            queryRange(lastLoadedIndex, listData.allCount);
+            await queryRange(lastLoadedIndex, rooms.allCount);
           }
           if (lastVisibleIndex > lastLoadedIndex) {
             const stopItem =
               lastVisibleIndex + overscreenItemCountForFurtherLoading;
-            stopItem > listData.allCount
-              ? queryRange(startItem, listData.allCount)
-              : queryRange(startItem, stopItem);
+            stopItem > rooms.allCount
+              ? await queryRange(startItem, rooms.allCount)
+              : await queryRange(startItem, stopItem);
           } else {
             const stopItem = startItem + overscreenItemCountForFurtherLoading;
-            queryRange(startItem, stopItem);
+            await queryRange(startItem, stopItem);
           }
         }
       }
@@ -162,8 +99,8 @@ export function RoomList() {
       isAllLoaded,
       isInitialLoading,
       isZeroItemCount,
-      listData?.allCount,
-      listData?.roomDataArr,
+      rooms?.allCount,
+      rooms?.roomDataArr,
       queryRange,
     ],
   );
@@ -181,7 +118,7 @@ export function RoomList() {
     );
 
   const skeletonCount = getRandomInt(4, 12);
-  if (!listData?.roomDataArr || isInitialLoading) {
+  if (!rooms?.roomDataArr || isInitialLoading) {
     return (
       <RootWrapper>
         <ListWrapper>
@@ -191,7 +128,7 @@ export function RoomList() {
     );
   }
 
-  const items = listData.roomDataArr.map((itemData) => (
+  const items = rooms.roomDataArr.map((itemData) => (
     <li key={itemData.roomId}>
       <Item isOpened={roomId === itemData.roomId} data={itemData} />
     </li>
@@ -202,9 +139,7 @@ export function RoomList() {
       <ListWrapper onScroll={debouncedHandleScroll}>
         {items}
         {!isAllLoaded && (
-          <SkeletonList
-            count={listData.allCount - listData.roomDataArr.length}
-          />
+          <SkeletonList count={rooms.allCount - rooms.roomDataArr.length} />
         )}
       </ListWrapper>
     </RootWrapper>

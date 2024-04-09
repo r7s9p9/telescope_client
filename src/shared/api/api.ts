@@ -109,7 +109,7 @@ export function useQueryRoomList() {
   const query = useQuery();
   const navigate = useNavigate();
 
-  const run = async (range: { min: string; max: string }) => {
+  const run = async (range: { min: number; max: number }) => {
     const { response } = await query.run(serverRoute.room.getRoomList, readRoomList(range))
 
     const isLogged = isAuth(response.status);

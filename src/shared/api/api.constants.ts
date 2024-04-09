@@ -60,8 +60,8 @@ export const readAccountBody = (userId: UserId | "self") => {
   };
 };
 
-export const readRoomList = (range: { min: string; max: string }) => {
-  return { range };
+export const readRoomList = (range: { min: number; max: number }) => {
+  return { range: { min: range.min.toString(), max: range.max.toString()} };
 };
 
 export const readRoomInfo = (

@@ -1,7 +1,7 @@
 import { IconSend2 } from "@tabler/icons-react";
 import { useNotify } from "../../notification/notification";
 import { useNavigate, useParams } from "react-router-dom";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { checkRoomId } from "../../../shared/lib/uuid";
 import { MessageType } from "../../../shared/api/api.schema";
 import { RoomId } from "../../../types";
@@ -10,28 +10,81 @@ import { formatDate, isSameDay } from "../../../shared/lib/date";
 import { useChat } from "../../../shared/store/store";
 import { useStore } from "../../../shared/store/StoreProvider";
 
+type MessageLIType = HTMLLIElement;
+type MessageRefType = React.RefObject<MessageLIType> | undefined;
+
+const itemCountToTriggerFurtherLoading = 2 as const;
+const itemCountToFurtherLoading = 4 as const;
+
+function observerMessageSelector(count: number, index: number) {
+  if (count > itemCountToTriggerFurtherLoading) {
+    if (count - index === itemCountToTriggerFurtherLoading) {
+      return { isTopTrigger: true as const, isBottomTrigger: false as const };
+    }
+    if (index === itemCountToTriggerFurtherLoading) {
+      return { isBottomTrigger: true as const, isTopTrigger: false as const };
+    }
+  } else {
+    if (index === count)
+      return { isTopTrigger: true as const, isBottomTrigger: false as const };
+    if (index === (0 as const))
+      return { isBottomTrigger: true as const, isTopTrigger: false as const };
+  }
+
+  return { isTopTrigger: false as const, isBottomTrigger: false as const };
+}
+
 export function Chat() {
   const notify = useNotify();
   const navigate = useNavigate();
-
-  const { roomId } = useParams();
-  const { queryReadAction } = useChat();
   const { store } = useStore();
-
+  const { roomId } = useParams();
   const chat = store?.chats?.[roomId as RoomId];
+  const { queryReadRange } = useChat(roomId as RoomId);
 
-  // Initial load data if no chat in store
+  const topMessageRef = useRef(null);
+  const bottomMessageRef = useRef(null);
+
   useEffect(() => {
     const action = async () => {
       // wrong roomId protection
       if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
-      await queryReadAction(roomId as RoomId, { min: 0, max: 100 });
-      if (chat && !chat.success && chat.error) {
-        notify.show.error(chat.error);
-      }
+      if (chat?.error) notify.show.error(chat.error);
     };
-    if (!chat) action();
+    if (chat) action();
   }, [roomId]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(async (entries) => {
+      const target = entries[0];
+      if (target.isIntersecting && target.target === topMessageRef.current) {
+        // const min = chat.data.messageArr.length;
+        // const range = {
+        //   min: chat.data.messageArr.length,
+        //   max: min + itemCountToFurtherLoading,
+        // };
+        console.log("Top Triggered !");
+        // await queryReadRange(range);
+      }
+      if (target.isIntersecting && target.target === bottomMessageRef.current) {
+        console.log("Bottom Triggered !");
+      }
+    });
+
+    if (
+      chat?.data?.messageArr &&
+      (topMessageRef.current || bottomMessageRef.current)
+    ) {
+      if (topMessageRef.current) observer.observe(topMessageRef.current);
+      if (bottomMessageRef.current) observer.observe(bottomMessageRef.current);
+    } else {
+      return () => {
+        if (topMessageRef.current) observer.unobserve(topMessageRef.current);
+        if (bottomMessageRef.current)
+          observer.unobserve(bottomMessageRef.current);
+      };
+    }
+  }, [chat, topMessageRef, bottomMessageRef]);
 
   if (!chat || !chat.data?.messageArr) {
     return (
@@ -46,6 +99,7 @@ export function Chat() {
   const messages: JSX.Element[] = [];
   let prevMessageCreated;
   let prevMessageAuthorId;
+
   for (let i = chat.data.messageArr.length - 1; i >= 0; i--) {
     const isSameCreatedDay =
       prevMessageCreated &&
@@ -67,6 +121,26 @@ export function Chat() {
       prevMessageAuthorId = chat.data.messageArr[i].authorId;
       isAvatar = true;
     }
+    const { isBottomTrigger, isTopTrigger } = observerMessageSelector(
+      chat.data.messageArr.length,
+      i + 1,
+    );
+    if (isBottomTrigger || isTopTrigger) {
+      messages.push(
+        <li
+          ref={
+            isTopTrigger
+              ? topMessageRef
+              : isBottomTrigger
+                ? bottomMessageRef
+                : undefined
+          }
+          key={`trigger-${chat.data.messageArr[i].created}`}
+          className="w-full py-1 bg-red-400"
+        ></li>,
+      );
+    }
+
     messages.push(
       <Message
         key={`message-${chat.data.messageArr[i].created}`}
@@ -94,7 +168,7 @@ function Wrapper({ children }: { children: ReactNode }) {
 function Spinner() {
   return (
     <div className="relative grow flex justify-center items-center ">
-      <div className="p-32 absolute rounded-full border-slate-50 border-x-2 animate-spin"></div>
+      <div className="p-32 absolute rounded-full border-slate-300 border-x-2 animate-spin"></div>
     </div>
   );
 }

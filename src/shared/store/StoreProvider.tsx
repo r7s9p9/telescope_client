@@ -17,7 +17,7 @@ export const useStore = () => useContext(StoreContext);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [store, setStore] = useState<StoreType>(StoreState["store"]);
-  console.log(store.chats);
+  console.log(store);
   return (
     <StoreContext.Provider value={{ store, setStore }}>
       {children}
