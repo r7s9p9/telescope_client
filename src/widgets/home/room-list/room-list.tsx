@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { RoomInListType } from "../../../shared/api/api.schema";
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo } from "react";
 import { formatDate } from "../../../shared/lib/date";
 import { useNotify } from "../../notification/notification";
 import { getRandomInt } from "../../../shared/lib/random";
@@ -39,11 +39,12 @@ export function RoomList() {
 
   const { queryRange } = useRooms();
   const { store } = useStore();
-  const rooms = store.rooms?.data;
+  const rooms = store.rooms;
+  const data = rooms?.data;
 
-  const isInitialLoading = !rooms?.roomDataArr;
-  const isZeroItemCount = rooms?.allCount === 0;
-  const isAllLoaded = !!(rooms && rooms.allCount === rooms.roomDataArr?.length);
+  const isInitialLoading = !data;
+  const isZeroItemCount = data?.allCount === 0;
+  const isAllLoaded = !!(data && data.allCount === data.rooms?.length);
 
   useEffect(() => {
     // wrong roomId protection
@@ -55,7 +56,7 @@ export function RoomList() {
       }
     };
     action();
-  }, [rooms]);
+  }, [data]);
 
   const handleScroll = useCallback(
     async (e: React.UIEvent<HTMLElement>) => {
@@ -63,13 +64,13 @@ export function RoomList() {
         !isInitialLoading &&
         !isAllLoaded &&
         !isZeroItemCount &&
-        rooms?.roomDataArr
+        data?.rooms
       ) {
         const target = e.nativeEvent.target as HTMLElement;
         const lastVisibleIndex = Math.ceil(
           (target.scrollTop + target.offsetHeight) / itemHeight,
         );
-        const lastLoadedIndex = rooms.roomDataArr.length;
+        const lastLoadedIndex = data.rooms.length;
         const isNeedToLoad = !!(
           lastLoadedIndex - lastVisibleIndex <
           overscreenItemCountToTriggerFurtherLoading
@@ -78,15 +79,15 @@ export function RoomList() {
           const startItem = lastLoadedIndex;
           if (
             lastLoadedIndex + overscreenItemCountForFurtherLoading >
-            rooms.allCount
+            data.allCount
           ) {
-            await queryRange(lastLoadedIndex, rooms.allCount);
+            await queryRange(lastLoadedIndex, data.allCount);
           }
           if (lastVisibleIndex > lastLoadedIndex) {
             const stopItem =
               lastVisibleIndex + overscreenItemCountForFurtherLoading;
-            stopItem > rooms.allCount
-              ? await queryRange(startItem, rooms.allCount)
+            stopItem > data.allCount
+              ? await queryRange(startItem, data.allCount)
               : await queryRange(startItem, stopItem);
           } else {
             const stopItem = startItem + overscreenItemCountForFurtherLoading;
@@ -99,8 +100,8 @@ export function RoomList() {
       isAllLoaded,
       isInitialLoading,
       isZeroItemCount,
-      rooms?.allCount,
-      rooms?.roomDataArr,
+      data?.allCount,
+      data?.rooms,
       queryRange,
     ],
   );
@@ -118,7 +119,7 @@ export function RoomList() {
     );
 
   const skeletonCount = getRandomInt(4, 12);
-  if (!rooms?.roomDataArr || isInitialLoading) {
+  if (!data?.rooms || isInitialLoading) {
     return (
       <RootWrapper>
         <ListWrapper>
@@ -128,7 +129,7 @@ export function RoomList() {
     );
   }
 
-  const items = rooms.roomDataArr.map((itemData) => (
+  const items = data.rooms.map((itemData) => (
     <li key={itemData.roomId}>
       <Item isOpened={roomId === itemData.roomId} data={itemData} />
     </li>
@@ -139,7 +140,7 @@ export function RoomList() {
       <ListWrapper onScroll={debouncedHandleScroll}>
         {items}
         {!isAllLoaded && (
-          <SkeletonList count={rooms.allCount - rooms.roomDataArr.length} />
+          <SkeletonList count={data.allCount - data.rooms.length} />
         )}
       </ListWrapper>
     </RootWrapper>

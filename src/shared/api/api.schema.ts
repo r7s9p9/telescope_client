@@ -18,8 +18,14 @@ export const roomIdSchema = z
   });
 
 export const emailSchema = z.string().email().max(env.emailLengthMax);
-export const usernameSchema = z.string().min(env.usernameRange.min).max(env.usernameRange.max);
-export const passwordSchema = z.string().min(env.passwordRange.min).max(env.passwordRange.max);
+export const usernameSchema = z
+  .string()
+  .min(env.usernameRange.min)
+  .max(env.usernameRange.max);
+export const passwordSchema = z
+  .string()
+  .min(env.passwordRange.min)
+  .max(env.passwordRange.max);
 export const codeSchema = z.string().length(env.codeLength);
 
 export const nameSchema = z.string().max(env.nameLengthMax);
@@ -28,18 +34,22 @@ export const lastSeenSchema = z.string();
 
 export const loginFormSchema = z.object({
   email: emailSchema,
-  password: passwordSchema
-})
+  password: passwordSchema,
+});
 
 export const codeFormSchema = z.object({
-  code: codeSchema
-})
+  code: codeSchema,
+});
 
 export const registerFormSchema = z.object({
   email: emailSchema,
   username: usernameSchema,
-  password: passwordSchema
-})
+  password: passwordSchema,
+});
+
+const accessSchema = z.boolean();
+const successSchema = z.boolean();
+const allCountSchema = z.number();
 
 const privacyRuleSchema = z.union([
   z.literal(privacyRule.everybody),
@@ -80,7 +90,9 @@ export const accountReadSchema = z.object({
 export type AccountReadType = z.infer<typeof accountReadSchema>;
 
 const messageContent = z.object({ text: z.string().min(1) });
-const messageAuthorId = userIdSchema.or(z.literal("service")).or(z.literal("self"));
+const messageAuthorId = userIdSchema
+  .or(z.literal("service"))
+  .or(z.literal("self"));
 const messageReplyTo = userIdSchema.optional();
 const messageTargetId = userIdSchema.optional(); // For Service Message
 const messageCreated = z.string();
@@ -98,7 +110,7 @@ export const messageSchema = z.object({
 
 export type MessageType = z.infer<typeof messageSchema>;
 
-const roomInListSchema = z.object({
+const roomsSchema = z.object({
   roomId: roomIdSchema,
   roomName: z.string(),
   unreadCount: z.number(),
@@ -114,22 +126,24 @@ export const roomListSchema = z.object({
       error: z.array(z.string()).optional(),
     })
     .optional(),
-  roomDataArr: z.array(roomInListSchema).optional(),
-})
+  rooms: z.array(roomsSchema).optional(),
+});
 
-export type RoomInListType = z.infer<typeof roomInListSchema>;
+export type RoomInListType = z.infer<typeof roomsSchema>;
 export type RoomListType = z.infer<typeof roomListSchema>;
 
 export const messageReadSchema = z.object({
+  access: accessSchema,
+  success: successSchema,
   dev: z
     .object({
       message: z.array(z.string()).optional(),
       error: z.array(z.string()).optional(),
     })
     .optional(),
-  messageArr: z.array(messageSchema).optional(),
   roomId: roomIdSchema,
-  success: z.boolean(),
+  allCount: allCountSchema.optional(),
+  messages: z.array(messageSchema).optional(),
 });
 
 export type MessageListType = z.infer<typeof messageReadSchema>;

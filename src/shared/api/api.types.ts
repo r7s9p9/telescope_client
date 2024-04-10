@@ -20,6 +20,7 @@ export type StoreType = {
       success: boolean;
       data?: MessageListType;
       error?: string;
+      bottomScrollPosition: number;
     };
   };
 };

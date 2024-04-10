@@ -1,7 +1,14 @@
 import { IconSend2 } from "@tabler/icons-react";
 import { useNotify } from "../../notification/notification";
 import { useNavigate, useParams } from "react-router-dom";
-import { ReactNode, useEffect, useRef } from "react";
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { checkRoomId } from "../../../shared/lib/uuid";
 import { MessageType } from "../../../shared/api/api.schema";
 import { RoomId } from "../../../types";
@@ -9,30 +16,13 @@ import { routes } from "../../../constants";
 import { formatDate, isSameDay } from "../../../shared/lib/date";
 import { useChat } from "../../../shared/store/store";
 import { useStore } from "../../../shared/store/StoreProvider";
+import React from "react";
+import { debounce } from "../../../shared/lib/debounce";
 
-type MessageLIType = HTMLLIElement;
-type MessageRefType = React.RefObject<MessageLIType> | undefined;
+const debounceScrollInterval = 250 as const;
 
-const itemCountToTriggerFurtherLoading = 2 as const;
-const itemCountToFurtherLoading = 4 as const;
-
-function observerMessageSelector(count: number, index: number) {
-  if (count > itemCountToTriggerFurtherLoading) {
-    if (count - index === itemCountToTriggerFurtherLoading) {
-      return { isTopTrigger: true as const, isBottomTrigger: false as const };
-    }
-    if (index === itemCountToTriggerFurtherLoading) {
-      return { isBottomTrigger: true as const, isTopTrigger: false as const };
-    }
-  } else {
-    if (index === count)
-      return { isTopTrigger: true as const, isBottomTrigger: false as const };
-    if (index === (0 as const))
-      return { isBottomTrigger: true as const, isTopTrigger: false as const };
-  }
-
-  return { isTopTrigger: false as const, isBottomTrigger: false as const };
-}
+const scrollHeightToTriggerFurtherLoading = 0.75 as const;
+const itemCountToFurtherLoading = 2 as const;
 
 export function Chat() {
   const notify = useNotify();
@@ -40,10 +30,14 @@ export function Chat() {
   const { store } = useStore();
   const { roomId } = useParams();
   const chat = store?.chats?.[roomId as RoomId];
-  const { queryReadRange } = useChat(roomId as RoomId);
+  const data = chat?.data;
+  const { queryReadRange, setScrollPosition } = useChat(roomId as RoomId);
 
-  const topMessageRef = useRef(null);
-  const bottomMessageRef = useRef(null);
+  const isAllLoaded =
+    data?.messages && data?.allCount === data?.messages?.length;
+  const [isLoading, setIsLoading] = useState(false);
+  const endTriggerRef = useRef(null);
+  const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     const action = async () => {
@@ -51,42 +45,65 @@ export function Chat() {
       if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
       if (chat?.error) notify.show.error(chat.error);
     };
-    if (chat) action();
-  }, [roomId]);
+    if (roomId || chat) action();
+  }, [roomId, chat]);
+
+  // Restore scroll position
+  useEffect(() => {
+    if (chat && listRef.current) {
+      console.log(12);
+      listRef.current.scrollTop =
+        listRef.current.scrollHeight - chat.bottomScrollPosition;
+    }
+  }, [roomId, chat]);
+
+  const loader = async () => {
+    if (!isLoading && !isAllLoaded && data?.messages && data.allCount) {
+      setIsLoading(true);
+      const min = data.messages.length;
+      const max =
+        data.allCount < min + itemCountToFurtherLoading
+          ? data.allCount
+          : min + itemCountToFurtherLoading;
+      await queryReadRange({ min, max });
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const observer = new IntersectionObserver(async (entries) => {
-      const target = entries[0];
-      if (target.isIntersecting && target.target === topMessageRef.current) {
-        // const min = chat.data.messageArr.length;
-        // const range = {
-        //   min: chat.data.messageArr.length,
-        //   max: min + itemCountToFurtherLoading,
-        // };
-        console.log("Top Triggered !");
-        // await queryReadRange(range);
-      }
-      if (target.isIntersecting && target.target === bottomMessageRef.current) {
-        console.log("Bottom Triggered !");
-      }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) loader();
     });
 
-    if (
-      chat?.data?.messageArr &&
-      (topMessageRef.current || bottomMessageRef.current)
-    ) {
-      if (topMessageRef.current) observer.observe(topMessageRef.current);
-      if (bottomMessageRef.current) observer.observe(bottomMessageRef.current);
-    } else {
-      return () => {
-        if (topMessageRef.current) observer.unobserve(topMessageRef.current);
-        if (bottomMessageRef.current)
-          observer.unobserve(bottomMessageRef.current);
-      };
-    }
-  }, [chat, topMessageRef, bottomMessageRef]);
+    if (endTriggerRef.current) observer.observe(endTriggerRef.current);
 
-  if (!chat || !chat.data?.messageArr) {
+    return () => {
+      if (endTriggerRef.current) observer.unobserve(endTriggerRef.current);
+    };
+  }, [data, endTriggerRef]);
+
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLElement>) => {
+      const target = e.nativeEvent.target as HTMLElement;
+      const scrollPercent = 1 - target.scrollTop / target.scrollHeight;
+      const isLoadNeeded = scrollPercent >= scrollHeightToTriggerFurtherLoading;
+      if (isLoadNeeded) loader();
+
+      // Set scroll position
+      const scrollBottom = target.scrollHeight - target.scrollTop;
+      if (scrollBottom !== chat?.bottomScrollPosition) {
+        setScrollPosition(scrollBottom);
+      }
+    },
+    [isAllLoaded, isLoading, roomId],
+  );
+
+  const debouncedHandleScroll = useMemo(
+    () => debounce(handleScroll, debounceScrollInterval),
+    [handleScroll, roomId],
+  );
+
+  if (!data || !data?.messages) {
     return (
       <Wrapper>
         <Bar />
@@ -97,54 +114,41 @@ export function Chat() {
   }
 
   const messages: JSX.Element[] = [];
+  if (!isAllLoaded) {
+    messages.push(
+      <div className="w-full" ref={endTriggerRef} key="trigger-skeleton" />,
+    );
+  }
+
   let prevMessageCreated;
   let prevMessageAuthorId;
 
-  for (let i = chat.data.messageArr.length - 1; i >= 0; i--) {
+  for (let i = data.messages.length - 1; i >= 0; i--) {
     const isSameCreatedDay =
       prevMessageCreated &&
-      isSameDay(chat.data.messageArr[i].created, prevMessageCreated);
+      isSameDay(data.messages[i].created, prevMessageCreated);
     if (!isSameCreatedDay) {
-      prevMessageCreated = chat.data.messageArr[i].created;
+      prevMessageCreated = data.messages[i].created;
       messages.push(
         <DateBubble
-          key={`date-${chat.data.messageArr[i].created}`}
-          date={chat.data.messageArr[i].created}
+          key={`date-${data.messages[i].created}`}
+          date={data.messages[i].created}
         />,
       );
     }
     let isAvatar = false;
     if (
-      chat.data.messageArr[i].authorId !== "service" &&
-      prevMessageAuthorId !== chat.data.messageArr[i].authorId
+      data.messages[i].authorId !== "service" &&
+      prevMessageAuthorId !== data.messages[i].authorId
     ) {
-      prevMessageAuthorId = chat.data.messageArr[i].authorId;
+      prevMessageAuthorId = data.messages[i].authorId;
       isAvatar = true;
-    }
-    const { isBottomTrigger, isTopTrigger } = observerMessageSelector(
-      chat.data.messageArr.length,
-      i + 1,
-    );
-    if (isBottomTrigger || isTopTrigger) {
-      messages.push(
-        <li
-          ref={
-            isTopTrigger
-              ? topMessageRef
-              : isBottomTrigger
-                ? bottomMessageRef
-                : undefined
-          }
-          key={`trigger-${chat.data.messageArr[i].created}`}
-          className="w-full py-1 bg-red-400"
-        ></li>,
-      );
     }
 
     messages.push(
       <Message
-        key={`message-${chat.data.messageArr[i].created}`}
-        message={chat.data.messageArr[i]}
+        key={`message-${data.messages[i].created}`}
+        message={data.messages[i]}
         isAvatar={isAvatar}
       />,
     );
@@ -153,7 +157,9 @@ export function Chat() {
   return (
     <Wrapper>
       <Bar />
-      <Messages>{messages}</Messages>
+      <Messages listRef={listRef} onScroll={debouncedHandleScroll}>
+        {messages}
+      </Messages>
       <Send />
     </Wrapper>
   );
@@ -182,9 +188,21 @@ function DateBubble({ date }: { date: string }) {
   );
 }
 
-function Messages({ children }: { children: ReactNode }) {
+function Messages({
+  children,
+  listRef,
+  onScroll,
+}: {
+  children: ReactNode;
+  listRef: React.RefObject<HTMLUListElement>;
+  onScroll: (e: React.UIEvent<HTMLElement>) => void;
+}) {
   return (
-    <ul className="relative grow w-full p-4 flex flex-col overflow-y-scroll overscroll-none scroll-smooth bg-slate-200">
+    <ul
+      ref={listRef}
+      onScroll={onScroll}
+      className="relative overflow-y-scroll will-change-scroll overscroll-none scroll-auto relative grow w-full p-4 flex flex-col bg-slate-200"
+    >
       {children}
     </ul>
   );
