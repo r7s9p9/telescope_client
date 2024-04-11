@@ -29,21 +29,21 @@ export function Chat() {
   const navigate = useNavigate();
   const { store } = useStore();
   const { roomId } = useParams();
-  const chat = store?.chats?.[roomId as RoomId];
-  const data = chat?.data;
-  const { queryReadRange, setScrollPosition } = useChat(roomId as RoomId);
+  const chat = store.chats?.[roomId as RoomId];
+  const { loadOlderMessages, setScrollPosition } = useChat(roomId as RoomId);
 
-  const isAllLoaded =
-    data?.messages && data?.allCount === data?.messages?.length;
+  const isAllLoaded = chat?.messages && chat.allCount === chat.messages.length;
   const [isLoading, setIsLoading] = useState(false);
   const endTriggerRef = useRef(null);
   const listRef = useRef<HTMLUListElement>(null);
+
+  console.log(chat);
 
   useEffect(() => {
     const action = async () => {
       // wrong roomId protection
       if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
-      if (chat?.error) notify.show.error(chat.error);
+      if (chat && !chat?.success) notify.show.error("CHAT NO SUCCESS");
     };
     if (roomId || chat) action();
   }, [roomId, chat]);
@@ -51,21 +51,20 @@ export function Chat() {
   // Restore scroll position
   useEffect(() => {
     if (chat && listRef.current) {
-      console.log(12);
       listRef.current.scrollTop =
         listRef.current.scrollHeight - chat.bottomScrollPosition;
     }
   }, [roomId, chat]);
 
   const loader = async () => {
-    if (!isLoading && !isAllLoaded && data?.messages && data.allCount) {
+    if (!isLoading && !isAllLoaded && chat?.messages && chat.allCount) {
       setIsLoading(true);
-      const min = data.messages.length;
+      const min = chat.messages.length;
       const max =
-        data.allCount < min + itemCountToFurtherLoading
-          ? data.allCount
+        chat.allCount < min + itemCountToFurtherLoading
+          ? chat.allCount
           : min + itemCountToFurtherLoading;
-      await queryReadRange({ min, max });
+      await loadOlderMessages(min, max);
       setIsLoading(false);
     }
   };
@@ -80,7 +79,7 @@ export function Chat() {
     return () => {
       if (endTriggerRef.current) observer.unobserve(endTriggerRef.current);
     };
-  }, [data, endTriggerRef]);
+  }, [chat, endTriggerRef]);
 
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLElement>) => {
@@ -103,7 +102,7 @@ export function Chat() {
     [handleScroll, roomId],
   );
 
-  if (!data || !data?.messages) {
+  if (!chat?.messages) {
     return (
       <Wrapper>
         <Bar />
@@ -123,32 +122,32 @@ export function Chat() {
   let prevMessageCreated;
   let prevMessageAuthorId;
 
-  for (let i = data.messages.length - 1; i >= 0; i--) {
+  for (let i = chat.messages.length - 1; i >= 0; i--) {
     const isSameCreatedDay =
       prevMessageCreated &&
-      isSameDay(data.messages[i].created, prevMessageCreated);
+      isSameDay(chat.messages[i].created, prevMessageCreated);
     if (!isSameCreatedDay) {
-      prevMessageCreated = data.messages[i].created;
+      prevMessageCreated = chat.messages[i].created;
       messages.push(
         <DateBubble
-          key={`date-${data.messages[i].created}`}
-          date={data.messages[i].created}
+          key={`date-${chat.messages[i].created}`}
+          date={chat.messages[i].created}
         />,
       );
     }
     let isAvatar = false;
     if (
-      data.messages[i].authorId !== "service" &&
-      prevMessageAuthorId !== data.messages[i].authorId
+      chat.messages[i].authorId !== "service" &&
+      prevMessageAuthorId !== chat.messages[i].authorId
     ) {
-      prevMessageAuthorId = data.messages[i].authorId;
+      prevMessageAuthorId = chat.messages[i].authorId;
       isAvatar = true;
     }
 
     messages.push(
       <Message
-        key={`message-${data.messages[i].created}`}
-        message={data.messages[i]}
+        key={`message-${chat.messages[i].created}`}
+        message={chat.messages[i]}
         isAvatar={isAvatar}
       />,
     );
@@ -179,7 +178,7 @@ function Spinner() {
   );
 }
 
-function DateBubble({ date }: { date: string }) {
+function DateBubble({ date }: { date: number }) {
   const str = formatDate().bubble(date);
   return (
     <li className="sticky text-center top-0 w-44 mt-4 px-4 py-1 bg-slate-50 self-center rounded-full ring-2 ring-slate-200 text-md font-light">

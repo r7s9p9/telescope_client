@@ -18,8 +18,10 @@ export type StoreType = {
   chats?: {
     [key: RoomId]: {
       success: boolean;
-      data?: MessageListType;
-      error?: string;
+      access: boolean;
+      isEmpty: boolean;
+      allCount: number;
+      messages?: MessageListType["messages"];
       bottomScrollPosition: number;
     };
   };

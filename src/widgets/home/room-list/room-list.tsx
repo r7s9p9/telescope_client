@@ -222,17 +222,21 @@ function ItemSkeleton() {
 }
 
 function Item({ isOpened, data }: { isOpened: boolean; data: RoomInListType }) {
-  const date = formatDate().roomList(data.lastMessage.created);
+  const date = data.lastMessage
+    ? formatDate().roomList(data.lastMessage.created)
+    : ("Never" as const);
 
   const lastMessage = data.lastMessage
     ? data.lastMessage.content.text
     : "There is no messages";
 
   let lastUsername: string | false = false;
-  if (data.lastMessage.authorId === "self") {
-    lastUsername = "You" as const;
-  } else if (data.lastMessage.username) {
-    lastUsername = data.lastMessage.username;
+  if (data.lastMessage) {
+    if (data.lastMessage.authorId === "self") {
+      lastUsername = "You" as const;
+    } else if (data.lastMessage.username) {
+      lastUsername = data.lastMessage.username;
+    }
   }
 
   return (

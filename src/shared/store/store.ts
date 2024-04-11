@@ -1,81 +1,176 @@
-import { useQueryReadMessageList, useQueryRoomList } from "../api/api";
+import {
+  useQueryCompareMessages,
+  useQueryReadMessages,
+  useQueryRoomList,
+} from "../api/api";
 import { useCallback, useEffect } from "react";
 import { RoomId } from "../../types";
-import { useStore } from "./StoreProvider";
+import { StoreState, useStore } from "./StoreProvider";
+import { MessageDates, MessageListType, MessageType } from "../api/api.schema";
+import { useInterval } from "../lib/useInterval";
 
 const roomsItemCountForInitialLoading = 20 as const;
 const roomsReloadInterval = 10000 as const;
 
-const chatItemCountForInitialLoading = 20 as const;
+const chatItemCountForInitialLoading = 10 as const;
+const chatCompareInterval = 7000 as const;
+const chatUpdateInterval = 3000 as const;
+
+const chat = (
+  setStore: StoreState["setStore"],
+  roomId: RoomId,
+  data?: MessageListType,
+) => {
+  const create = () => {
+    setStore((store) => ({
+      ...store,
+      chats: {
+        ...store.chats,
+        [roomId]: {
+          success: true as const,
+          access: data?.access,
+          isEmpty: data?.allCount === 0,
+          allCount: data?.allCount,
+          messages: data?.messages,
+          bottomScrollPosition: 0 as const,
+        },
+      },
+    }));
+  };
+
+  const update = (messages: MessageType[]) => {
+    setStore((store) => ({
+      ...store,
+      chats: {
+        ...store.chats,
+        [roomId]: {
+          ...store?.chats?.[roomId],
+          success: true as const,
+          access: data?.access,
+          isEmpty: data?.allCount === 0,
+          allCount: data?.allCount,
+          messages: messages,
+        },
+      },
+    }));
+  };
+
+  const flagAsBad = () => {
+    setStore((store) => ({
+      ...store,
+      chats: {
+        ...store.chats,
+        [roomId]: {
+          ...store?.chats?.[roomId],
+          success: false as const,
+        },
+      },
+    }));
+  };
+  return { create, update, flagAsBad };
+};
 
 export function useChat(roomId: RoomId) {
   const { store, setStore } = useStore();
+
   const storedChat = store.chats?.[roomId];
+  const storedMessages = storedChat?.messages;
 
-  const queryRead = useQueryReadMessageList();
+  const queryRead = useQueryReadMessages();
+  const queryCompare = useQueryCompareMessages();
 
-  const queryReadRange = useCallback(
-    async (range: { min: number; max: number }) => {
-      const { success, data } = await queryRead.run(roomId, {
-        min: range.min,
-        max: range.max,
-      });
+  const loadOlderMessages = useCallback(
+    async (min: number, max: number) => {
+      const { success, data } = await queryRead
+        .run()
+        .indexRange(roomId, { min, max });
+
+      const chatAction = chat(setStore, roomId, data);
+
       if (success && data) {
-        if (!storedChat) {
-          setStore((store) => ({
-            ...store,
-            chats: {
-              ...store.chats,
-              [roomId]: {
-                data,
-                success: true as const,
-                bottomScrollPosition: 0 as const,
-              },
-            },
-          }));
-        }
-        if (storedChat) {
-          setStore((store) => ({
-            ...store,
-            chats: {
-              ...store.chats,
-              [roomId]: {
-                ...store?.chats?.[roomId],
-                data: {
-                  ...data,
-                  messages: (storedChat.data?.messages || []).concat(
-                    data.messages || [],
-                  ),
-                },
-                success: true as const,
-              },
-            },
-          }));
+        if (!storedMessages) chatAction.create();
+        if (storedMessages) {
+          const messages = storedMessages.concat(data.messages || []);
+          chatAction.update(messages);
         }
       }
-      if (!success)
-        setStore((store) => ({
-          ...store,
-          chats: {
-            ...store.chats,
-            [roomId]: {
-              ...store?.chats?.[roomId],
-              success: false as const,
-              error: "Chat no success!",
-            },
-          },
-        }));
+      if (!success) chatAction.flagAsBad();
     },
-    [queryRead, store],
+    [queryRead, storedChat],
   );
+
+  const loadNewerMessages = useCallback(async () => {
+    if (storedMessages) {
+      const range = {
+        min: storedMessages[0].created + 1,
+      };
+      const { success, data } = await queryRead
+        .run()
+        .createdRange(roomId, range);
+
+      const chatAction = chat(setStore, roomId, data);
+
+      if (success) {
+        const messages = (data?.messages || []).concat(storedMessages);
+        chatAction.update(messages);
+      }
+      if (!success) chatAction.flagAsBad();
+    }
+  }, [queryRead, storedChat]);
+
+  const compareMessages = useCallback(async () => {
+    if (storedMessages) {
+      const toCompare: MessageDates[] = [];
+      for (const message of storedMessages) {
+        if (message.modified) {
+          toCompare.push({
+            created: message.created,
+            modified: message.modified,
+          });
+        } else {
+          toCompare.push({ created: message.created });
+        }
+      }
+      const { success, data } = await queryCompare.run(roomId, toCompare);
+      const chatAction = chat(setStore, roomId, data);
+      if (success) {
+        if (data.isEqual) return;
+
+        let messages: MessageType[] = [];
+        if (data.toRemove) {
+          for (let i = 0; i < storedMessages.length; i++) {
+            if (!data.toRemove.includes(storedMessages[i].created)) {
+              messages.push(storedMessages[i]);
+            }
+          }
+        } else {
+          messages = [...storedMessages];
+        }
+        if (data.toUpdate) {
+          for (let i = 0; i < storedMessages.length; i++) {
+            for (const message of data.toUpdate) {
+              if (message.created === storedMessages[i].created) {
+                messages[i] = message;
+              }
+            }
+          }
+        }
+        chatAction.update(messages);
+      }
+      if (!success) chatAction.flagAsBad();
+    }
+  }, [queryCompare, storedMessages]);
 
   // Initial load data if no chat in store
   useEffect(() => {
-    const action = async () => {
-      await queryReadRange({ min: 0, max: chatItemCountForInitialLoading });
-    };
-    if (!storedChat) action();
+    if (!storedChat) loadOlderMessages(0, chatItemCountForInitialLoading);
   }, [roomId]);
+
+  // Compare existing messages
+  useInterval(() => compareMessages(), chatCompareInterval);
+
+  // Update messages
+  useInterval(() => loadNewerMessages(), chatUpdateInterval);
 
   const setScrollPosition = (bottomScrollPosition: number) => {
     setStore((store) => ({
@@ -90,7 +185,7 @@ export function useChat(roomId: RoomId) {
     }));
   };
 
-  return { queryReadRange, setScrollPosition };
+  return { loadOlderMessages, setScrollPosition };
 }
 
 export function useRooms() {
@@ -170,21 +265,13 @@ export function useRooms() {
 
   // Initial load data
   useEffect(() => {
-    const action = async () => {
-      if (!storedRooms) await queryAtFirst(roomsItemCountForInitialLoading);
-    };
-    action();
+    if (!storedRooms) queryAtFirst(roomsItemCountForInitialLoading);
   }, []);
 
   // Reload rooms
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      if (storedRooms?.rooms) {
-        await queryAtFirst(storedRooms.rooms.length);
-      }
-    }, roomsReloadInterval);
-    return () => clearInterval(interval);
-  }, [storedRooms]);
+  useInterval(() => {
+    if (storedRooms?.rooms) queryAtFirst(storedRooms.rooms.length);
+  }, roomsReloadInterval);
 
   return { queryAtFirst, queryRange };
 }

@@ -17,6 +17,13 @@ export const roomIdSchema = z
     return id as RoomId;
   });
 
+export const devSchema = z
+  .object({
+    message: z.array(z.string()).optional(),
+    error: z.array(z.object({}).or(z.string())).optional(),
+  })
+  .optional();
+
 export const emailSchema = z.string().email().max(env.emailLengthMax);
 export const usernameSchema = z
   .string()
@@ -95,8 +102,18 @@ const messageAuthorId = userIdSchema
   .or(z.literal("self"));
 const messageReplyTo = userIdSchema.optional();
 const messageTargetId = userIdSchema.optional(); // For Service Message
-const messageCreated = z.string();
-const messageModified = z.string();
+
+const maxMessageTimestamp = 2000000000000 as const; // TODO move to .env
+const minMessageTimestamp = 1000000000000 as const; // TODO move to .env
+
+const messageTimestamp = z
+  .number()
+  .finite()
+  .safe()
+  .gte(minMessageTimestamp)
+  .lte(maxMessageTimestamp);
+const messageCreated = messageTimestamp;
+const messageModified = messageTimestamp;
 
 export const messageSchema = z.object({
   username: z.string().optional(),
@@ -108,25 +125,26 @@ export const messageSchema = z.object({
   replyTo: messageReplyTo.optional(),
 });
 
+export const messageDatesSchema = z.object({
+  created: messageCreated,
+  modified: messageModified.optional(),
+});
+
 export type MessageType = z.infer<typeof messageSchema>;
+export type MessageDates = z.infer<typeof messageDatesSchema>;
 
 const roomsSchema = z.object({
   roomId: roomIdSchema,
   roomName: z.string(),
   unreadCount: z.number(),
-  lastMessage: messageSchema,
+  lastMessage: messageSchema.optional(),
 });
 
 export const roomListSchema = z.object({
   success: z.boolean(),
   allCount: z.number(),
-  dev: z
-    .object({
-      message: z.array(z.string()).optional(),
-      error: z.array(z.string()).optional(),
-    })
-    .optional(),
   rooms: z.array(roomsSchema).optional(),
+  dev: devSchema,
 });
 
 export type RoomInListType = z.infer<typeof roomsSchema>;
@@ -135,15 +153,20 @@ export type RoomListType = z.infer<typeof roomListSchema>;
 export const messageReadSchema = z.object({
   access: accessSchema,
   success: successSchema,
-  dev: z
-    .object({
-      message: z.array(z.string()).optional(),
-      error: z.array(z.string()).optional(),
-    })
-    .optional(),
   roomId: roomIdSchema,
   allCount: allCountSchema.optional(),
   messages: z.array(messageSchema).optional(),
+  dev: devSchema,
 });
 
 export type MessageListType = z.infer<typeof messageReadSchema>;
+
+export const messageCompareSchema = z.object({
+  access: accessSchema,
+  success: successSchema,
+  roomId: roomIdSchema,
+  isEqual: z.boolean().optional(),
+  toRemove: z.array(messageCreated).optional(),
+  toUpdate: z.array(messageSchema).optional(),
+  dev: devSchema,
+});

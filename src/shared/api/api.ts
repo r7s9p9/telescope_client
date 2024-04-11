@@ -1,23 +1,24 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { RoomId } from "../../types";
 import {
+  compareMessages,
   readAccountBody,
-  readMessages,
+  readMessagesByCreatedRange,
+  readMessagesByIndexRange,
   readRoomList,
   serverRoute,
 } from "./api.constants";
 import {
+  MessageDates,
   accountReadSchema,
+  messageCompareSchema,
   messageReadSchema,
   roomListSchema,
 } from "./api.schema";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
 
-const fetcher = async (
-  route: string,
-  body: any,
-) => {
+const fetcher = async (route: string, body: any) => {
   const result = await fetch(route, {
     method: "POST",
     headers: {
@@ -32,14 +33,13 @@ const fetcher = async (
 function useQuery() {
   const [isLoading, setIsLoading] = useState(false);
 
-  const run = async (route: string,
-  body: any) => {
+  const run = async (route: string, body: any) => {
     setIsLoading(true);
     const response = await fetcher(route, body);
     setIsLoading(false);
-    return {response, request: { route, body }};
-  }
-  return { isLoading, run }
+    return { response, request: { route, body } };
+  };
+  return { isLoading, run };
 }
 
 function isAuth(status: number) {
@@ -65,8 +65,15 @@ function roomListDataValidator(payload: object) {
   return { success: true as const, data: result.data };
 }
 
-function messagesValidator(payload: object) {
+function readMessagesValidator(payload: object) {
   const result = messageReadSchema.safeParse(payload);
+
+  if (!result.success) return { success: false as const, error: result.error };
+  return { success: true as const, data: result.data };
+}
+
+function compareMessagesValidator(payload: object) {
+  const result = messageCompareSchema.safeParse(payload);
 
   if (!result.success) return { success: false as const, error: result.error };
   return { success: true as const, data: result.data };
@@ -77,32 +84,38 @@ export function useQuerySelfAccount() {
   const navigate = useNavigate();
 
   const run = async () => {
-    const { response } = await query.run(serverRoute.account.read, readAccountBody("self"))
+    const { response } = await query.run(
+      serverRoute.account.read,
+      readAccountBody("self"),
+    );
     const isLogged = isAuth(response.status);
     if (!isLogged) {
       navigate(
-      { pathname: routes.login.path },
-      // { state: { isLoggedOut: true } }, // need other value for !isLogged
-    );}
-    
-    const { success, data } = accountDataValidator(response.payload);
-   
-    if (!success) return { success: false as const};
-    return { success: true as const, data };
-  }
+        { pathname: routes.login.path },
+        // { state: { isLoggedOut: true } }, // need other value for !isLogged
+      );
+    }
 
-  return { run, isLoading: query.isLoading }
+    const { success, data } = accountDataValidator(response.payload);
+
+    if (!success) return { success: false as const };
+    return { success: true as const, data };
+  };
+
+  return { run, isLoading: query.isLoading };
 }
 
 export function useQueryLogout() {
   const query = useQuery();
 
   const run = async (sessionId: string | "self") => {
-    const { response } = await query.run(serverRoute.session.remove, { sessionId: sessionId })
-    return { success: !!response.payload.success }
-  }
+    const { response } = await query.run(serverRoute.session.remove, {
+      sessionId: sessionId,
+    });
+    return { success: !!response.payload.success };
+  };
 
-  return { run, isLoading: query.isLoading }
+  return { run, isLoading: query.isLoading };
 }
 
 export function useQueryRoomList() {
@@ -110,63 +123,106 @@ export function useQueryRoomList() {
   const navigate = useNavigate();
 
   const run = async (range: { min: number; max: number }) => {
-    const { response } = await query.run(serverRoute.room.getRoomList, readRoomList(range))
+    const { response } = await query.run(
+      serverRoute.room.getRoomList,
+      readRoomList(range),
+    );
 
     const isLogged = isAuth(response.status);
     if (!isLogged) {
       navigate(
-      { pathname: routes.login.path },
-      // { state: { isLoggedOut: true } }, // need other value for !isLogged
-    );}
+        { pathname: routes.login.path },
+        // { state: { isLoggedOut: true } }, // need other value for !isLogged
+      );
+    }
 
     const { success, data } = roomListDataValidator(response.payload);
     if (!success) return { success: false as const };
     return { success: true as const, data };
-  }
- 
-  return { run, isLoading: query.isLoading }
+  };
+
+  return { run, isLoading: query.isLoading };
 }
 
-export function useQueryReadMessageList() {
+export function useQueryReadMessages() {
   const query = useQuery();
   const navigate = useNavigate();
 
-  const run = async (roomId: RoomId,
-    range: { min: number; max: number },) => {
-    const { response } = await query.run(serverRoute.message.read,
-      readMessages(roomId, range),)
+  const run = () => {
+    const indexRange = async (
+      roomId: RoomId,
+      indexRange: { min: number; max: number },
+    ) => {
+      const { response } = await query.run(
+        serverRoute.message.read,
+        readMessagesByIndexRange(roomId, indexRange),
+      );
+
+      const isLogged = isAuth(response.status);
+      if (!isLogged) {
+        navigate(
+          { pathname: routes.login.path },
+          // { state: { isLoggedOut: true } }, // need other value for !isLogged
+        );
+      }
+
+      const { success, data } = readMessagesValidator(response.payload);
+
+      if (!success) return { success: false as const };
+      return { success: true as const, data };
+    };
+    const createdRange = async (
+      roomId: RoomId,
+      createdRange: { min: number; max?: number },
+    ) => {
+      const { response } = await query.run(
+        serverRoute.message.read,
+        readMessagesByCreatedRange(roomId, createdRange),
+      );
+
+      const isLogged = isAuth(response.status);
+      if (!isLogged) {
+        navigate(
+          { pathname: routes.login.path },
+          // { state: { isLoggedOut: true } }, // need other value for !isLogged
+        );
+      }
+
+      const { success, data } = readMessagesValidator(response.payload);
+      if (!success) return { success: false as const };
+      return { success: true as const, data };
+    };
+    return { indexRange, createdRange };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryCompareMessages() {
+  const query = useQuery();
+  const navigate = useNavigate();
+
+  const run = async (roomId: RoomId, toCompare: MessageDates[]) => {
+    const { response } = await query.run(
+      serverRoute.message.compare,
+      compareMessages(roomId, toCompare),
+    );
 
     const isLogged = isAuth(response.status);
     if (!isLogged) {
       navigate(
-      { pathname: routes.login.path },
-      // { state: { isLoggedOut: true } }, // need other value for !isLogged
-    );}
+        { pathname: routes.login.path },
+        // { state: { isLoggedOut: true } }, // need other value for !isLogged
+      );
+    }
 
-    const { success, data } = messagesValidator(response.payload);
+    const { success, data } = compareMessagesValidator(response.payload);
     if (!success) return { success: false as const };
     return { success: true as const, data };
-  }
- 
-  return { run, isLoading: query.isLoading }
+  };
+
+  return { run, isLoading: query.isLoading };
 }
-
-// export async function fetchReadMessages(
-//   roomId: RoomId,
-//   range: { minCreated: string; maxCreated: string },
-// ) {
-//   const result = await fetcher(
-//     serverRoute.message.read,
-//     readMessages(roomId, range),
-//   );
-
-//   const isLogged = isAuth(result.status);
-//   if (!isLogged) return { success: true as const, isLogged: false as const };
-//   const { success, data } = messagesValidator(result.payload);
-
-//   if (!success) return { success: false as const, isLogged: true as const };
-//   return { success: true as const, isLogged: true as const, data };
-// }
 
 export async function fetchAddMessage(payload: {
   roomId: RoomId;
@@ -176,7 +232,7 @@ export async function fetchAddMessage(payload: {
 
   const isLogged = isAuth(result.status);
   if (!isLogged) return { success: true as const, isLogged: false as const };
-  //const { success, data } = messagesValidator(result.payload);
+  //const { success, data } = readMessagesValidator(result.payload);
 
   //if (!success) return { success: false as const, isLogged: true as const };
   //return { success: true as const, isLogged: true as const, data };
@@ -186,37 +242,46 @@ export async function fetchAddMessage(payload: {
 export function useQueryLogin() {
   const query = useQuery();
 
-  const run = async (payload: { email: string, password: string}) => {
-    const { response } = await query.run(serverRoute.auth.login, payload)
-    if (!response.payload.success) return { success: false as const, isCodeNeeded: false as const }
-    if (response.payload.code) return { success: true as const, isCodeNeeded: true as const }
-    return { success: true as const, isCodeNeeded: false as const }
-  }
+  const run = async (payload: { email: string; password: string }) => {
+    const { response } = await query.run(serverRoute.auth.login, payload);
+    if (!response.payload.success)
+      return { success: false as const, isCodeNeeded: false as const };
+    if (response.payload.code)
+      return { success: true as const, isCodeNeeded: true as const };
+    return { success: true as const, isCodeNeeded: false as const };
+  };
 
-  return { run, isLoading: query.isLoading }
+  return { run, isLoading: query.isLoading };
 }
 
 export function useQueryCode() {
   const query = useQuery();
-  const run = async (payload: { email: string, code: string }) => {
-    const { response } = await query.run(serverRoute.auth.code, payload)
-    return { success: !!response.payload.success }
+  const run = async (payload: { email: string; code: string }) => {
+    const { response } = await query.run(serverRoute.auth.code, payload);
+    return { success: !!response.payload.success };
     // Without !! no work
-  }
-  return { run, isLoading: query.isLoading}
+  };
+  return { run, isLoading: query.isLoading };
 }
 
 export function useQueryRegister() {
   const query = useQuery();
-  const run = async (payload: { email: string, username: string, password: string}) => {
-    const { response } = await query.run(serverRoute.auth.register, payload)
+  const run = async (payload: {
+    email: string;
+    username: string;
+    password: string;
+  }) => {
+    const { response } = await query.run(serverRoute.auth.register, payload);
     if (!response.payload.success) {
       if (response.payload.errorCode) {
-        return { success: false as const, errorCode: response.payload.errorCode }
+        return {
+          success: false as const,
+          errorCode: response.payload.errorCode,
+        };
       }
-      return { success: false as const }
+      return { success: false as const };
     }
-    return { success: true as const }
-  }
-  return { run, isLoading: query.isLoading }
+    return { success: true as const };
+  };
+  return { run, isLoading: query.isLoading };
 }

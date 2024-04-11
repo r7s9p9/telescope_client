@@ -1,4 +1,5 @@
 import { RoomId, UserId } from "../../types";
+import { MessageDates } from "./api.schema";
 
 export const privacyRule = {
   everybody: "everybody" as const,
@@ -32,10 +33,10 @@ export const serverRoute = {
   auth: {
     register: endpoint + "/api/auth/register",
     login: endpoint + "/api/auth/login",
-    code: endpoint + "/api/auth/code"
+    code: endpoint + "/api/auth/code",
   },
   session: {
-    remove: endpoint + "/api/session/remove"
+    remove: endpoint + "/api/session/remove",
   },
   account: {
     read: endpoint + "/api/account/read",
@@ -47,6 +48,7 @@ export const serverRoute = {
   },
   message: {
     read: endpoint + "/api/message/read",
+    compare: endpoint + "/api/message/compare",
     add: endpoint + "/api/message/add",
   },
 };
@@ -61,7 +63,7 @@ export const readAccountBody = (userId: UserId | "self") => {
 };
 
 export const readRoomList = (range: { min: number; max: number }) => {
-  return { range: { min: range.min.toString(), max: range.max.toString()} };
+  return { range: { min: range.min.toString(), max: range.max.toString() } };
 };
 
 export const readRoomInfo = (
@@ -74,12 +76,29 @@ export const readRoomInfo = (
   };
 };
 
-export const readMessages = (
+export const readMessagesByIndexRange = (
   roomId: RoomId,
-  range: { min: number; max: number },
+  indexRange: { min: number; max: number },
 ) => {
   return {
-    roomId: roomId,
-    range: range,
+    roomId,
+    indexRange,
+  };
+};
+
+export const readMessagesByCreatedRange = (
+  roomId: RoomId,
+  createdRange: { min: number; max?: number },
+) => {
+  return {
+    roomId,
+    createdRange,
+  };
+};
+
+export const compareMessages = (roomId: RoomId, toCompare: MessageDates[]) => {
+  return {
+    roomId,
+    toCompare,
   };
 };

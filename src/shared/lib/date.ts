@@ -1,6 +1,6 @@
 export const formatDate = () => {
-  function roomList(timestamp: string) {
-    const date = new Date(Number(timestamp));
+  function roomList(timestamp: number) {
+    const date = new Date(timestamp);
     const dateString = date.toDateString();
     const nowDate = new Date();
 
@@ -23,16 +23,16 @@ export const formatDate = () => {
     return result;
   }
 
-  function message(createdTimestamp: string, modifiedTimestamp?: string) {
+  function message(createdTimestamp: number, modifiedTimestamp?: number) {
     if (!modifiedTimestamp) {
-      const date = new Date(Number(createdTimestamp));
+      const date = new Date(createdTimestamp);
       const hours = date.getHours();
       const minutes = "0" + date.getMinutes();
       const seconds = "0" + date.getSeconds();
 
       return hours + ":" + minutes.slice(-2) + ":" + seconds.slice(-2);
     }
-    const date = new Date(Number(modifiedTimestamp));
+    const date = new Date(modifiedTimestamp);
     const hours = date.getHours();
     const minutes = "0" + date.getMinutes();
     const seconds = "0" + date.getSeconds();
@@ -42,19 +42,23 @@ export const formatDate = () => {
     );
   }
 
-  function bubble(timestamp: string) {
-    const date = new Date(Number(timestamp));
+  function bubble(timestamp: number) {
+    const date = new Date(timestamp);
     const nowDate = new Date();
     if (date.getFullYear() === nowDate.getFullYear()) {
-      return date.toLocaleString("default", { month: 'long', day: 'numeric'})
+      return date.toLocaleString("default", { month: "long", day: "numeric" });
     }
-    return date.toLocaleString("default", { year: 'numeric', month: 'long', day: 'numeric'})
+    return date.toLocaleString("default", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   }
   return { roomList, message, bubble };
 };
 
-export function isSameDay(firstTimestamp: string, secondTimestamp: string) {
-  const firstDate = new Date(Number(firstTimestamp));
-  const secondDate = new Date(Number(secondTimestamp));
+export function isSameDay(firstTimestamp: number, secondTimestamp: number) {
+  const firstDate = new Date(firstTimestamp);
+  const secondDate = new Date(secondTimestamp);
   return firstDate.toDateString() === secondDate.toDateString();
 }
