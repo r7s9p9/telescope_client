@@ -1,4 +1,10 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { RoomInListType } from "../../../shared/api/api.schema";
 import { ReactNode, useCallback, useEffect, useMemo } from "react";
 import { formatDate } from "../../../shared/lib/date";
@@ -149,13 +155,16 @@ export function RoomList() {
 
 function RootWrapper({ children }: { children: ReactNode }) {
   return (
-    <div className="h-full flex flex-col w-1/2 min-w-52 max-w-xs">
-      <div className="pb-4 px-4 flex flex-col items-center flex-col">
-        <Title />
-        <Search />
+    <>
+      <div className="h-full flex flex-col w-1/2 min-w-52 max-w-xs">
+        <div className="pb-4 px-4 flex flex-col items-center flex-col">
+          <Title />
+          <Search />
+        </div>
+        {children}
       </div>
-      {children}
-    </div>
+      <Outlet key={useLocation().pathname} />
+    </>
   );
 }
 

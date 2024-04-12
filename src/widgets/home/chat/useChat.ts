@@ -12,21 +12,24 @@ import { checkRoomId } from "../../../shared/lib/uuid";
 import { useNavigate, useParams } from "react-router-dom";
 import { routes } from "../../../constants";
 
-const chatItemCountForInitialLoading = 10 as const;
+const chatItemCountForInitialLoading = 20 as const;
 const chatCompareInterval = 7000 as const;
 const chatUpdateInterval = 3000 as const;
 
 const debounceScrollInterval = 250 as const;
 const scrollHeightToTriggerFurtherLoading = 0.75 as const;
 
-const itemCountToFurtherLoading = 2 as const;
+const itemCountToFurtherLoading = 10 as const;
+
+const thresholdForShowingScrollButton = 500 as const;
 
 export function useChat() {
   const navigate = useNavigate();
   const { roomId } = useParams();
 
   const [isLoading, setIsLoading] = useState(false);
-  const scrollRestoredRoomId = useRef<RoomId>();
+  const [isScrolledDown, setScrolledDown] = useState(false);
+  const [isShowScrollToBottom, setIsShowScrollToBottom] = useState(false);
   const messagesRef = useRef<HTMLUListElement>(null);
 
   const queryRead = useQueryReadMessages();
@@ -56,7 +59,7 @@ export function useChat() {
       }
       if (!success) storeAction.flagAsBad();
     },
-    [queryRead],
+    [queryRead, roomId, storedMessages],
   );
 
   const loadNewerMessages = useCallback(async () => {
@@ -69,12 +72,15 @@ export function useChat() {
         .createdRange(roomId as RoomId, range);
 
       if (success) {
-        const messages = (data?.messages || []).concat(storedMessages);
-        storeAction.update(data, messages);
+        if (data.messages) {
+          const messages = (data?.messages || []).concat(storedMessages);
+          storeAction.update(data, messages);
+          scrollToBottom(); // bad idea
+        }
       }
       if (!success) storeAction.flagAsBad();
     }
-  }, [queryRead, storedChat]);
+  }, [queryRead, roomId, storedChat]);
 
   const compareMessages = useCallback(async () => {
     if (storedMessages) {
@@ -147,18 +153,6 @@ export function useChat() {
     }
   };
 
-  const isScrollRestored = !(
-    scrollRestoredRoomId.current !== roomId &&
-    messagesRef.current &&
-    storedChat
-  );
-  if (!isScrollRestored) {
-    const bottomScroll = storeAction.scrollPosition().read();
-    messagesRef.current.scrollTop =
-      messagesRef.current.scrollHeight - bottomScroll;
-    scrollRestoredRoomId.current = roomId as RoomId;
-  }
-
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLElement>) => {
       const target = e.nativeEvent.target as HTMLElement;
@@ -166,11 +160,24 @@ export function useChat() {
       const isLoadNeeded = scrollPercent >= scrollHeightToTriggerFurtherLoading;
       if (isLoadNeeded) onScrollLoader();
 
-      // Set scroll position
-      const scrollBottom = target.scrollHeight - target.scrollTop;
-      if (scrollBottom !== storedChat?.bottomScrollPosition) {
-        storeAction.scrollPosition().update(scrollBottom);
+      // Showing scroll to bottom button
+      if (
+        messagesRef.current &&
+        messagesRef.current.scrollHeight -
+          messagesRef.current?.offsetHeight -
+          messagesRef.current.scrollTop >=
+          thresholdForShowingScrollButton
+      ) {
+        setIsShowScrollToBottom(true);
+      } else {
+        setIsShowScrollToBottom(false);
       }
+
+      // // Set scroll position
+      // const scrollBottom = target.scrollHeight - target.scrollTop;
+      // if (scrollBottom !== storedChat?.bottomScrollPosition) {
+      //   storeAction.scrollPosition().update(scrollBottom);
+      // }
     },
     [isAllLoaded, isLoading, roomId],
   );
@@ -180,9 +187,27 @@ export function useChat() {
     [handleScroll, roomId],
   );
 
+  // Scroll down
+  useEffect(() => {
+    if (messagesRef.current && !isScrolledDown) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      setScrolledDown(true);
+    }
+  }, [messagesRef, storedChat]);
+
+  const scrollToBottom = useCallback(() => {
+    if (messagesRef.current) {
+      console.log("SCROLL!!");
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      setIsShowScrollToBottom(false);
+    }
+  }, [messagesRef.current]);
+
   return {
     messages: storedMessages,
     messagesRef,
     debouncedHandleScroll,
+    isShowScrollToBottom,
+    scrollToBottom,
   };
 }

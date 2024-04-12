@@ -63,28 +63,7 @@ export const store = () => {
       }));
     };
 
-    const scrollPosition = () => {
-      const read = () => {
-        return store?.chats?.[roomId].bottomScrollPosition
-          ? store.chats[roomId].bottomScrollPosition
-          : 0;
-      };
-      const update = (bottomScrollPosition: number) => {
-        setStore((store) => ({
-          ...store,
-          chats: {
-            ...store.chats,
-            [roomId]: {
-              ...store?.chats?.[roomId],
-              bottomScrollPosition: bottomScrollPosition,
-            },
-          },
-        }));
-      };
-      return { read, update };
-    };
-
-    return { read, create, update, flagAsBad, scrollPosition };
+    return { read, create, update, flagAsBad };
   };
 
   return { chat };

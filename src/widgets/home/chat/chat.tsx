@@ -1,12 +1,22 @@
-import { IconSend2 } from "@tabler/icons-react";
+import {
+  IconArrowDown,
+  IconArrowDownCircle,
+  IconSend2,
+} from "@tabler/icons-react";
 import { ReactNode } from "react";
 import { MessageType } from "../../../shared/api/api.schema";
 import { formatDate, isSameDay } from "../../../shared/lib/date";
 import React from "react";
-import { useChat } from ".";
+import { useChat } from "./useChat";
 
 export function Chat() {
-  const { messagesRef, messages, debouncedHandleScroll } = useChat();
+  const {
+    messagesRef,
+    messages,
+    debouncedHandleScroll,
+    isShowScrollToBottom,
+    scrollToBottom,
+  } = useChat();
 
   if (!messages) {
     return (
@@ -17,6 +27,8 @@ export function Chat() {
       </Wrapper>
     );
   }
+
+  console.log(isShowScrollToBottom);
 
   const readyMessages: JSX.Element[] = [];
   let prevMessageCreated;
@@ -55,7 +67,12 @@ export function Chat() {
   return (
     <Wrapper>
       <Bar />
-      <Messages listRef={messagesRef} onScroll={debouncedHandleScroll}>
+      <Messages
+        listRef={messagesRef}
+        isShowScrollToBottom={isShowScrollToBottom}
+        scrollToBottom={scrollToBottom}
+        onScroll={debouncedHandleScroll}
+      >
         {readyMessages}
       </Messages>
       <Send />
@@ -65,7 +82,9 @@ export function Chat() {
 
 function Wrapper({ children }: { children: ReactNode }) {
   return (
-    <div className="w-full h-full flex flex-col bg-slate-200">{children}</div>
+    <div className="relative w-full h-full flex flex-col bg-slate-200">
+      {children}
+    </div>
   );
 }
 
@@ -89,20 +108,34 @@ function DateBubble({ date }: { date: number }) {
 function Messages({
   children,
   listRef,
+  isShowScrollToBottom,
+  scrollToBottom,
   onScroll,
 }: {
   children: ReactNode;
   listRef: React.RefObject<HTMLUListElement>;
+  isShowScrollToBottom: boolean;
+  scrollToBottom: ReturnType<typeof Function>;
   onScroll: (e: React.UIEvent<HTMLElement>) => void;
 }) {
   return (
-    <ul
-      ref={listRef}
-      onScroll={onScroll}
-      className="relative overflow-y-scroll will-change-scroll overscroll-none scroll-auto relative grow w-full p-4 flex flex-col bg-slate-200"
-    >
-      {children}
-    </ul>
+    <>
+      <ul
+        ref={listRef}
+        onScroll={onScroll}
+        className="relative overflow-y-scroll will-change-scroll overscroll-none scroll-auto relative grow w-full p-4 flex flex-col bg-slate-200"
+      >
+        {children}
+      </ul>
+      <button
+        disabled={!isShowScrollToBottom}
+        onClick={() => scrollToBottom()}
+        style={{ transform: isShowScrollToBottom ? "" : "translateY(200%)" }}
+        className="absolute bottom-24 right-4 bg-slate-50 text-slate-600 rounded-full p-2 hover:bg-slate-100 duration-300 ease-in-out"
+      >
+        <IconArrowDown strokeWidth="1" size={32} />
+      </button>
+    </>
   );
 }
 
