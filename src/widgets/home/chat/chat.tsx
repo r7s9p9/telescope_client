@@ -1,108 +1,14 @@
 import { IconSend2 } from "@tabler/icons-react";
-import { useNotify } from "../../notification/notification";
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { checkRoomId } from "../../../shared/lib/uuid";
+import { ReactNode } from "react";
 import { MessageType } from "../../../shared/api/api.schema";
-import { RoomId } from "../../../types";
-import { routes } from "../../../constants";
 import { formatDate, isSameDay } from "../../../shared/lib/date";
-import { useChat } from "../../../shared/store/store";
-import { useStore } from "../../../shared/store/StoreProvider";
 import React from "react";
-import { debounce } from "../../../shared/lib/debounce";
-
-const debounceScrollInterval = 250 as const;
-
-const scrollHeightToTriggerFurtherLoading = 0.75 as const;
-const itemCountToFurtherLoading = 2 as const;
+import { useChat } from ".";
 
 export function Chat() {
-  const notify = useNotify();
-  const navigate = useNavigate();
-  const { store } = useStore();
-  const { roomId } = useParams();
-  const chat = store.chats?.[roomId as RoomId];
-  const { loadOlderMessages, setScrollPosition } = useChat(roomId as RoomId);
+  const { messagesRef, messages, debouncedHandleScroll } = useChat();
 
-  const isAllLoaded = chat?.messages && chat.allCount === chat.messages.length;
-  const [isLoading, setIsLoading] = useState(false);
-  const endTriggerRef = useRef(null);
-  const listRef = useRef<HTMLUListElement>(null);
-
-  console.log(chat);
-
-  useEffect(() => {
-    const action = async () => {
-      // wrong roomId protection
-      if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
-      if (chat && !chat?.success) notify.show.error("CHAT NO SUCCESS");
-    };
-    if (roomId || chat) action();
-  }, [roomId, chat]);
-
-  // Restore scroll position
-  useEffect(() => {
-    if (chat && listRef.current) {
-      listRef.current.scrollTop =
-        listRef.current.scrollHeight - chat.bottomScrollPosition;
-    }
-  }, [roomId, chat]);
-
-  const loader = async () => {
-    if (!isLoading && !isAllLoaded && chat?.messages && chat.allCount) {
-      setIsLoading(true);
-      const min = chat.messages.length;
-      const max =
-        chat.allCount < min + itemCountToFurtherLoading
-          ? chat.allCount
-          : min + itemCountToFurtherLoading;
-      await loadOlderMessages(min, max);
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) loader();
-    });
-
-    if (endTriggerRef.current) observer.observe(endTriggerRef.current);
-
-    return () => {
-      if (endTriggerRef.current) observer.unobserve(endTriggerRef.current);
-    };
-  }, [chat, endTriggerRef]);
-
-  const handleScroll = useCallback(
-    (e: React.UIEvent<HTMLElement>) => {
-      const target = e.nativeEvent.target as HTMLElement;
-      const scrollPercent = 1 - target.scrollTop / target.scrollHeight;
-      const isLoadNeeded = scrollPercent >= scrollHeightToTriggerFurtherLoading;
-      if (isLoadNeeded) loader();
-
-      // Set scroll position
-      const scrollBottom = target.scrollHeight - target.scrollTop;
-      if (scrollBottom !== chat?.bottomScrollPosition) {
-        setScrollPosition(scrollBottom);
-      }
-    },
-    [isAllLoaded, isLoading, roomId],
-  );
-
-  const debouncedHandleScroll = useMemo(
-    () => debounce(handleScroll, debounceScrollInterval),
-    [handleScroll, roomId],
-  );
-
-  if (!chat?.messages) {
+  if (!messages) {
     return (
       <Wrapper>
         <Bar />
@@ -112,42 +18,35 @@ export function Chat() {
     );
   }
 
-  const messages: JSX.Element[] = [];
-  if (!isAllLoaded) {
-    messages.push(
-      <div className="w-full" ref={endTriggerRef} key="trigger-skeleton" />,
-    );
-  }
-
+  const readyMessages: JSX.Element[] = [];
   let prevMessageCreated;
   let prevMessageAuthorId;
 
-  for (let i = chat.messages.length - 1; i >= 0; i--) {
+  for (let i = messages.length - 1; i >= 0; i--) {
     const isSameCreatedDay =
-      prevMessageCreated &&
-      isSameDay(chat.messages[i].created, prevMessageCreated);
+      prevMessageCreated && isSameDay(messages[i].created, prevMessageCreated);
     if (!isSameCreatedDay) {
-      prevMessageCreated = chat.messages[i].created;
-      messages.push(
+      prevMessageCreated = messages[i].created;
+      readyMessages.push(
         <DateBubble
-          key={`date-${chat.messages[i].created}`}
-          date={chat.messages[i].created}
+          key={`date-${messages[i].created}`}
+          date={messages[i].created}
         />,
       );
     }
     let isAvatar = false;
     if (
-      chat.messages[i].authorId !== "service" &&
-      prevMessageAuthorId !== chat.messages[i].authorId
+      messages[i].authorId !== "service" &&
+      prevMessageAuthorId !== messages[i].authorId
     ) {
-      prevMessageAuthorId = chat.messages[i].authorId;
+      prevMessageAuthorId = messages[i].authorId;
       isAvatar = true;
     }
 
-    messages.push(
+    readyMessages.push(
       <Message
-        key={`message-${chat.messages[i].created}`}
-        message={chat.messages[i]}
+        key={`message-${messages[i].created}`}
+        message={messages[i]}
         isAvatar={isAvatar}
       />,
     );
@@ -156,8 +55,8 @@ export function Chat() {
   return (
     <Wrapper>
       <Bar />
-      <Messages listRef={listRef} onScroll={debouncedHandleScroll}>
-        {messages}
+      <Messages listRef={messagesRef} onScroll={debouncedHandleScroll}>
+        {readyMessages}
       </Messages>
       <Send />
     </Wrapper>
