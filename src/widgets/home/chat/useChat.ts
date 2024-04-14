@@ -151,7 +151,7 @@ export function useChat() {
     storedMessages && storedMessages.length === storedChat.allCount;
 
   const useLoadOlderMessages = useCallback(
-    async (min: number, max: number, storedMessages?: MessageType[]) => {
+    async (min: number, max: number) => {
       const { success, data } = await queryRead
         .run()
         .indexRange(roomId as RoomId, { min, max });
@@ -168,8 +168,8 @@ export function useChat() {
     [queryRead, roomId, storedMessages],
   );
 
-  const useLoadNewerMessages = useCallback(
-    async (storedMessages: MessageType[]) => {
+  const useLoadNewerMessages = useCallback(async () => {
+    if (storedMessages) {
       const range = {
         min: storedMessages[0].created + 1,
       };
@@ -186,12 +186,14 @@ export function useChat() {
         storeAction.flagAsBad();
         console.error("queryRead !success");
       }
-    },
-    [queryRead, roomId, storedMessages],
-  );
+    }
+  }, [queryRead, roomId, storedMessages]);
 
-  const useCompareMessages = useCallback(
-    async (storedMessages: MessageType[]) => {
+  // Update messages
+  useInterval(() => useLoadNewerMessages(), CHAT_UPDATE_INTERVAL);
+
+  const useCompareMessages = useCallback(async () => {
+    if (storedMessages) {
       const { success, data } = await queryCompare.run(
         roomId as RoomId,
         compareGenerator(storedMessages),
@@ -211,27 +213,11 @@ export function useChat() {
         storeAction.flagAsBad();
         console.error("queryCompare !success");
       }
-    },
-    [queryCompare, storedMessages, compareGenerator],
-  );
-
-  useEffect(() => {
-    // wrong roomId protection
-    if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
-    // Initial load data if no chat in store
-    if (!storedChat)
-      useLoadOlderMessages(0, CHAT_ITEM_COUNT_FOR_INITIAL_LOADING - 1);
-  }, [roomId, storedChat]);
+    }
+  }, [queryCompare, storedMessages, compareGenerator]);
 
   // Compare existing messages
-  useInterval(() => {
-    if (storedMessages) useCompareMessages(storedMessages);
-  }, CHAT_COMPARE_INTERVAL);
-
-  // Update messages
-  useInterval(() => {
-    if (storedMessages) useLoadNewerMessages(storedMessages);
-  }, CHAT_UPDATE_INTERVAL);
+  useInterval(() => useCompareMessages(), CHAT_COMPARE_INTERVAL);
 
   const onScrollLoader = async () => {
     if (!isLoading && !isAllLoaded && storedMessages && storedChat.allCount) {
@@ -279,6 +265,15 @@ export function useChat() {
     [handleScroll, roomId],
   );
 
+  // Initial actions
+  useEffect(() => {
+    // wrong roomId protection
+    if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
+    // Initial load data if no chat in store
+    if (!storedChat)
+      useLoadOlderMessages(0, CHAT_ITEM_COUNT_FOR_INITIAL_LOADING - 1);
+  }, [roomId, storedChat]);
+
   // Restoring scroll
   useEffect(() => {
     if (storedChat && messagesRef.current && !isRestoredScroll) {
@@ -293,7 +288,7 @@ export function useChat() {
     }
   }, [messagesRef, storedChat]);
 
-  // For click on ScrollBottom button
+  // Handle click on ScrollBottom button
   const scrollToBottom = useCallback(() => {
     if (messagesRef.current) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
