@@ -1,7 +1,50 @@
-export function getRandomInt(min: number, max: number) {
-    return Math.ceil(Math.random() * (max - min) + min * 1/2) * 2
+export function getRandomInt(min: number, max: number): number {
+  if (!isFinite(min) || !isFinite(max)) {
+    console.error("Min and max must be finite numbers");
+    return NaN;
   }
 
-export function getRandomBoolean() {
-    return Math.random() < 0.5;
+  if (min >= max) {
+    console.error("Min must be less than max");
+    return NaN;
+  }
+
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+export function getRandomArray(
+  min: number,
+  max: number,
+  count: number,
+): number[] {
+  if (!isFinite(min) || !isFinite(max) || !isFinite(count)) {
+    console.error("Min, max and count must be finite numbers");
+    return [];
+  }
+
+  if (min >= max) {
+    console.error("Min must be less than max");
+    return [];
+  }
+
+  if (count <= 0) {
+    console.error("Count must be greater than 0");
+    return [];
+  }
+
+  const result: number[] = [];
+  while (result.length < count) {
+    const randomInt = getRandomInt(min, max);
+    if (!result.includes(randomInt)) result.push(randomInt);
+  }
+  return result;
+}
+
+export function getRandomBoolean(chance: number = 0.5): boolean {
+  if (!isFinite(chance) || chance < 0 || chance > 1) {
+    console.error("Chance must be a finite number between 0 and 1");
+    return false;
+  }
+
+  return Math.random() < chance;
 }

@@ -165,7 +165,7 @@ export const messageCompareSchema = z.object({
   access: accessSchema,
   success: successSchema,
   roomId: roomIdSchema,
-  isEqual: z.boolean().optional(),
+  isEqual: z.boolean(),
   toRemove: z.array(messageCreated).optional(),
   toUpdate: z.array(messageSchema).optional(),
   dev: devSchema,

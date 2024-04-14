@@ -12,10 +12,9 @@ type StoreType = {
     [key: RoomId]: {
       success: boolean;
       access: boolean;
-      isEmpty: boolean;
       allCount: number;
       messages?: MessageListType["messages"];
-      bottomScrollPosition: number;
+      scrollPosition: number;
     };
   };
 };
@@ -35,7 +34,7 @@ const StoreContext = createContext<StoreState>(StoreState);
 export const useStore = () => useContext(StoreContext);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [store, setStore] = useState(StoreState["store"]);
+  const [store, setStore] = useState<StoreType>(StoreState["store"]);
   return (
     <StoreContext.Provider value={{ store, setStore }}>
       {children}

@@ -24,30 +24,48 @@ export const store = () => {
           [roomId]: {
             success: true as const,
             access: data?.access,
-            isEmpty: data?.allCount === 0,
             allCount: data?.allCount,
             messages: data?.messages,
-            bottomScrollPosition: 0 as const,
+            scrollPosition: 0 as const,
           },
         },
       }));
     };
 
-    const update = (data: MessageListType, messages: MessageType[]) => {
-      setStore((store) => ({
-        ...store,
-        chats: {
-          ...store.chats,
-          [roomId]: {
-            ...store?.chats?.[roomId],
-            success: true as const,
-            access: data?.access,
-            isEmpty: data?.allCount === 0,
-            allCount: data?.allCount,
-            messages: messages,
+    const update = () => {
+      const messages = (
+        data: MessageListType,
+        updatedMessages: MessageType[],
+      ) => {
+        setStore((store) => ({
+          ...store,
+          chats: {
+            ...store.chats,
+            [roomId]: {
+              ...store?.chats?.[roomId],
+              success: true as const,
+              access: data?.access,
+              allCount: data?.allCount,
+              messages: updatedMessages,
+            },
           },
-        },
-      }));
+        }));
+      };
+
+      const scrollPosition = (px: number) => {
+        setStore((store) => ({
+          ...store,
+          chats: {
+            ...store.chats,
+            [roomId]: {
+              ...store?.chats?.[roomId],
+              scrollPosition: px,
+            },
+          },
+        }));
+      };
+
+      return { messages, scrollPosition };
     };
 
     const flagAsBad = () => {

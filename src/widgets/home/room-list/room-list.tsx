@@ -171,7 +171,9 @@ function RootWrapper({ children }: { children: ReactNode }) {
 function Title() {
   return (
     <div className="h-16 py-2 w-full flex justify-between items-center">
-      <p className="font-thin tracking-widest uppercase text-3xl">Rooms</p>
+      <p className="font-thin tracking-widest uppercase text-3xl select-none">
+        Rooms
+      </p>
       <Link
         to={routes.createRoom.path}
         title="Create new room"

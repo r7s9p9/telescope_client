@@ -11,24 +11,130 @@ import { debounce } from "../../../shared/lib/debounce";
 import { checkRoomId } from "../../../shared/lib/uuid";
 import { useNavigate, useParams } from "react-router-dom";
 import { routes } from "../../../constants";
+import { getRandomArray, getRandomBoolean } from "../../../shared/lib/random";
 
-const chatItemCountForInitialLoading = 20 as const;
-const chatCompareInterval = 7000 as const;
-const chatUpdateInterval = 3000 as const;
+const CHAT_UPDATE_INTERVAL = 2000 as const;
+const CHAT_COMPARE_INTERVAL = 7000 as const;
 
-const debounceScrollInterval = 250 as const;
-const scrollHeightToTriggerFurtherLoading = 0.75 as const;
+const CHAT_ITEM_COUNT_FOR_INITIAL_LOADING = 20 as const;
+const ITEM_COUNT_TO_FURTHER_LOADING = 10 as const;
 
-const itemCountToFurtherLoading = 10 as const;
+const RECENT_MESSAGES_COUNT_FOR_MANDATORY_COMPARISON = 20 as const;
+const MESSAGES_COUNT_FOR_OPTIONAL_COMPARISON = 20 as const;
+const CHANCE_OF_OPTIONAL_COMPARISON = 0.25 as const;
 
-const thresholdForShowingScrollButton = 500 as const;
+const THRESHOLD_FOR_SHOW_SCROLL_BUTTON = 750 as const;
+const THRESHOLD_FOR_HIDE_SCROLL_BUTTON = 250 as const;
+
+const DEBOUNCE_SCROLL_INTERVAL = 250 as const;
+const SCROLL_HEIGHT_TO_TRIGGER_FURTHER_LOADING = 0.75 as const;
+
+const calcScrollBottom = (target: HTMLElement) => {
+  return target.scrollHeight - (target.offsetHeight + target.scrollTop);
+};
+
+const calcScrollTop = (target: HTMLElement, scrollBottom: number) => {
+  if (!isFinite(scrollBottom)) {
+    console.error("scrollBottom must be finite number");
+    return 0;
+  }
+  return target.scrollHeight - (target.offsetHeight + scrollBottom);
+};
+
+const compareGenerator = (storedMessages: MessageDates[]) => {
+  if (storedMessages.length === 0) {
+    console.error("the array must have at least one element");
+    return [];
+  }
+
+  function datesAssembler(
+    index: number,
+    dates: MessageDates[],
+    result: MessageDates[],
+  ) {
+    if (dates[index].modified) {
+      result.push({
+        created: dates[index].created,
+        modified: dates[index].modified,
+      });
+    } else {
+      result.push({ created: dates[index].created });
+    }
+  }
+
+  // Mandatory Comparison
+  const result: MessageDates[] = [];
+  for (
+    let i = 0;
+    i < RECENT_MESSAGES_COUNT_FOR_MANDATORY_COMPARISON &&
+    i < storedMessages.length;
+    i++
+  ) {
+    datesAssembler(i, storedMessages, result);
+  }
+
+  // Optional Comparison
+  const isOptionalCompare = getRandomBoolean(CHANCE_OF_OPTIONAL_COMPARISON);
+  if (
+    isOptionalCompare &&
+    storedMessages.length > RECENT_MESSAGES_COUNT_FOR_MANDATORY_COMPARISON
+  ) {
+    let count =
+      storedMessages.length - RECENT_MESSAGES_COUNT_FOR_MANDATORY_COMPARISON;
+    if (count > MESSAGES_COUNT_FOR_OPTIONAL_COMPARISON) {
+      count = MESSAGES_COUNT_FOR_OPTIONAL_COMPARISON;
+    }
+    const minIndex = RECENT_MESSAGES_COUNT_FOR_MANDATORY_COMPARISON;
+    const maxIndex = storedMessages.length - 1;
+    const targetIndices = getRandomArray(minIndex, maxIndex, count);
+
+    for (const index of targetIndices) {
+      datesAssembler(index, storedMessages, result);
+    }
+  }
+
+  return result;
+};
+
+const compareUpdater = (
+  storedMessages: MessageType[],
+  isEqual: boolean,
+  toUpdate?: MessageType[],
+  toRemove?: MessageType["created"][],
+) => {
+  if (isEqual) return { isUpdateNeeded: false as const };
+  if (!toRemove && !toUpdate) return { isUpdateNeeded: false as const };
+
+  let updatedMessages: MessageType[] = [];
+
+  if (toRemove) {
+    for (let i = 0; i < storedMessages.length; i++) {
+      if (!toRemove.includes(storedMessages[i].created)) {
+        updatedMessages.push(storedMessages[i]);
+      }
+    }
+  } else {
+    updatedMessages = [...storedMessages];
+  }
+
+  if (toUpdate) {
+    for (let i = 0; i < storedMessages.length; i++) {
+      for (const message of toUpdate) {
+        if (message.created === storedMessages[i].created) {
+          updatedMessages[i] = message;
+        }
+      }
+    }
+  }
+  return { isUpdateNeeded: true as const, updatedMessages };
+};
 
 export function useChat() {
   const navigate = useNavigate();
   const { roomId } = useParams();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isScrolledDown, setScrolledDown] = useState(false);
+  const [isRestoredScroll, setIsRestoredScroll] = useState(false);
   const [isShowScrollToBottom, setIsShowScrollToBottom] = useState(false);
   const messagesRef = useRef<HTMLUListElement>(null);
 
@@ -44,8 +150,8 @@ export function useChat() {
   const isAllLoaded =
     storedMessages && storedMessages.length === storedChat.allCount;
 
-  const loadOlderMessages = useCallback(
-    async (min: number, max: number) => {
+  const useLoadOlderMessages = useCallback(
+    async (min: number, max: number, storedMessages?: MessageType[]) => {
       const { success, data } = await queryRead
         .run()
         .indexRange(roomId as RoomId, { min, max });
@@ -54,7 +160,7 @@ export function useChat() {
         if (!storedMessages) storeAction.create(data);
         if (storedMessages) {
           const messages = storedMessages.concat(data.messages || []);
-          storeAction.update(data, messages);
+          storeAction.update().messages(data, messages);
         }
       }
       if (!success) storeAction.flagAsBad();
@@ -62,8 +168,8 @@ export function useChat() {
     [queryRead, roomId, storedMessages],
   );
 
-  const loadNewerMessages = useCallback(async () => {
-    if (storedMessages) {
+  const useLoadNewerMessages = useCallback(
+    async (storedMessages: MessageType[]) => {
       const range = {
         min: storedMessages[0].created + 1,
       };
@@ -71,84 +177,71 @@ export function useChat() {
         .run()
         .createdRange(roomId as RoomId, range);
 
-      if (success) {
-        if (data.messages) {
-          const messages = (data?.messages || []).concat(storedMessages);
-          storeAction.update(data, messages);
-          scrollToBottom(); // bad idea
-        }
+      if (success && data.messages) {
+        const messages = (data?.messages || []).concat(storedMessages);
+        storeAction.update().messages(data, messages);
+        scrollToBottom(); // bad idea
       }
-      if (!success) storeAction.flagAsBad();
-    }
-  }, [queryRead, roomId, storedChat]);
+      if (!success) {
+        storeAction.flagAsBad();
+        console.error("queryRead !success");
+      }
+    },
+    [queryRead, roomId, storedMessages],
+  );
 
-  const compareMessages = useCallback(async () => {
-    if (storedMessages) {
-      const toCompare: MessageDates[] = [];
-      for (const message of storedMessages) {
-        if (message.modified) {
-          toCompare.push({
-            created: message.created,
-            modified: message.modified,
-          });
-        } else {
-          toCompare.push({ created: message.created });
-        }
-      }
+  const useCompareMessages = useCallback(
+    async (storedMessages: MessageType[]) => {
       const { success, data } = await queryCompare.run(
         roomId as RoomId,
-        toCompare,
+        compareGenerator(storedMessages),
       );
       if (success) {
-        if (data.isEqual) return;
-
-        let messages: MessageType[] = [];
-        if (data.toRemove) {
-          for (let i = 0; i < storedMessages.length; i++) {
-            if (!data.toRemove.includes(storedMessages[i].created)) {
-              messages.push(storedMessages[i]);
-            }
-          }
-        } else {
-          messages = [...storedMessages];
+        const { isUpdateNeeded, updatedMessages } = compareUpdater(
+          storedMessages,
+          data.isEqual,
+          data.toUpdate,
+          data.toRemove,
+        );
+        if (isUpdateNeeded) {
+          storeAction.update().messages(data, updatedMessages);
         }
-        if (data.toUpdate) {
-          for (let i = 0; i < storedMessages.length; i++) {
-            for (const message of data.toUpdate) {
-              if (message.created === storedMessages[i].created) {
-                messages[i] = message;
-              }
-            }
-          }
-        }
-        storeAction.update(data, messages);
       }
-      if (!success) storeAction.flagAsBad();
-    }
-  }, [queryCompare, storedMessages]);
+      if (!success) {
+        storeAction.flagAsBad();
+        console.error("queryCompare !success");
+      }
+    },
+    [queryCompare, storedMessages, compareGenerator],
+  );
 
   useEffect(() => {
-    // Initial load data if no chat in store
-    if (!storedChat) loadOlderMessages(0, chatItemCountForInitialLoading);
     // wrong roomId protection
     if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
+    // Initial load data if no chat in store
+    if (!storedChat)
+      useLoadOlderMessages(0, CHAT_ITEM_COUNT_FOR_INITIAL_LOADING - 1);
   }, [roomId, storedChat]);
 
   // Compare existing messages
-  useInterval(() => compareMessages(), chatCompareInterval);
+  useInterval(() => {
+    if (storedMessages) useCompareMessages(storedMessages);
+  }, CHAT_COMPARE_INTERVAL);
 
   // Update messages
-  useInterval(() => loadNewerMessages(), chatUpdateInterval);
+  useInterval(() => {
+    if (storedMessages) useLoadNewerMessages(storedMessages);
+  }, CHAT_UPDATE_INTERVAL);
 
   const onScrollLoader = async () => {
     if (!isLoading && !isAllLoaded && storedMessages && storedChat.allCount) {
       setIsLoading(true);
       const min = storedMessages.length;
       const max =
-        storedChat.allCount < min + itemCountToFurtherLoading
+        storedChat.allCount < min + ITEM_COUNT_TO_FURTHER_LOADING
           ? storedChat.allCount
-          : min + itemCountToFurtherLoading;
-      await loadOlderMessages(min, max);
+          : min + ITEM_COUNT_TO_FURTHER_LOADING;
+      await useLoadOlderMessages(min, max);
       setIsLoading(false);
     }
   };
@@ -157,47 +250,52 @@ export function useChat() {
     (e: React.UIEvent<HTMLElement>) => {
       const target = e.nativeEvent.target as HTMLElement;
       const scrollPercent = 1 - target.scrollTop / target.scrollHeight;
-      const isLoadNeeded = scrollPercent >= scrollHeightToTriggerFurtherLoading;
+      const isLoadNeeded =
+        scrollPercent >= SCROLL_HEIGHT_TO_TRIGGER_FURTHER_LOADING;
       if (isLoadNeeded) onScrollLoader();
 
       // Showing scroll to bottom button
-      if (
-        messagesRef.current &&
-        messagesRef.current.scrollHeight -
-          messagesRef.current?.offsetHeight -
-          messagesRef.current.scrollTop >=
-          thresholdForShowingScrollButton
-      ) {
+      const scrollBottom = calcScrollBottom(target);
+      if (scrollBottom >= THRESHOLD_FOR_SHOW_SCROLL_BUTTON) {
         setIsShowScrollToBottom(true);
-      } else {
+      }
+      if (scrollBottom <= THRESHOLD_FOR_HIDE_SCROLL_BUTTON) {
         setIsShowScrollToBottom(false);
       }
 
-      // // Set scroll position
-      // const scrollBottom = target.scrollHeight - target.scrollTop;
-      // if (scrollBottom !== storedChat?.bottomScrollPosition) {
-      //   storeAction.scrollPosition().update(scrollBottom);
-      // }
+      // Save scroll position (calc offset from bottom)
+      const scrollPosition =
+        target.scrollHeight - (target.scrollTop + target.offsetHeight);
+
+      if (scrollPosition !== storedChat?.scrollPosition) {
+        storeAction.update().scrollPosition(scrollPosition);
+      }
     },
-    [isAllLoaded, isLoading, roomId],
+    [isAllLoaded, isLoading, roomId, storedMessages],
   );
 
   const debouncedHandleScroll = useMemo(
-    () => debounce(handleScroll, debounceScrollInterval),
+    () => debounce(handleScroll, DEBOUNCE_SCROLL_INTERVAL),
     [handleScroll, roomId],
   );
 
-  // Scroll down
+  // Restoring scroll
   useEffect(() => {
-    if (messagesRef.current && !isScrolledDown) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-      setScrolledDown(true);
+    if (storedChat && messagesRef.current && !isRestoredScroll) {
+      const target = messagesRef.current;
+      if (storedChat.scrollPosition !== 0) {
+        target.scrollTop = calcScrollTop(target, storedChat.scrollPosition);
+      } else {
+        // First chat opening
+        target.scrollTop = target.scrollHeight;
+      }
+      setIsRestoredScroll(true);
     }
   }, [messagesRef, storedChat]);
 
+  // For click on ScrollBottom button
   const scrollToBottom = useCallback(() => {
     if (messagesRef.current) {
-      console.log("SCROLL!!");
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
       setIsShowScrollToBottom(false);
     }
