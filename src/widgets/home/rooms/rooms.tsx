@@ -1,28 +1,14 @@
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
-import { RoomInListType } from "../../../shared/api/api.schema";
-import { ReactNode, useCallback, useEffect, useMemo } from "react";
+import { Link, Outlet, useLocation } from "react-router-dom";
+import React, { ReactNode } from "react";
 import { formatDate } from "../../../shared/lib/date";
-import { useNotify } from "../../notification/notification";
 import { getRandomInt } from "../../../shared/lib/random";
-import { checkRoomId } from "../../../shared/lib/uuid";
 import { routes } from "../../../constants";
-import { debounce } from "../../../shared/lib/debounce";
-import React from "react";
 import { IconCirclePlus, IconSearch } from "@tabler/icons-react";
-import { useStore } from "../../../shared/store/StoreProvider";
-import { useRooms } from "../../../shared/store/store";
+import { useRooms } from "./useRooms";
+import { ITEM_HEIGHT } from "./constants";
+import { RoomType } from "../../../shared/api/api.schema";
 
-const itemHeight = 64 as const; // for skeleton & item
-
-const overscreenItemCountToTriggerFurtherLoading = 5 as const;
-const overscreenItemCountForFurtherLoading = 10 as const;
-const debounceScrollDelay = 100 as const;
+const itemHeightStyle = { height: ITEM_HEIGHT + "px" };
 
 const SkeletonList = React.memo(({ count }: { count: number }) => {
   if (count > 0) {
@@ -38,84 +24,16 @@ const SkeletonList = React.memo(({ count }: { count: number }) => {
   return null;
 });
 
-export function RoomList() {
-  const notify = useNotify();
-  const navigate = useNavigate();
-  const { roomId } = useParams();
+export function Rooms() {
+  const {
+    isZeroItemCount,
+    isAllLoaded,
+    roomId,
+    storedData,
+    debouncedHandleScroll,
+  } = useRooms();
 
-  const { queryRange } = useRooms();
-  const { store } = useStore();
-  const rooms = store.rooms;
-  const data = rooms?.data;
-
-  const isInitialLoading = !data;
-  const isZeroItemCount = data?.allCount === 0;
-  const isAllLoaded = !!(data && data.allCount === data.rooms?.length);
-
-  useEffect(() => {
-    // wrong roomId protection
-    if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
-    // show errors
-    const action = async () => {
-      if (store.rooms?.error) {
-        notify.show.error(store.rooms.error);
-      }
-    };
-    action();
-  }, [data]);
-
-  const handleScroll = useCallback(
-    async (e: React.UIEvent<HTMLElement>) => {
-      if (
-        !isInitialLoading &&
-        !isAllLoaded &&
-        !isZeroItemCount &&
-        data?.rooms
-      ) {
-        const target = e.nativeEvent.target as HTMLElement;
-        const lastVisibleIndex = Math.ceil(
-          (target.scrollTop + target.offsetHeight) / itemHeight,
-        );
-        const lastLoadedIndex = data.rooms.length;
-        const isNeedToLoad = !!(
-          lastLoadedIndex - lastVisibleIndex <
-          overscreenItemCountToTriggerFurtherLoading
-        );
-        if (isNeedToLoad) {
-          const startItem = lastLoadedIndex;
-          if (
-            lastLoadedIndex + overscreenItemCountForFurtherLoading >
-            data.allCount
-          ) {
-            await queryRange(lastLoadedIndex, data.allCount);
-          }
-          if (lastVisibleIndex > lastLoadedIndex) {
-            const stopItem =
-              lastVisibleIndex + overscreenItemCountForFurtherLoading;
-            stopItem > data.allCount
-              ? await queryRange(startItem, data.allCount)
-              : await queryRange(startItem, stopItem);
-          } else {
-            const stopItem = startItem + overscreenItemCountForFurtherLoading;
-            await queryRange(startItem, stopItem);
-          }
-        }
-      }
-    },
-    [
-      isAllLoaded,
-      isInitialLoading,
-      isZeroItemCount,
-      data?.allCount,
-      data?.rooms,
-      queryRange,
-    ],
-  );
-
-  const debouncedHandleScroll = useMemo(
-    () => debounce(handleScroll, debounceScrollDelay),
-    [handleScroll],
-  );
+  const storedRooms = storedData?.items;
 
   if (isZeroItemCount)
     return (
@@ -125,7 +43,7 @@ export function RoomList() {
     );
 
   const skeletonCount = getRandomInt(4, 12);
-  if (!data?.rooms || isInitialLoading) {
+  if (!storedRooms) {
     return (
       <RootWrapper>
         <ListWrapper>
@@ -135,7 +53,7 @@ export function RoomList() {
     );
   }
 
-  const items = data.rooms.map((itemData) => (
+  const items = storedRooms.map((itemData) => (
     <li key={itemData.roomId}>
       <Item isOpened={roomId === itemData.roomId} data={itemData} />
     </li>
@@ -146,7 +64,7 @@ export function RoomList() {
       <ListWrapper onScroll={debouncedHandleScroll}>
         {items}
         {!isAllLoaded && (
-          <SkeletonList count={data.allCount - data.rooms.length} />
+          <SkeletonList count={storedData.allCount - storedRooms.length} />
         )}
       </ListWrapper>
     </RootWrapper>
@@ -156,7 +74,7 @@ export function RoomList() {
 function RootWrapper({ children }: { children: ReactNode }) {
   return (
     <>
-      <div className="h-full flex flex-col w-1/2 min-w-52 max-w-xs">
+      <div className="h-full flex flex-col w-1/2 min-w-52 max-w-xs bg-slate-50">
         <div className="pb-4 px-4 flex flex-col items-center flex-col">
           <Title />
           <Search />
@@ -177,9 +95,13 @@ function Title() {
       <Link
         to={routes.createRoom.path}
         title="Create new room"
-        className="size-12 rounded-full hover:bg-slate-200 duration-200 justify-self-end flex justify-center items-center"
+        className="size-8 rounded-full hover:bg-slate-200 duration-200 justify-self-end flex justify-center items-center"
       >
-        <IconCirclePlus strokeWidth="1" className="text-slate-400" size={32} />
+        <IconCirclePlus
+          strokeWidth="0.5"
+          className="text-slate-600"
+          size={32}
+        />
       </Link>
     </div>
   );
@@ -201,8 +123,6 @@ function ListWrapper({
     </ul>
   );
 }
-
-const itemHeightStyle = { height: itemHeight + "px" };
 
 function ListEmpty() {
   return (
@@ -232,7 +152,7 @@ function ItemSkeleton() {
   );
 }
 
-function Item({ isOpened, data }: { isOpened: boolean; data: RoomInListType }) {
+function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
   const date = data.lastMessage
     ? formatDate().roomList(data.lastMessage.created)
     : ("Never" as const);
@@ -293,7 +213,7 @@ function Search() {
         className="h-full w-full pl-4 pr-16 outline-none font-light text-gray-800 text-xl bg-slate-100 ring-2 ring-slate-200 rounded-xl focus:ring-slate-300 focus:bg-slate-50 duration-300 ease-in-out"
       ></input>
       <div className="absolute right-4 flex items-center">
-        <IconSearch className="text-slate-400" size={18} />
+        <IconSearch className="text-slate-400" strokeWidth="1" size={24} />
       </div>
     </div>
   );

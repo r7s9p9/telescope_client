@@ -1,5 +1,5 @@
 import { RoomId, UserId } from "../../types";
-import { MessageDates } from "./api.schema";
+import { MessageDates, SendMessageFormType } from "./api.schema";
 
 export const privacyRule = {
   everybody: "everybody" as const,
@@ -49,7 +49,7 @@ export const serverRoute = {
   message: {
     read: endpoint + "/api/message/read",
     compare: endpoint + "/api/message/compare",
-    add: endpoint + "/api/message/add",
+    send: endpoint + "/api/message/add",
   },
 };
 
@@ -101,4 +101,8 @@ export const compareMessages = (roomId: RoomId, toCompare: MessageDates[]) => {
     roomId,
     toCompare,
   };
+};
+
+export const sendMessage = (roomId: RoomId, content: SendMessageFormType) => {
+  return { roomId, message: { content } };
 };

@@ -133,27 +133,35 @@ export const messageDatesSchema = z.object({
 export type MessageType = z.infer<typeof messageSchema>;
 export type MessageDates = z.infer<typeof messageDatesSchema>;
 
-const roomsSchema = z.object({
+const roomTypeSchema = z
+  .literal("public")
+  .or(z.literal("private"))
+  .or(z.literal("service"))
+  .or(z.literal("single"));
+
+const roomSchema = z.object({
   roomId: roomIdSchema,
   roomName: z.string(),
+  type: roomTypeSchema,
   unreadCount: z.number(),
+  userCount: z.number(),
   lastMessage: messageSchema.optional(),
 });
 
-export const roomListSchema = z.object({
+export const roomsSchema = z.object({
   success: z.boolean(),
   allCount: z.number(),
-  rooms: z.array(roomsSchema).optional(),
-  dev: devSchema,
+  items: z.array(roomSchema).optional(),
 });
 
-export type RoomInListType = z.infer<typeof roomsSchema>;
-export type RoomListType = z.infer<typeof roomListSchema>;
+export type RoomType = z.infer<typeof roomSchema>;
+export type RoomsType = z.infer<typeof roomsSchema>;
 
 export const messageReadSchema = z.object({
   access: accessSchema,
   success: successSchema,
   roomId: roomIdSchema,
+  name: z.string().optional(), // from useRooms
   allCount: allCountSchema.optional(),
   messages: z.array(messageSchema).optional(),
   dev: devSchema,
@@ -170,3 +178,22 @@ export const messageCompareSchema = z.object({
   toUpdate: z.array(messageSchema).optional(),
   dev: devSchema,
 });
+
+export const sendMessageFormSchema = z.object({
+  text: z.string().trim().optional(),
+});
+
+export type SendMessageFormType = z.infer<typeof sendMessageFormSchema>;
+
+export const messageSendSchema = z
+  .object({
+    access: z.literal(false),
+    success: z.literal(false),
+  })
+  .or(
+    z.object({
+      access: z.literal(true),
+      success: z.literal(true),
+      created: messageCreated,
+    }),
+  );

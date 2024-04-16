@@ -10,7 +10,7 @@ import { routes } from "../constants";
 
 export default function Home() {
   return (
-    <div className="w-full h-full flex flex-row bg-slate-50">
+    <div className="w-full h-full flex flex-row bg-slate-200">
       <NotifyStack />
       {/* <HomeHeader /> */}
       <LeftPanel />

@@ -1,17 +1,18 @@
-import { useQueryRoomList } from "../api/api";
-import { useCallback, useEffect } from "react";
 import { RoomId } from "../../types";
 import { useStore } from "./StoreProvider";
-import { MessageListType, MessageType } from "../api/api.schema";
-import { useInterval } from "../lib/useInterval";
+import {
+  MessageListType,
+  MessageType,
+  RoomType,
+  RoomsType,
+} from "../api/api.schema";
 
-const roomsItemCountForInitialLoading = 20 as const;
-const roomsReloadInterval = 10000 as const;
+export type StoreActionType = ReturnType<typeof store>;
 
 export const store = () => {
-  const chat = (roomId: RoomId) => {
-    const { store, setStore } = useStore();
+  const { store, setStore } = useStore();
 
+  const chat = (roomId: RoomId) => {
     const read = () => {
       return store?.chats?.[roomId];
     };
@@ -52,6 +53,25 @@ export const store = () => {
         }));
       };
 
+      const info = (
+        name: RoomType["roomName"],
+        type: RoomType["type"],
+        userCount: RoomType["userCount"],
+      ) => {
+        setStore((store) => ({
+          ...store,
+          chats: {
+            ...store.chats,
+            [roomId]: {
+              ...store?.chats?.[roomId],
+              name,
+              type,
+              userCount,
+            },
+          },
+        }));
+      };
+
       const scrollPosition = (px: number) => {
         setStore((store) => ({
           ...store,
@@ -65,7 +85,7 @@ export const store = () => {
         }));
       };
 
-      return { messages, scrollPosition };
+      return { messages, info, scrollPosition };
     };
 
     const flagAsBad = () => {
@@ -84,93 +104,20 @@ export const store = () => {
     return { read, create, update, flagAsBad };
   };
 
-  return { chat };
+  const rooms = () => {
+    const read = () => {
+      return store.rooms;
+    };
+
+    const update = (data: RoomsType) => {
+      setStore((store) => ({
+        ...store,
+        rooms: data,
+      }));
+    };
+
+    return { read, update };
+  };
+
+  return { chat, rooms };
 };
-
-export function useRooms() {
-  const { store, setStore } = useStore();
-  const storedRooms = store.rooms?.data;
-
-  const query = useQueryRoomList();
-
-  const queryAtFirst = useCallback(
-    async (max: number) => {
-      const { success, data } = await query.run({ min: 0 as const, max });
-      if (success && data)
-        setStore((store) => ({
-          ...store,
-          rooms: { data, success: true as const },
-        }));
-      if (!success)
-        setStore((store) => ({
-          ...store,
-          rooms: {
-            ...store.rooms,
-            success: false as const,
-            error: "Rooms no success!",
-          },
-        }));
-    },
-    [query, store],
-  );
-
-  const queryRange = useCallback(
-    async (min: number, max: number) => {
-      const { success, data } = await query.run({
-        min,
-        max,
-      });
-      if (success && data?.rooms && storedRooms?.rooms) {
-        if (storedRooms.allCount !== data.allCount) {
-          await queryAtFirst(max);
-          return;
-        }
-        if (storedRooms.allCount === data.allCount) {
-          for (let i = 0; i < storedRooms.allCount; i++) {
-            if (
-              storedRooms.rooms[i + min] &&
-              storedRooms.rooms[i + min].roomId !== data.rooms[i].roomId
-            ) {
-              await queryAtFirst(max);
-              return;
-            }
-          }
-          setStore((store) => ({
-            ...store,
-            rooms: {
-              success: true as const,
-              data: {
-                success: true as const,
-                allCount: data.allCount,
-                dev: data.dev,
-                rooms: (storedRooms.rooms || []).concat(data.rooms || []),
-              },
-            },
-          }));
-        }
-      }
-      if (!success)
-        setStore((store) => ({
-          ...store,
-          rooms: {
-            ...store.rooms,
-            success: false as const,
-            error: "ROOMS NO SUCCESS" as const,
-          },
-        }));
-    },
-    [query, store],
-  );
-
-  // Initial load data
-  useEffect(() => {
-    if (!storedRooms) queryAtFirst(roomsItemCountForInitialLoading);
-  }, []);
-
-  // Reload rooms
-  useInterval(() => {
-    if (storedRooms?.rooms) queryAtFirst(storedRooms.rooms.length);
-  }, roomsReloadInterval);
-
-  return { queryAtFirst, queryRange };
-}

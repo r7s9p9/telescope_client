@@ -2,9 +2,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   useQueryCompareMessages,
   useQueryReadMessages,
+  useQuerySendMessage,
 } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
-import { MessageDates, MessageType } from "../../../shared/api/api.schema";
+import {
+  MessageDates,
+  MessageType,
+  SendMessageFormType,
+  sendMessageFormSchema,
+} from "../../../shared/api/api.schema";
 import { useInterval } from "../../../shared/lib/useInterval";
 import { store } from "../../../shared/store/store";
 import { debounce } from "../../../shared/lib/debounce";
@@ -12,8 +18,10 @@ import { checkRoomId } from "../../../shared/lib/uuid";
 import { useNavigate, useParams } from "react-router-dom";
 import { routes } from "../../../constants";
 import { getRandomArray, getRandomBoolean } from "../../../shared/lib/random";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
-const CHAT_UPDATE_INTERVAL = 2000 as const;
+const CHAT_UPDATE_INTERVAL = 4000 as const;
 const CHAT_COMPARE_INTERVAL = 7000 as const;
 
 const CHAT_ITEM_COUNT_FOR_INITIAL_LOADING = 20 as const;
@@ -23,10 +31,10 @@ const RECENT_MESSAGES_COUNT_FOR_MANDATORY_COMPARISON = 20 as const;
 const MESSAGES_COUNT_FOR_OPTIONAL_COMPARISON = 20 as const;
 const CHANCE_OF_OPTIONAL_COMPARISON = 0.25 as const;
 
-const THRESHOLD_FOR_SHOW_SCROLL_BUTTON = 750 as const;
-const THRESHOLD_FOR_HIDE_SCROLL_BUTTON = 250 as const;
+const THRESHOLD_FOR_SHOW_SCROLL_BUTTON = 200 as const;
+const THRESHOLD_FOR_HIDE_SCROLL_BUTTON = 50 as const;
 
-const DEBOUNCE_SCROLL_INTERVAL = 250 as const;
+const DEBOUNCE_SCROLL_INTERVAL = 500 as const;
 const SCROLL_HEIGHT_TO_TRIGGER_FURTHER_LOADING = 0.75 as const;
 
 const calcScrollBottom = (target: HTMLElement) => {
@@ -136,6 +144,7 @@ export function useChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRestoredScroll, setIsRestoredScroll] = useState(false);
   const [isShowScrollToBottom, setIsShowScrollToBottom] = useState(false);
+  const [isUnreadMessage, setIsUnreadMessage] = useState(false);
   const messagesRef = useRef<HTMLUListElement>(null);
 
   const queryRead = useQueryReadMessages();
@@ -180,7 +189,7 @@ export function useChat() {
       if (success && data.messages) {
         const messages = (data?.messages || []).concat(storedMessages);
         storeAction.update().messages(data, messages);
-        scrollToBottom(); // bad idea
+        setIsUnreadMessage(true);
       }
       if (!success) {
         storeAction.flagAsBad();
@@ -247,6 +256,7 @@ export function useChat() {
       }
       if (scrollBottom <= THRESHOLD_FOR_HIDE_SCROLL_BUTTON) {
         setIsShowScrollToBottom(false);
+        setIsUnreadMessage(false);
       }
 
       // Save scroll position (calc offset from bottom)
@@ -274,8 +284,8 @@ export function useChat() {
       useLoadOlderMessages(0, CHAT_ITEM_COUNT_FOR_INITIAL_LOADING - 1);
   }, [roomId, storedChat]);
 
-  // Restoring scroll
   useEffect(() => {
+    // Restoring scroll
     if (storedChat && messagesRef.current && !isRestoredScroll) {
       const target = messagesRef.current;
       if (storedChat.scrollPosition !== 0) {
@@ -286,21 +296,63 @@ export function useChat() {
       }
       setIsRestoredScroll(true);
     }
+
+    // Scroll To Bottom if new messages
+    if (
+      storedChat &&
+      !isShowScrollToBottom &&
+      messagesRef.current &&
+      isRestoredScroll &&
+      isUnreadMessage
+    ) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      setIsShowScrollToBottom(false);
+      setIsUnreadMessage(false);
+    }
   }, [messagesRef, storedChat]);
 
   // Handle click on ScrollBottom button
   const scrollToBottom = useCallback(() => {
     if (messagesRef.current) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
       setIsShowScrollToBottom(false);
+      setIsUnreadMessage(false);
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
   }, [messagesRef.current]);
 
+  const useSend = () => {
+    const { register, reset, handleSubmit } = useForm<SendMessageFormType>({
+      resolver: zodResolver(sendMessageFormSchema),
+    });
+
+    const [sendingMessages, setSendingMessages] = useState<{ text: string }[]>(
+      [],
+    );
+
+    const query = useQuerySendMessage();
+
+    const onSubmit = handleSubmit(async (data) => {
+      if (data.text && !query.isLoading) {
+        // setSendingMessages((messages) => ({...messages, data }) )
+        const result = await query.run(roomId as RoomId, data);
+        if (result.success) {
+          useLoadNewerMessages();
+        }
+        reset();
+      }
+    });
+
+    return { register, onSubmit, isLoading: query.isLoading };
+  };
+
   return {
+    chat: storedChat,
     messages: storedMessages,
     messagesRef,
     debouncedHandleScroll,
+    isUnreadMessage,
     isShowScrollToBottom,
     scrollToBottom,
+    useSend,
   };
 }

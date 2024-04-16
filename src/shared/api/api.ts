@@ -6,14 +6,17 @@ import {
   readMessagesByCreatedRange,
   readMessagesByIndexRange,
   readRoomList,
+  sendMessage,
   serverRoute,
 } from "./api.constants";
 import {
   MessageDates,
+  SendMessageFormType,
   accountReadSchema,
   messageCompareSchema,
   messageReadSchema,
-  roomListSchema,
+  messageSendSchema,
+  roomsSchema,
 } from "./api.schema";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
@@ -58,8 +61,8 @@ function accountDataValidator(payload: object) {
   return { success: true as const, data: result.data };
 }
 
-function roomListDataValidator(payload: object) {
-  const result = roomListSchema.safeParse(payload);
+function roomsValidator(payload: object) {
+  const result = roomsSchema.safeParse(payload);
 
   if (!result.success) return { success: false as const, error: result.error };
   return { success: true as const, data: result.data };
@@ -67,6 +70,13 @@ function roomListDataValidator(payload: object) {
 
 function readMessagesValidator(payload: object) {
   const result = messageReadSchema.safeParse(payload);
+
+  if (!result.success) return { success: false as const, error: result.error };
+  return { success: true as const, data: result.data };
+}
+
+function sendMessageValidator(payload: object) {
+  const result = messageSendSchema.safeParse(payload);
 
   if (!result.success) return { success: false as const, error: result.error };
   return { success: true as const, data: result.data };
@@ -136,7 +146,7 @@ export function useQueryRoomList() {
       );
     }
 
-    const { success, data } = roomListDataValidator(response.payload);
+    const { success, data } = roomsValidator(response.payload);
     if (!success) return { success: false as const };
     return { success: true as const, data };
   };
@@ -198,6 +208,33 @@ export function useQueryReadMessages() {
   return { run, isLoading: query.isLoading };
 }
 
+export function useQuerySendMessage() {
+  const query = useQuery();
+  const navigate = useNavigate();
+
+  const run = async (roomId: RoomId, content: SendMessageFormType) => {
+    const { response } = await query.run(
+      serverRoute.message.send,
+      sendMessage(roomId, content),
+    );
+
+    const isLogged = isAuth(response.status);
+    if (!isLogged) {
+      navigate(
+        { pathname: routes.login.path },
+        // { state: { isLoggedOut: true } }, // need other value for !isLogged
+      );
+    }
+
+    const { success, data } = sendMessageValidator(response.payload);
+
+    if (!success) return { success: false as const };
+    return data;
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
 export function useQueryCompareMessages() {
   const query = useQuery();
   const navigate = useNavigate();
@@ -222,21 +259,6 @@ export function useQueryCompareMessages() {
   };
 
   return { run, isLoading: query.isLoading };
-}
-
-export async function fetchAddMessage(payload: {
-  roomId: RoomId;
-  message: { replyTo?: string; content: { text: string } };
-}) {
-  const result = await fetcher(serverRoute.message.add, payload);
-
-  const isLogged = isAuth(result.status);
-  if (!isLogged) return { success: true as const, isLogged: false as const };
-  //const { success, data } = readMessagesValidator(result.payload);
-
-  //if (!success) return { success: false as const, isLogged: true as const };
-  //return { success: true as const, isLogged: true as const, data };
-  console.log(result);
 }
 
 export function useQueryLogin() {
