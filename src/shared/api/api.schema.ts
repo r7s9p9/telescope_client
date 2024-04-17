@@ -17,6 +17,9 @@ export const roomIdSchema = z
     return id as RoomId;
   });
 
+const selfIdSchema = z.literal("self");
+const serviceIdSchema = z.literal("service");
+
 export const devSchema = z
   .object({
     message: z.array(z.string()).optional(),
@@ -97,9 +100,7 @@ export const accountReadSchema = z.object({
 export type AccountReadType = z.infer<typeof accountReadSchema>;
 
 const messageContent = z.object({ text: z.string().min(1) });
-const messageAuthorId = userIdSchema
-  .or(z.literal("service"))
-  .or(z.literal("self"));
+const messageAuthorId = z.union([userIdSchema, selfIdSchema, serviceIdSchema]);
 const messageReplyTo = userIdSchema.optional();
 const messageTargetId = userIdSchema.optional(); // For Service Message
 
@@ -133,16 +134,23 @@ export const messageDatesSchema = z.object({
 export type MessageType = z.infer<typeof messageSchema>;
 export type MessageDates = z.infer<typeof messageDatesSchema>;
 
-const roomTypeSchema = z
-  .literal("public")
-  .or(z.literal("private"))
-  .or(z.literal("service"))
-  .or(z.literal("single"));
+const roomNameSchema = z.string();
+const roomTypeSchema = z.union([
+  z.literal("public"),
+  z.literal("private"),
+  z.literal("service"),
+  z.literal("single"),
+]);
+const roomAboutSchema = z.string();
+const roomCreatedSchema = z.number();
 
 const roomSchema = z.object({
   roomId: roomIdSchema,
-  roomName: z.string(),
+  name: roomNameSchema,
   type: roomTypeSchema,
+  about: roomAboutSchema,
+  created: roomCreatedSchema,
+  creatorId: z.union([userIdSchema, selfIdSchema, serviceIdSchema]),
   unreadCount: z.number(),
   userCount: z.number(),
   lastMessage: messageSchema.optional(),
@@ -197,3 +205,8 @@ export const messageSendSchema = z
       created: messageCreated,
     }),
   );
+
+export const messageDeleteSchema = z.object({
+  access: z.literal(false),
+  success: z.literal(false),
+});

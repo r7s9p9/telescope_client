@@ -2,8 +2,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useCallback, useEffect, useMemo } from "react";
 import { checkRoomId } from "../../../shared/lib/uuid";
 import { routes } from "../../../constants";
-import { useQueryRoomList } from "../../../shared/api/api";
-import { StoreActionType, store } from "../../../shared/store/store";
+import { useQueryRooms } from "../../../shared/api/api";
+import { store } from "../../../shared/store/store";
 import { useInterval } from "../../../shared/lib/useInterval";
 import { debounce } from "../../../shared/lib/debounce";
 import {
@@ -14,18 +14,6 @@ import {
   OVERSCREEN_ITEM_COUNT_TO_TRIGGER_FURTHER_LOADING,
   RELOAD_INTERVAL,
 } from "./constants";
-import { RoomsType } from "../../../shared/api/api.schema";
-
-const chatInfoUpdater = (storeAction: StoreActionType, data: RoomsType) => {
-  if (data.items) {
-    for (const item of data.items) {
-      storeAction
-        .chat(item.roomId)
-        .update()
-        .info(item.roomName, item.type, item.userCount);
-    }
-  }
-};
 
 export function useRooms() {
   const navigate = useNavigate();
@@ -40,14 +28,13 @@ export function useRooms() {
     storedData && storedData.allCount === storedRooms?.length
   );
 
-  const query = useQueryRoomList();
+  const query = useQueryRooms();
 
   const queryFull = useCallback(
     async (max: number) => {
       const { success, data } = await query.run({ min: 0 as const, max });
       if (success && data) {
         storeAction.rooms().update(data);
-        chatInfoUpdater(storeAction, data);
       }
       if (!success) console.error("Rooms no success");
     },

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   useQueryCompareMessages,
+  useQueryDeleteMessage,
   useQueryReadMessages,
   useQuerySendMessage,
 } from "../../../shared/api/api";
@@ -8,6 +9,7 @@ import { RoomId } from "../../../types";
 import {
   MessageDates,
   MessageType,
+  RoomType,
   SendMessageFormType,
   sendMessageFormSchema,
 } from "../../../shared/api/api.schema";
@@ -22,7 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 const CHAT_UPDATE_INTERVAL = 4000 as const;
-const CHAT_COMPARE_INTERVAL = 7000 as const;
+const CHAT_COMPARE_INTERVAL = 8000 as const;
 
 const CHAT_ITEM_COUNT_FOR_INITIAL_LOADING = 20 as const;
 const ITEM_COUNT_TO_FURTHER_LOADING = 10 as const;
@@ -154,6 +156,19 @@ export function useChat() {
   const storedChat = store()
     .chat(roomId as RoomId)
     .read();
+  // TODO make rooms stored in objects
+  let storedInfo: RoomType | undefined;
+
+  const roomsInfo = store().rooms().read()?.items;
+  if (roomsInfo) {
+    for (const info of roomsInfo) {
+      if (info.roomId === roomId) {
+        storedInfo = info;
+        break;
+      }
+    }
+  }
+
   const storedMessages = storedChat?.messages;
 
   const isAllLoaded =
@@ -345,8 +360,21 @@ export function useChat() {
     return { register, onSubmit, isLoading: query.isLoading };
   };
 
+  const useDelete = () => {
+    const query = useQueryDeleteMessage();
+
+    const onDelete = async (created: MessageType["created"]) => {
+      const { success } = await query.run(roomId as RoomId, created);
+      if (success) {
+      }
+      return { success };
+    };
+    return { onDelete, isLoading: query.isLoading };
+  };
+
   return {
     chat: storedChat,
+    info: storedInfo,
     messages: storedMessages,
     messagesRef,
     debouncedHandleScroll,
@@ -354,5 +382,6 @@ export function useChat() {
     isShowScrollToBottom,
     scrollToBottom,
     useSend,
+    useDelete,
   };
 }

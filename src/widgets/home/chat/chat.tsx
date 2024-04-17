@@ -8,7 +8,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { FormEventHandler, ReactNode } from "react";
-import { MessageType } from "../../../shared/api/api.schema";
+import { MessageType, RoomType } from "../../../shared/api/api.schema";
 import { formatDate, isSameDay } from "../../../shared/lib/date";
 import React from "react";
 import { useChat } from "./useChat";
@@ -17,6 +17,7 @@ import { useMenuContext } from "../../context-menu/ContextMenu";
 export function Chat() {
   const {
     chat,
+    info,
     messagesRef,
     messages,
     debouncedHandleScroll,
@@ -24,16 +25,16 @@ export function Chat() {
     isShowScrollToBottom,
     scrollToBottom,
     useSend,
+    useDelete,
   } = useChat();
 
   const { register, onSubmit, isLoading } = useSend();
-
-  console.log(chat);
+  const deleteAction = useDelete();
 
   if (!messages) {
     return (
       <Wrapper>
-        <Bar name={chat?.name} type={chat?.type} userCount={chat?.userCount} />
+        <Bar info={info} />
         <Spinner />
         <Send register={register} onSubmit={onSubmit} isLoading={isLoading} />
       </Wrapper>
@@ -57,13 +58,17 @@ export function Chat() {
     }
 
     readyMessages.push(
-      <Message key={`message-${messages[i].created}`} data={messages[i]} />,
+      <Message
+        key={`message-${messages[i].created}`}
+        data={messages[i]}
+        deleteAction={deleteAction}
+      />,
     );
   }
 
   return (
     <Wrapper>
-      <Bar name={chat?.name} type={chat?.type} userCount={chat?.userCount} />
+      <Bar info={info} />
       <Messages listRef={messagesRef} onScroll={debouncedHandleScroll}>
         {readyMessages}
       </Messages>
@@ -147,7 +152,18 @@ function ScrollButton({
   );
 }
 
-function Message({ data }: { data: MessageType }) {
+function Message({
+  data,
+  deleteAction,
+}: {
+  data: MessageType;
+  deleteAction: {
+    onDelete: (created: number) => Promise<{
+      success: false;
+    }>;
+    isLoading: boolean;
+  };
+}) {
   const text = data.content.text;
   const date = formatDate().message(data.created, data.modified);
   if (data.authorId === "service") {
@@ -164,7 +180,15 @@ function Message({ data }: { data: MessageType }) {
   const { openMenu, closeMenu } = useMenuContext();
 
   function onClickHandler(e: React.MouseEvent<HTMLElement, MouseEvent>) {
-    openMenu(e, <MessageContextMenu closeMenu={closeMenu} />);
+    openMenu(
+      e,
+      <MessageContextMenu
+        closeMenu={closeMenu}
+        created={data.created}
+        isYourMessage={isYourMessage}
+        deleteAction={deleteAction}
+      />,
+    );
   }
 
   return (
@@ -187,8 +211,19 @@ function Message({ data }: { data: MessageType }) {
 
 function MessageContextMenu({
   closeMenu,
+  created,
+  isYourMessage,
+  deleteAction,
 }: {
   closeMenu: ReturnType<typeof Function>;
+  created: MessageType["created"];
+  isYourMessage: boolean;
+  deleteAction: {
+    onDelete: (created: number) => Promise<{
+      success: false;
+    }>;
+    isLoading: boolean;
+  };
 }) {
   function Button({
     type,
@@ -214,7 +249,7 @@ function MessageContextMenu({
       Icon = <IconCopy className="text-slate-600" strokeWidth="2" size={18} />;
     }
     if (type === "delete") {
-      Icon = <IconTrash className="text-slate-600" strokeWidth="2" size={18} />;
+      Icon = <IconTrash className="text-red-600" strokeWidth="2" size={18} />;
     }
 
     return (
@@ -223,7 +258,11 @@ function MessageContextMenu({
         className="flex flex-row items-center gap-4 p-2 px-4 hover:bg-slate-300 duration-100"
       >
         {Icon}
-        <p className="capitalize font-light">{type}</p>
+        <p
+          className={`${type === "delete" ? "text-red-600" : "text-slate-600"} capitalize`}
+        >
+          {type}
+        </p>
       </button>
     );
   }
@@ -236,41 +275,35 @@ function MessageContextMenu({
     if (type === "copy") {
     }
     if (type === "delete") {
+      deleteAction.onDelete(created);
+      closeMenu();
     }
   }
 
   return (
-    <div className="bg-slate-100 flex flex-col m-2 border-2 border-slate-300 rounded-lg shadow-xl">
+    <div className="bg-slate-100 flex flex-col m-2 rounded-lg shadow-xl">
       <Button onClick={onClickHandler} type={"reply"} />
-      <Button onClick={onClickHandler} type={"edit"} />
+      {isYourMessage && <Button onClick={onClickHandler} type={"edit"} />}
       <Button onClick={onClickHandler} type={"copy"} />
-      <Button onClick={onClickHandler} type={"delete"} />
+      {isYourMessage && <Button onClick={onClickHandler} type={"delete"} />}
     </div>
   );
 }
 
-function Bar({
-  name,
-  type,
-  userCount,
-}: {
-  name?: string;
-  type?: string;
-  userCount?: number;
-}) {
+function Bar({ info }: { info?: RoomType }) {
   return (
     <div className="shrink-0 w-full h-16 px-4 font-light flex justify-between items-center border-x-2 border-slate-100 bg-slate-50 select-none">
       <div className="size-10 flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
-        {name?.at(0)}
+        {info?.name?.at(0)}
       </div>
       <div className="flex flex-col ml-4 grow">
-        {name && <p className="text-xl">{name}</p>}
-        {type && userCount && (
+        {info?.name && <p className="text-xl">{info?.name}</p>}
+        {info?.type && info.userCount && (
           <div className="flex flex-row gap-1">
-            <p className="text-sm capitalize">{type}</p>
+            <p className="text-sm capitalize">{info?.type}</p>
             <p className="text-sm">room,</p>
             <p className="text-sm">
-              {userCount} {userCount > 1 ? "members" : "member"}
+              {info?.userCount} {info?.userCount > 1 ? "members" : "member"}
             </p>
           </div>
         )}

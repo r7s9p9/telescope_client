@@ -2,6 +2,7 @@ import { useState } from "react";
 import { RoomId } from "../../types";
 import {
   compareMessages,
+  deleteMessage,
   readAccountBody,
   readMessagesByCreatedRange,
   readMessagesByIndexRange,
@@ -11,9 +12,11 @@ import {
 } from "./api.constants";
 import {
   MessageDates,
+  MessageType,
   SendMessageFormType,
   accountReadSchema,
   messageCompareSchema,
+  messageDeleteSchema,
   messageReadSchema,
   messageSendSchema,
   roomsSchema,
@@ -63,7 +66,7 @@ function accountDataValidator(payload: object) {
 
 function roomsValidator(payload: object) {
   const result = roomsSchema.safeParse(payload);
-
+  console.log(result);
   if (!result.success) return { success: false as const, error: result.error };
   return { success: true as const, data: result.data };
 }
@@ -77,6 +80,13 @@ function readMessagesValidator(payload: object) {
 
 function sendMessageValidator(payload: object) {
   const result = messageSendSchema.safeParse(payload);
+
+  if (!result.success) return { success: false as const, error: result.error };
+  return { success: true as const, data: result.data };
+}
+
+function deleteMessageValidator(payload: object) {
+  const result = messageDeleteSchema.safeParse(payload);
 
   if (!result.success) return { success: false as const, error: result.error };
   return { success: true as const, data: result.data };
@@ -128,7 +138,7 @@ export function useQueryLogout() {
   return { run, isLoading: query.isLoading };
 }
 
-export function useQueryRoomList() {
+export function useQueryRooms() {
   const query = useQuery();
   const navigate = useNavigate();
 
@@ -227,6 +237,33 @@ export function useQuerySendMessage() {
     }
 
     const { success, data } = sendMessageValidator(response.payload);
+
+    if (!success) return { success: false as const };
+    return data;
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryDeleteMessage() {
+  const query = useQuery();
+  const navigate = useNavigate();
+
+  const run = async (roomId: RoomId, created: MessageType["created"]) => {
+    const { response } = await query.run(
+      serverRoute.message.remove,
+      deleteMessage(roomId, created),
+    );
+
+    const isLogged = isAuth(response.status);
+    if (!isLogged) {
+      navigate(
+        { pathname: routes.login.path },
+        // { state: { isLoggedOut: true } }, // need other value for !isLogged
+      );
+    }
+
+    const { success, data } = deleteMessageValidator(response.payload);
 
     if (!success) return { success: false as const };
     return data;

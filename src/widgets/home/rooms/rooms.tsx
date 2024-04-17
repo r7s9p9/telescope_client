@@ -75,7 +75,7 @@ function RootWrapper({ children }: { children: ReactNode }) {
   return (
     <>
       <div className="h-full flex flex-col w-1/2 min-w-52 max-w-xs bg-slate-50">
-        <div className="pb-4 px-4 flex flex-col items-center flex-col">
+        <div className="pb-4 px-4 flex flex-col items-center">
           <Title />
           <Search />
         </div>
@@ -177,7 +177,7 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
       className={`${isOpened ? "bg-slate-200 cursor-default" : "bg-slate-50"} w-full flex flex-col px-4 py-2 justify-between items-center hover:bg-slate-200 duration-300 ease-out`}
     >
       <div className="w-full flex flex-row justify-between items-center gap-2">
-        <p className="text-md text-green-600 font-light">{data.roomName}</p>
+        <p className="text-md text-green-600 font-light">{data.name}</p>
         <p className="text-sm text-slate-600 font-light lowercase">{date}</p>
       </div>
       <div className="w-full flex flex-row gap-2 items-center">

@@ -9,7 +9,7 @@ export type StoreType = {
       access: boolean;
       allCount: number;
       messages?: MessageListType["messages"];
-      name?: RoomType["roomName"];
+      name?: RoomType["name"];
       type: RoomType["type"];
       userCount: RoomType["userCount"];
       scrollPosition: number;

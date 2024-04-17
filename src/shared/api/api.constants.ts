@@ -1,5 +1,5 @@
 import { RoomId, UserId } from "../../types";
-import { MessageDates, SendMessageFormType } from "./api.schema";
+import { MessageDates, MessageType, SendMessageFormType } from "./api.schema";
 
 export const privacyRule = {
   everybody: "everybody" as const,
@@ -50,6 +50,7 @@ export const serverRoute = {
     read: endpoint + "/api/message/read",
     compare: endpoint + "/api/message/compare",
     send: endpoint + "/api/message/add",
+    remove: endpoint + "/api/message/remove",
   },
 };
 
@@ -63,7 +64,7 @@ export const readAccountBody = (userId: UserId | "self") => {
 };
 
 export const readRoomList = (range: { min: number; max: number }) => {
-  return { range: { min: range.min.toString(), max: range.max.toString() } };
+  return { range: { min: range.min, max: range.max } };
 };
 
 export const readRoomInfo = (
@@ -105,4 +106,11 @@ export const compareMessages = (roomId: RoomId, toCompare: MessageDates[]) => {
 
 export const sendMessage = (roomId: RoomId, content: SendMessageFormType) => {
   return { roomId, message: { content } };
+};
+
+export const deleteMessage = (
+  roomId: RoomId,
+  created: MessageType["created"],
+) => {
+  return { roomId, created };
 };

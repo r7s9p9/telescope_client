@@ -53,20 +53,14 @@ export const store = () => {
         }));
       };
 
-      const info = (
-        name: RoomType["roomName"],
-        type: RoomType["type"],
-        userCount: RoomType["userCount"],
-      ) => {
+      const info = (data: Omit<RoomType, "lastMessage" | "roomId">) => {
         setStore((store) => ({
           ...store,
           chats: {
             ...store.chats,
             [roomId]: {
               ...store?.chats?.[roomId],
-              name,
-              type,
-              userCount,
+              data,
             },
           },
         }));

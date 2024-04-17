@@ -9,9 +9,7 @@ import {
   IconMail,
   IconPassword,
   IconSend2,
-  IconSettings,
   IconUser,
-  IconWifi,
 } from "@tabler/icons-react";
 import { SubmitHandler, UseFormReset, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
