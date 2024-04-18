@@ -16,7 +16,6 @@ import { useMenuContext } from "../../context-menu/ContextMenu";
 
 export function Chat() {
   const {
-    chat,
     info,
     messagesRef,
     messages,
@@ -168,7 +167,7 @@ function Message({
   const date = formatDate().message(data.created, data.modified);
   if (data.authorId === "service") {
     return (
-      <li className="flex flex-col p-2 mt-4 self-center bg-slate-50 rounded-xl ring-2 ring-slate-200">
+      <li className="flex flex-col h-fit p-2 mt-4 self-center bg-slate-50 rounded-xl ring-2 ring-slate-200">
         <p className="text-sm text-justify">{text}</p>
         <p className="text-slate-400 text-sm text-center">{date}</p>
       </li>
@@ -194,16 +193,16 @@ function Message({
   return (
     <li
       onContextMenu={(e) => onClickHandler(e)}
-      className="flex flex-row mt-4 w-fit"
+      className="flex flex-row mt-4 max-w-full"
     >
-      <div className="flex flex-col h-fit w-fit p-2 bg-slate-50 ring-2 ring-slate-200 rounded-xl">
-        <div className="flex flex-row justify-between gap-4">
-          <p className="text-green-500 text-sm">
+      <div className="flex flex-col p-2 bg-slate-50 ring-2 ring-slate-200 rounded-xl max-w-full">
+        <div className="flex flex-row justify-between gap-4 max-w-full">
+          <p className="text-green-500 text-sm  max-w-full">
             {isYourMessage ? "You" : data.username}
           </p>
           <p className="text-slate-400 text-sm">{date}</p>
         </div>
-        <p className="text-sm text-justify">{text}</p>
+        <p className="text-sm text-justify break-all">{text}</p>
       </div>
     </li>
   );
@@ -333,11 +332,14 @@ function Send({
       onSubmit={onSubmit}
       className="shrink-0 relative p-4 w-full flex items-center border-x-2 border-slate-100 bg-slate-50"
     >
-      <input
+      <textarea
         {...register("text")}
+        rows={"2"}
+        aria-multiline={true}
+        aria-expanded={true}
         autoComplete="off"
         placeholder="Send message..."
-        className="h-12 grow pl-4 pr-1 outline-none font-light text-gray-800 text-xl bg-slate-100 ring-2 ring-slate-200 rounded-xl focus:ring-slate-300 focus:bg-slate-50 duration-300 ease-in-out"
+        className=" resize-none h-fit grow pl-4 pr-12 outline-none font-light text-gray-800 text-xl bg-slate-100 ring-2 ring-slate-200 rounded-xl focus:ring-slate-300 focus:bg-slate-50 duration-300 ease-in-out"
       />
       <SendButton isLoading={isLoading} />
     </form>
