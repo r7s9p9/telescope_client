@@ -6,13 +6,15 @@ import {
   IconMessageReply,
   IconSend2,
   IconTrash,
+  IconX,
 } from "@tabler/icons-react";
-import { FormEventHandler, ReactNode } from "react";
+import { ReactNode } from "react";
 import { MessageType, RoomType } from "../../../shared/api/api.schema";
 import { formatDate, isSameDay } from "../../../shared/lib/date";
 import React from "react";
 import { useChat } from "./useChat";
 import { useMenuContext } from "../../context-menu/ContextMenu";
+import { UseFormRegister } from "react-hook-form";
 
 export function Chat() {
   const {
@@ -25,17 +27,19 @@ export function Chat() {
     scrollToBottom,
     useSend,
     useDelete,
+    useEdit,
   } = useChat();
 
-  const { register, onSubmit, isLoading } = useSend();
+  const sendAction = useSend();
   const deleteAction = useDelete();
+  const editAction = useEdit();
 
   if (!messages) {
     return (
       <Wrapper>
         <Bar info={info} />
         <Spinner />
-        <Send register={register} onSubmit={onSubmit} isLoading={isLoading} />
+        <Send sendAction={sendAction} />
       </Wrapper>
     );
   }
@@ -59,8 +63,9 @@ export function Chat() {
     readyMessages.push(
       <Message
         key={`message-${messages[i].created}`}
-        data={messages[i]}
+        message={messages[i]}
         deleteAction={deleteAction}
+        editAction={editAction}
       />,
     );
   }
@@ -68,22 +73,29 @@ export function Chat() {
   return (
     <Wrapper>
       <Bar info={info} />
-      <Messages listRef={messagesRef} onScroll={debouncedHandleScroll}>
-        {readyMessages}
-      </Messages>
-      <ScrollButton
+      <Messages
+        listRef={messagesRef}
         isUnreadMessage={isUnreadMessage}
         isShowScrollToBottom={isShowScrollToBottom}
         scrollToBottom={scrollToBottom}
+        onScroll={debouncedHandleScroll}
+      >
+        {readyMessages}
+      </Messages>
+      <Send
+        messages={messages}
+        editAction={editAction}
+        sendAction={sendAction}
       />
-      <Send register={register} onSubmit={onSubmit} isLoading={isLoading} />
     </Wrapper>
   );
 }
 
 function Wrapper({ children }: { children: ReactNode }) {
   return (
-    <div className="w-full h-full flex flex-col bg-slate-200">{children}</div>
+    <div className="relative w-full h-full flex flex-col bg-slate-200">
+      {children}
+    </div>
   );
 }
 
@@ -107,20 +119,33 @@ function DateBubble({ date }: { date: number }) {
 function Messages({
   children,
   listRef,
+  isUnreadMessage,
+  isShowScrollToBottom,
+  scrollToBottom,
   onScroll,
 }: {
   children: ReactNode;
   listRef: React.RefObject<HTMLUListElement>;
+  isUnreadMessage: boolean;
+  isShowScrollToBottom: boolean;
+  scrollToBottom: ReturnType<typeof Function>;
   onScroll: (e: React.UIEvent<HTMLElement>) => void;
 }) {
   return (
-    <ul
-      ref={listRef}
-      onScroll={onScroll}
-      className="relative overflow-y-scroll will-change-scroll overscroll-none scroll-auto grow w-full p-4 flex flex-col bg-slate-200"
-    >
-      {children}
-    </ul>
+    <>
+      <ul
+        ref={listRef}
+        onScroll={onScroll}
+        className="relative overflow-y-scroll will-change-scroll overscroll-none scroll-auto grow w-full p-4 flex flex-col bg-slate-200"
+      >
+        {children}
+      </ul>
+      <ScrollButton
+        isUnreadMessage={isUnreadMessage}
+        isShowScrollToBottom={isShowScrollToBottom}
+        scrollToBottom={scrollToBottom}
+      />
+    </>
   );
 }
 
@@ -139,9 +164,11 @@ function ScrollButton({
       onClick={() => scrollToBottom()}
       style={{
         transform:
-          isShowScrollToBottom || isUnreadMessage ? "" : "translateY(150%)",
+          isShowScrollToBottom || isUnreadMessage
+            ? ""
+            : "translateY(100%) rotate(90deg) scale(0)",
       }}
-      className={`absolute bottom-24 right-4 border-2 rounded-full bg-slate-100 text-slate-600 p-2 hover:bg-slate-200 duration-200 ease-in-out`}
+      className={`absolute bottom-40 right-4 border-2 rounded-full bg-slate-100 text-slate-600 p-2 hover:bg-slate-200 duration-500 ease-in-out`}
     >
       {isUnreadMessage && (
         <div className="absolute top-0 left-0 size-12 rounded-full ring-2 ring-blue-400 animate-pulse" />
@@ -152,76 +179,83 @@ function ScrollButton({
 }
 
 function Message({
-  data,
+  message,
   deleteAction,
+  editAction,
 }: {
-  data: MessageType;
+  message: MessageType;
   deleteAction: {
     onDelete: (created: number) => Promise<{
-      success: false;
+      success: boolean;
     }>;
     isLoading: boolean;
   };
+  editAction: {
+    onEdit: (message: MessageType) => void;
+  };
 }) {
-  const text = data.content.text;
-  const date = formatDate().message(data.created, data.modified);
-  if (data.authorId === "service") {
+  const text = message.content.text;
+  const date = formatDate().message(message.created, message.modified);
+  if (message.authorId === "service") {
     return (
-      <li className="flex flex-col h-fit p-2 mt-4 self-center bg-slate-50 rounded-xl ring-2 ring-slate-200">
+      <li className="flex flex-col h-fit p-2 mt-4 self-center bg-slate-50 rounded-xl ring-2 ring-slate-200 select-none">
         <p className="text-sm text-justify">{text}</p>
         <p className="text-slate-400 text-sm text-center">{date}</p>
       </li>
     );
   }
 
-  const isYourMessage = data.authorId === ("self" as const);
+  const isYourMessage = message.authorId === "self";
 
   const { openMenu, closeMenu } = useMenuContext();
 
-  function onClickHandler(e: React.MouseEvent<HTMLElement, MouseEvent>) {
+  function onContextHandler(e: React.MouseEvent<HTMLElement, MouseEvent>) {
     openMenu(
       e,
       <MessageContextMenu
         closeMenu={closeMenu}
-        created={data.created}
+        message={message}
         isYourMessage={isYourMessage}
         deleteAction={deleteAction}
+        editAction={editAction}
       />,
     );
   }
 
   return (
     <li
-      onContextMenu={(e) => onClickHandler(e)}
-      className="flex flex-row mt-4 max-w-full"
+      onContextMenu={(e) => onContextHandler(e)}
+      className="flex flex-col mt-4 p-2 bg-slate-50 ring-slate-400 rounded-xl shadow w-fit max-w-full select-none"
     >
-      <div className="flex flex-col p-2 bg-slate-50 ring-2 ring-slate-200 rounded-xl max-w-full">
-        <div className="flex flex-row justify-between gap-4 max-w-full">
-          <p className="text-green-500 text-sm  max-w-full">
-            {isYourMessage ? "You" : data.username}
-          </p>
-          <p className="text-slate-400 text-sm">{date}</p>
-        </div>
-        <p className="text-sm text-justify break-all">{text}</p>
+      <div className="flex flex-row justify-between gap-4 min-w-32 max-w-full text-sm">
+        <p className="text-green-500 max-w-full">
+          {isYourMessage ? "You" : message.username}
+        </p>
+        <p className="text-gray-400">{date}</p>
       </div>
+      <p className="text-sm text-justify break-all">{text}</p>
     </li>
   );
 }
 
 function MessageContextMenu({
   closeMenu,
-  created,
+  message,
   isYourMessage,
   deleteAction,
+  editAction,
 }: {
   closeMenu: ReturnType<typeof Function>;
-  created: MessageType["created"];
+  message: MessageType;
   isYourMessage: boolean;
   deleteAction: {
     onDelete: (created: number) => Promise<{
-      success: false;
+      success: boolean;
     }>;
     isLoading: boolean;
+  };
+  editAction: {
+    onEdit: (message: MessageType) => void;
   };
 }) {
   function Button({
@@ -266,16 +300,20 @@ function MessageContextMenu({
     );
   }
 
-  function onClickHandler(type: "reply" | "edit" | "copy" | "delete") {
+  async function onClickHandler(type: "reply" | "edit" | "copy" | "delete") {
     if (type === "reply") {
     }
     if (type === "edit") {
+      editAction.onEdit(message);
+      closeMenu();
     }
     if (type === "copy") {
+      navigator.clipboard.writeText(message.content.text);
+      closeMenu();
     }
     if (type === "delete") {
-      deleteAction.onDelete(created);
-      closeMenu();
+      const success = await deleteAction.onDelete(message.created);
+      if (success) closeMenu();
     }
   }
 
@@ -319,30 +357,75 @@ function Bar({ info }: { info?: RoomType }) {
 }
 
 function Send({
-  register,
-  onSubmit,
-  isLoading,
+  messages,
+  editAction,
+  sendAction,
 }: {
-  register: ReturnType<typeof Function>;
-  onSubmit: FormEventHandler<HTMLFormElement>;
-  isLoading: boolean;
+  messages?: MessageType[];
+  editAction?: {
+    onEdit: (message: MessageType) => void;
+    closeEdit: () => void;
+    editable?: {
+      isExist: boolean;
+      message?: MessageType;
+    };
+  };
+  sendAction: {
+    register: UseFormRegister<{
+      text?: string | undefined;
+    }>;
+    onSubmit: (
+      e?: React.BaseSyntheticEvent<object, any, any> | undefined,
+    ) => Promise<void>;
+    isLoading: boolean;
+  };
 }) {
+  const { register, isLoading } = sendAction;
+
   return (
-    <form
-      onSubmit={onSubmit}
-      className="shrink-0 relative p-4 w-full flex items-center border-x-2 border-slate-100 bg-slate-50"
-    >
-      <textarea
-        {...register("text")}
-        rows={"2"}
-        aria-multiline={true}
-        aria-expanded={true}
-        autoComplete="off"
-        placeholder="Send message..."
-        className=" resize-none h-fit grow pl-4 pr-12 outline-none font-light text-gray-800 text-xl bg-slate-100 ring-2 ring-slate-200 rounded-xl focus:ring-slate-300 focus:bg-slate-50 duration-300 ease-in-out"
-      />
-      <SendButton isLoading={isLoading} />
-    </form>
+    <>
+      {editAction?.editable?.isExist && editAction.editable.message && (
+        <div className="w-full px-4 border-x-2 border-b-2 border-slate-100 bg-slate-50 flex flex-row items-center">
+          <IconEdit
+            className="shrink-0 text-slate-400"
+            strokeWidth="1"
+            size={24}
+          />
+          <div className="grow w-0 pl-4 h-12 flex flex-col justify-center text-sm">
+            <p className="font-light">Edit message</p>
+            <p className="w-full truncate">
+              {editAction.editable.message.content.text}
+            </p>
+          </div>
+          <button
+            onClick={() => editAction.closeEdit()}
+            className="shrink-0 rounded-full ring-slate-200 hover:bg-slate-200 hover:ring-4 duration-300 ease-in-out"
+          >
+            <IconX className="text-slate-600" strokeWidth="1" size={24} />
+          </button>
+        </div>
+      )}
+      <form
+        onSubmit={sendAction.onSubmit}
+        className="shrink-0 relative p-4 w-full flex items-center border-x-2 border-slate-100 bg-slate-50"
+      >
+        <textarea
+          {...register("text")}
+          rows={2}
+          defaultValue={
+            editAction?.editable?.message?.content.text
+              ? editAction.editable.message?.content.text
+              : ""
+          }
+          aria-multiline={true}
+          aria-expanded={true}
+          autoComplete="off"
+          placeholder="Send message..."
+          className={`resize-none h-fit grow py-2 pl-4 pr-12 outline-none font-light text-gray-800 text-xl bg-slate-100 ring-2 ring-slate-200 rounded-xl focus:ring-slate-300 focus:bg-slate-50 duration-300 ease-in-out`}
+        />
+        <SendButton isLoading={isLoading} />
+      </form>
+    </>
   );
 }
 

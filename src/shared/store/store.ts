@@ -1,11 +1,6 @@
 import { RoomId } from "../../types";
 import { useStore } from "./StoreProvider";
-import {
-  MessageListType,
-  MessageType,
-  RoomType,
-  RoomsType,
-} from "../api/api.schema";
+import { MessageListType, MessageType, RoomsType } from "../api/api.schema";
 
 export type StoreActionType = ReturnType<typeof store>;
 
@@ -14,7 +9,7 @@ export const store = () => {
 
   const chat = (roomId: RoomId) => {
     const read = () => {
-      return store?.chats?.[roomId];
+      return store.chats?.[roomId];
     };
 
     const create = (data?: MessageListType) => {
@@ -23,44 +18,49 @@ export const store = () => {
         chats: {
           ...store.chats,
           [roomId]: {
-            success: true as const,
-            access: data?.access,
-            allCount: data?.allCount,
-            messages: data?.messages,
+            ...data,
             scrollPosition: 0 as const,
+            selected: { isSelected: false, created: 0 },
           },
         },
       }));
     };
 
     const update = () => {
-      const messages = (
-        data: MessageListType,
-        updatedMessages: MessageType[],
-      ) => {
+      const editable = (isExist: boolean, message?: MessageType) => {
         setStore((store) => ({
           ...store,
           chats: {
             ...store.chats,
             [roomId]: {
-              ...store?.chats?.[roomId],
-              success: true as const,
-              access: data?.access,
-              allCount: data?.allCount,
-              messages: updatedMessages,
+              ...store.chats?.[roomId],
+              editable: message ? { isExist, message } : { isExist },
             },
           },
         }));
       };
 
-      const info = (data: Omit<RoomType, "lastMessage" | "roomId">) => {
+      const messages = (messages: MessageType[]) => {
         setStore((store) => ({
           ...store,
           chats: {
             ...store.chats,
             [roomId]: {
-              ...store?.chats?.[roomId],
-              data,
+              ...store.chats?.[roomId],
+              messages: messages,
+            },
+          },
+        }));
+      };
+
+      const data = (data: MessageListType) => {
+        setStore((store) => ({
+          ...store,
+          chats: {
+            ...store.chats,
+            [roomId]: {
+              ...store.chats?.[roomId],
+              ...data,
             },
           },
         }));
@@ -79,7 +79,7 @@ export const store = () => {
         }));
       };
 
-      return { messages, info, scrollPosition };
+      return { editable, data, messages, scrollPosition };
     };
 
     const flagAsBad = () => {

@@ -9,17 +9,19 @@ import {
   readRoomList,
   sendMessage,
   serverRoute,
+  updateMessage,
 } from "./api.constants";
 import {
   MessageDates,
   MessageType,
   SendMessageFormType,
   accountReadSchema,
+  messageReadSchema,
   messageCompareSchema,
   messageDeleteSchema,
-  messageReadSchema,
   messageSendSchema,
   roomsSchema,
+  messageUpdateSchema,
 } from "./api.schema";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
@@ -80,6 +82,13 @@ function readMessagesValidator(payload: object) {
 
 function sendMessageValidator(payload: object) {
   const result = messageSendSchema.safeParse(payload);
+
+  if (!result.success) return { success: false as const, error: result.error };
+  return { success: true as const, data: result.data };
+}
+
+function updateMessageValidator(payload: object) {
+  const result = messageUpdateSchema.safeParse(payload);
 
   if (!result.success) return { success: false as const, error: result.error };
   return { success: true as const, data: result.data };
@@ -237,6 +246,37 @@ export function useQuerySendMessage() {
     }
 
     const { success, data } = sendMessageValidator(response.payload);
+
+    if (!success) return { success: false as const };
+    return data;
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryUpdateMessage() {
+  const query = useQuery();
+  const navigate = useNavigate();
+
+  const run = async (
+    roomId: RoomId,
+    prevCreated: MessageType["created"],
+    content: SendMessageFormType,
+  ) => {
+    const { response } = await query.run(
+      serverRoute.message.update,
+      updateMessage(roomId, prevCreated, content),
+    );
+
+    const isLogged = isAuth(response.status);
+    if (!isLogged) {
+      navigate(
+        { pathname: routes.login.path },
+        // { state: { isLoggedOut: true } }, // need other value for !isLogged
+      );
+    }
+
+    const { success, data } = updateMessageValidator(response.payload);
 
     if (!success) return { success: false as const };
     return data;

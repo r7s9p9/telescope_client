@@ -50,6 +50,7 @@ export const serverRoute = {
     read: endpoint + "/api/message/read",
     compare: endpoint + "/api/message/compare",
     send: endpoint + "/api/message/add",
+    update: endpoint + "/api/message/update",
     remove: endpoint + "/api/message/remove",
   },
 };
@@ -106,6 +107,14 @@ export const compareMessages = (roomId: RoomId, toCompare: MessageDates[]) => {
 
 export const sendMessage = (roomId: RoomId, content: SendMessageFormType) => {
   return { roomId, message: { content } };
+};
+
+export const updateMessage = (
+  roomId: RoomId,
+  prevCreated: MessageType["created"],
+  content: SendMessageFormType,
+) => {
+  return { roomId, message: { content, created: prevCreated } };
 };
 
 export const deleteMessage = (

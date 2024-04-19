@@ -4,6 +4,7 @@ import {
   useQueryDeleteMessage,
   useQueryReadMessages,
   useQuerySendMessage,
+  useQueryUpdateMessage,
 } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
 import {
@@ -184,7 +185,8 @@ export function useChat() {
         if (!storedMessages) storeAction.create(data);
         if (storedMessages) {
           const messages = storedMessages.concat(data.messages || []);
-          storeAction.update().messages(data, messages);
+          storeAction.update().data(data);
+          storeAction.update().messages(messages);
         }
       }
       if (!success) storeAction.flagAsBad();
@@ -203,7 +205,8 @@ export function useChat() {
 
       if (success && data.messages) {
         const messages = (data?.messages || []).concat(storedMessages);
-        storeAction.update().messages(data, messages);
+        storeAction.update().data(data);
+        storeAction.update().messages(messages);
         setIsUnreadMessage(true);
       }
       if (!success) {
@@ -230,7 +233,8 @@ export function useChat() {
           data.toRemove,
         );
         if (isUpdateNeeded) {
-          storeAction.update().messages(data, updatedMessages);
+          storeAction.update().data(data);
+          storeAction.update().messages(updatedMessages);
         }
       }
       if (!success) {
@@ -340,24 +344,55 @@ export function useChat() {
       resolver: zodResolver(sendMessageFormSchema),
     });
 
-    const [sendingMessages, setSendingMessages] = useState<{ text: string }[]>(
-      [],
-    );
+    const querySend = useQuerySendMessage();
+    const queryUpdate = useQueryUpdateMessage();
 
-    const query = useQuerySendMessage();
+    const editable = storedChat?.editable;
 
     const onSubmit = handleSubmit(async (data) => {
-      if (data.text && !query.isLoading) {
-        // setSendingMessages((messages) => ({...messages, data }) )
-        const result = await query.run(roomId as RoomId, data);
-        if (result.success) {
-          useLoadNewerMessages();
+      if (
+        data.text &&
+        !querySend.isLoading &&
+        !queryUpdate.isLoading &&
+        storedMessages
+      ) {
+        // If message edited
+        if (editable?.isExist) {
+          const result = await queryUpdate.run(
+            roomId as RoomId,
+            editable.message.created,
+            data,
+          );
+          if (result.success && result.access) {
+            const updatedMessages = storedMessages.map((message) => {
+              if (message.created === editable.message.created) {
+                return {
+                  ...message,
+                  content: data,
+                  modified: result.dates.modified,
+                };
+              }
+              return message;
+            }) as MessageType[];
+            storeAction.update().messages(updatedMessages);
+            storeAction.update().editable(false);
+          }
+        } else {
+          // If new message writed
+          const result = await querySend.run(roomId as RoomId, data);
+          if (result.success) {
+            useLoadNewerMessages();
+          }
         }
         reset();
       }
     });
 
-    return { register, onSubmit, isLoading: query.isLoading };
+    return {
+      register,
+      onSubmit,
+      isLoading: querySend.isLoading || queryUpdate.isLoading,
+    };
   };
 
   const useDelete = () => {
@@ -365,11 +400,28 @@ export function useChat() {
 
     const onDelete = async (created: MessageType["created"]) => {
       const { success } = await query.run(roomId as RoomId, created);
-      if (success) {
+      if (success && storedMessages) {
+        const messages = storedMessages?.filter(
+          (message) => message.created !== created,
+        );
+        storeAction.update().messages(messages);
       }
       return { success };
     };
     return { onDelete, isLoading: query.isLoading };
+  };
+
+  const useEdit = () => {
+    const editable = storedChat?.editable;
+
+    const onEdit = (message: MessageType) => {
+      storeAction.update().editable(true, message);
+    };
+
+    const closeEdit = () => {
+      storeAction.update().editable(false);
+    };
+    return { onEdit, closeEdit, editable };
   };
 
   return {
@@ -383,5 +435,6 @@ export function useChat() {
     scrollToBottom,
     useSend,
     useDelete,
+    useEdit,
   };
 }

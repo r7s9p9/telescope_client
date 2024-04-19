@@ -28,18 +28,14 @@ export const formatDate = () => {
       const date = new Date(createdTimestamp);
       const hours = date.getHours();
       const minutes = "0" + date.getMinutes();
-      const seconds = "0" + date.getSeconds();
 
-      return hours + ":" + minutes.slice(-2) + ":" + seconds.slice(-2);
+      return hours + ":" + minutes.slice(-2);
     }
     const date = new Date(modifiedTimestamp);
     const hours = date.getHours();
     const minutes = "0" + date.getMinutes();
-    const seconds = "0" + date.getSeconds();
 
-    return (
-      "edited " + hours + ":" + minutes.slice(-2) + ":" + seconds.slice(-2)
-    );
+    return "edited " + hours + ":" + minutes.slice(-2);
   }
 
   function bubble(timestamp: number) {

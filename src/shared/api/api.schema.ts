@@ -206,7 +206,20 @@ export const messageSendSchema = z
     }),
   );
 
+export const messageUpdateSchema = z
+  .object({
+    access: z.literal(false),
+    success: z.literal(false),
+  })
+  .or(
+    z.object({
+      access: z.literal(true),
+      success: z.literal(true),
+      dates: z.object({ created: messageCreated, modified: messageModified }),
+    }),
+  );
+
 export const messageDeleteSchema = z.object({
-  access: z.literal(false),
-  success: z.literal(false),
+  access: z.boolean(),
+  success: z.boolean(),
 });

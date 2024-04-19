@@ -1,5 +1,10 @@
 import { RoomId } from "../../types";
-import { MessageListType, RoomType, RoomsType } from "../api/api.schema";
+import {
+  MessageListType,
+  MessageType,
+  RoomType,
+  RoomsType,
+} from "../api/api.schema";
 
 export type StoreType = {
   rooms?: RoomsType;
@@ -13,6 +18,7 @@ export type StoreType = {
       type: RoomType["type"];
       userCount: RoomType["userCount"];
       scrollPosition: number;
+      editable: { isExist: boolean; message: MessageType };
     };
   };
 };
