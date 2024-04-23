@@ -134,7 +134,7 @@ export const messageDatesSchema = z.object({
 export type MessageType = z.infer<typeof messageSchema>;
 export type MessageDates = z.infer<typeof messageDatesSchema>;
 
-const roomNameSchema = z.string();
+const roomNameSchema = z.string().min(4);
 const roomTypeSchema = z.union([
   z.literal("public"),
   z.literal("private"),
@@ -143,6 +143,17 @@ const roomTypeSchema = z.union([
 ]);
 const roomAboutSchema = z.string().optional();
 const roomCreatedSchema = z.number();
+
+export const roomUpdateInfoSchema = z.object({
+  name: roomNameSchema.optional(),
+  type: z
+    .union([z.literal("public"), z.literal("private"), z.literal("single")])
+    .optional(),
+  about: roomAboutSchema.optional(),
+  creatorId: userIdSchema.optional(),
+});
+
+export type RoomInfoUpdate = z.infer<typeof roomUpdateInfoSchema>;
 
 const roomSchema = z.object({
   roomId: roomIdSchema,

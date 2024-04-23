@@ -22,7 +22,7 @@ import {
   useState,
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { RoomType } from "../../../shared/api/api.schema";
+import { RoomInfoUpdate, RoomType } from "../../../shared/api/api.schema";
 import { store } from "../../../shared/store/store";
 import { routes } from "../../../constants";
 import { formatDate } from "../../../shared/lib/date";
@@ -30,7 +30,9 @@ import {
   useQueryDeleteRoom,
   useQueryUpdateRoom,
 } from "../../../shared/api/api";
-import { RoomId } from "../../../types";
+import { RoomId, UserId } from "../../../types";
+import { useCallbackStore } from "../../../shared/store/StoreProvider";
+import { checkUserId } from "../../../shared/lib/uuid";
 
 export function ChatInfo() {
   const { roomId } = useParams();
@@ -117,7 +119,7 @@ function Info({
   data: RoomType;
   isAdmin: boolean;
 }) {
-  const defaultInfo = {
+  let defaultInfo = {
     name: data.name,
     creatorId: data.creatorId,
     type: data.type,
@@ -128,30 +130,37 @@ function Info({
   const [info, setInfo] = useState(defaultInfo);
 
   const navigate = useNavigate();
+  const callbacks = useCallbackStore();
   const queryUpdate = useQueryUpdateRoom();
   const queryDelete = useQueryDeleteRoom();
 
-  function sendSelector() {
-    const result: Partial<typeof defaultInfo> = Object.create(null);
+  function sendHandler() {
+    const result: RoomInfoUpdate = Object.create(null);
     let isUpdated = false;
     if (info.name !== data.name) {
       result.name = info.name;
       isUpdated = true;
     }
     if (info.type !== data.type) {
-      result.type = info.type;
-      isUpdated = true;
+      if (
+        info.type === "public" ||
+        info.type === "private" ||
+        info.type === "single"
+      ) {
+        result.type = info.type;
+        isUpdated = true;
+      }
     }
     if (info.about !== data.about) {
       result.about = info.about;
       isUpdated = true;
     }
-    if (info.creatorId !== data.creatorId) {
-      result.creatorId = info.creatorId;
+    if (info.creatorId !== data.creatorId && checkUserId(data.creatorId)) {
+      result.creatorId = info.creatorId as UserId;
       isUpdated = true;
     }
-    if (isUpdated) return { isUpdated: true as const, info: result };
-    return { isUpdated: false as const };
+    if (!isUpdated) return { isUpdated: false as const };
+    return { isUpdated: true as const, info: result };
   }
 
   async function handleClick(type: "edit" | "cancel" | "send") {
@@ -161,11 +170,11 @@ function Info({
       setInfo(defaultInfo);
     }
     if (type === "send") {
-      const { isUpdated, info } = sendSelector();
+      const { isUpdated, info } = sendHandler();
       if (isUpdated) {
-        const { success } = queryUpdate.run(roomId, info);
+        const { success } = await queryUpdate.run(roomId, info);
+        if (success) callbacks.reloadRooms();
       }
-
       setIsEdit(false);
     }
   }
@@ -293,7 +302,10 @@ function EditGroup({
     <div className="relative size-8">
       <button
         onClick={() => handleClick("edit")}
-        style={{ opacity: isEdit ? "0" : "1" }}
+        style={{
+          transform: isEdit ? "scale(0)" : "",
+          opacity: isEdit ? "0" : "1",
+        }}
         className={`${isEdit ? "z-0" : "z-10"} absolute size-8 flex items-center justify-center rounded-full hover:bg-slate-200 duration-300 ease-in-out"`}
       >
         <IconEdit strokeWidth="1" className="text-slate-600" size={24} />
@@ -301,6 +313,7 @@ function EditGroup({
       <button
         onClick={() => handleClick("cancel")}
         style={{
+          transform: isEdit ? "" : "scale(0)",
           opacity: isEdit ? "1" : "0",
         }}
         className="absolute size-8 flex items-center justify-center rounded-full hover:bg-slate-200 duration-300 ease-in-out"
@@ -310,6 +323,7 @@ function EditGroup({
       <button
         onClick={() => handleClick("send")}
         style={{
+          transform: isEdit ? "" : "scale(0)",
           opacity: isEdit ? "1" : "0",
         }}
         className="absolute top-8 size-8 flex items-center justify-center rounded-full hover:bg-slate-200 duration-300 ease-in-out"

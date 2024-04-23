@@ -23,6 +23,8 @@ import {
   roomsSchema,
   messageUpdateSchema,
   RoomType,
+  roomUpdateInfoSchema,
+  RoomInfoUpdate,
 } from "./api.schema";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
@@ -70,6 +72,12 @@ function accountDataValidator(payload: object) {
 function roomsValidator(payload: object) {
   const result = roomsSchema.safeParse(payload);
   console.log(result);
+  if (!result.success) return { success: false as const, error: result.error };
+  return { success: true as const, data: result.data };
+}
+
+function updateRoomValidator(payload: object) {
+  const result = roomUpdateInfoSchema.safeParse(payload);
   if (!result.success) return { success: false as const, error: result.error };
   return { success: true as const, data: result.data };
 }
@@ -415,18 +423,12 @@ export function useQueryCreateRoom() {
 export function useQueryUpdateRoom() {
   const query = useQuery();
 
-  const run = async (
-    roomId: RoomId,
-    info: {
-      name?: string;
-      type?: Omit<RoomType["type"], "service">;
-      about?: string;
-      creatorId?: UserId;
-    },
-  ) => {
+  const run = async (roomId: RoomId, info: RoomInfoUpdate) => {
+    const { success, data } = updateRoomValidator(info);
+    if (!success) return { success: false as const };
     const { response } = await query.run(serverRoute.room.updateInfo, {
       roomId,
-      info,
+      info: data,
     });
     if (response.payload.success)
       return {
