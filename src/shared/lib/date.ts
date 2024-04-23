@@ -50,7 +50,17 @@ export const formatDate = () => {
       day: "numeric",
     });
   }
-  return { roomList, message, bubble };
+
+  function info(timestamp: number) {
+    const date = new Date(timestamp);
+    return date.toLocaleString("default", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }
+
+  return { roomList, message, bubble, info };
 };
 
 export function isSameDay(firstTimestamp: number, secondTimestamp: number) {

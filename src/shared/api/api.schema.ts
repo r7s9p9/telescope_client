@@ -141,7 +141,7 @@ const roomTypeSchema = z.union([
   z.literal("service"),
   z.literal("single"),
 ]);
-const roomAboutSchema = z.string();
+const roomAboutSchema = z.string().optional();
 const roomCreatedSchema = z.number();
 
 const roomSchema = z.object({
@@ -222,4 +222,9 @@ export const messageUpdateSchema = z
 export const messageDeleteSchema = z.object({
   access: z.boolean(),
   success: z.boolean(),
+});
+
+export const createRoomFormSchema = z.object({
+  name: roomNameSchema.min(4),
+  about: roomAboutSchema,
 });

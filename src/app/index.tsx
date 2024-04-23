@@ -15,6 +15,8 @@ import { Chat } from "../widgets/home/chat/chat.tsx";
 import { Rooms } from "../widgets/home/rooms/rooms.tsx";
 import { StoreProvider } from "../shared/store/StoreProvider.tsx";
 import { ContextMenuProvider } from "../widgets/context-menu/ContextMenu.tsx";
+import { CreateRoom } from "../widgets/home/create-room/CreateRoom.tsx";
+import { ChatInfo } from "../widgets/home/chat-info/ChatInfo.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -43,17 +45,20 @@ const router = createBrowserRouter(
           element={<Rooms />}
         >
           <Route
-            path={routes.chat.path}
-            id={routes.chat.id}
-            element={<Chat />}
+            path={routes.createRoom.path}
+            id={routes.createRoom.id}
+            element={<CreateRoom />}
           />
+          <Route path={routes.chat.path} id={routes.chat.id} element={<Chat />}>
+            <Route
+              path={routes.chatInfo.path}
+              id={routes.chatInfo.id}
+              element={<ChatInfo />}
+            />
+          </Route>
         </Route>
+
         {/* <Route
-          path={routes.createRoom.path}
-          id={routes.createRoom.id}
-          element={<RoomList />}
-        />
-        <Route
           path={routes.friends.path}
           id={routes.friends.id}
           element={<RoomList />}
@@ -62,7 +67,7 @@ const router = createBrowserRouter(
           path={routes.settings.path}
           id={routes.settings.id}
           element={<RoomList />}
-        /> */}
+        />  */}
       </Route>
     </>,
   ),

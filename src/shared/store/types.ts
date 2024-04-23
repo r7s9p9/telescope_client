@@ -23,6 +23,10 @@ export type StoreType = {
   };
 };
 
+export type CallbackType = {
+  reloadRooms: () => void;
+};
+
 export type StoreState = {
   store: StoreType;
   setStore: React.Dispatch<React.SetStateAction<StoreType>>;

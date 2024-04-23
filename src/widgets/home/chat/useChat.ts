@@ -301,7 +301,7 @@ export function useChat() {
     // Initial load data if no chat in store
     if (!storedChat)
       useLoadOlderMessages(0, CHAT_ITEM_COUNT_FOR_INITIAL_LOADING - 1);
-  }, [roomId, storedChat]);
+  }, [roomId, storedChat, storedInfo]);
 
   useEffect(() => {
     // Restoring scroll

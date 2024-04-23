@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RoomId } from "../../types";
+import { RoomId, UserId } from "../../types";
 import {
   compareMessages,
   deleteMessage,
@@ -22,6 +22,7 @@ import {
   messageSendSchema,
   roomsSchema,
   messageUpdateSchema,
+  RoomType,
 } from "./api.schema";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
@@ -382,5 +383,94 @@ export function useQueryRegister() {
     }
     return { success: true as const };
   };
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryCreateRoom() {
+  const query = useQuery();
+
+  const run = async (
+    name: string,
+    type: Omit<RoomType["type"], "service">,
+    about: string,
+  ) => {
+    const { response } = await query.run(serverRoute.room.create, {
+      roomInfo: {
+        name,
+        type,
+        about,
+      },
+    });
+    if (response.payload.success)
+      return {
+        success: true as const,
+        roomId: response.payload.roomId as RoomId,
+      };
+    return { success: false as const };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryUpdateRoom() {
+  const query = useQuery();
+
+  const run = async (
+    roomId: RoomId,
+    info: {
+      name?: string;
+      type?: Omit<RoomType["type"], "service">;
+      about?: string;
+      creatorId?: UserId;
+    },
+  ) => {
+    const { response } = await query.run(serverRoute.room.updateInfo, {
+      roomId,
+      info,
+    });
+    if (response.payload.success)
+      return {
+        success: true as const,
+        roomId: response.payload.roomId as RoomId,
+      };
+    return { success: false as const };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryDeleteRoom() {
+  const query = useQuery();
+
+  const run = async (roomId: RoomId) => {
+    const { response } = await query.run(serverRoute.room.delete, {
+      roomId,
+    });
+    if (response.payload.success)
+      return {
+        success: true as const,
+        roomId: response.payload.roomId as RoomId,
+      };
+    return { success: false as const };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryLeaveRoom() {
+  const query = useQuery();
+
+  const run = async (roomId: RoomId) => {
+    const { response } = await query.run(serverRoute.room.leave, {
+      roomId,
+    });
+    if (response.payload.success)
+      return {
+        success: true as const,
+        roomId: response.payload.roomId as RoomId,
+      };
+    return { success: false as const };
+  };
+
   return { run, isLoading: query.isLoading };
 }

@@ -1,20 +1,35 @@
 import {
   IconArrowDown,
   IconCopy,
+  IconDoorExit,
   IconDotsVertical,
   IconEdit,
+  IconInfoCircle,
+  IconLogout,
   IconMessageReply,
   IconSend2,
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
-import { ReactNode } from "react";
+import {
+  Dispatch,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { MessageType, RoomType } from "../../../shared/api/api.schema";
 import { formatDate, isSameDay } from "../../../shared/lib/date";
 import React from "react";
 import { useChat } from "./useChat";
 import { useMenuContext } from "../../context-menu/ContextMenu";
 import { UseFormRegister } from "react-hook-form";
+import { useQueryLeaveRoom } from "../../../shared/api/api";
+import { RoomId } from "../../../types";
+import { Outlet, useNavigate } from "react-router-dom";
+import { routes } from "../../../constants";
+import { useCallbackStore } from "../../../shared/store/StoreProvider";
 
 export function Chat() {
   const {
@@ -82,20 +97,19 @@ export function Chat() {
       >
         {readyMessages}
       </Messages>
-      <Send
-        messages={messages}
-        editAction={editAction}
-        sendAction={sendAction}
-      />
+      <Send editAction={editAction} sendAction={sendAction} />
     </Wrapper>
   );
 }
 
 function Wrapper({ children }: { children: ReactNode }) {
   return (
-    <div className="relative w-full h-full flex flex-col bg-slate-200">
-      {children}
-    </div>
+    <>
+      <div className="relative w-full h-full flex flex-col bg-slate-200">
+        {children}
+      </div>
+      <Outlet />
+    </>
   );
 }
 
@@ -330,38 +344,168 @@ function MessageContextMenu({
 function Bar({ info }: { info?: RoomType }) {
   return (
     <div className="shrink-0 w-full h-16 px-4 font-light flex justify-between items-center border-x-2 border-slate-100 bg-slate-50 select-none">
-      <div className="size-10 flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
-        {info?.name?.at(0)}
-      </div>
-      <div className="flex flex-col ml-4 grow">
-        {info?.name && <p className="text-xl">{info?.name}</p>}
-        {info?.type && info.userCount && (
-          <div className="flex flex-row gap-1">
-            <p className="text-sm capitalize">{info?.type}</p>
-            <p className="text-sm">room,</p>
-            <p className="text-sm">
-              {info?.userCount} {info?.userCount > 1 ? "members" : "member"}
-            </p>
+      {info ? (
+        <>
+          <div className="size-10 flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
+            {info.name.at(0)}
           </div>
-        )}
+          <div className="flex flex-col ml-4 grow">
+            <p className="text-xl">{info.name}</p>
+            <div className="flex flex-row gap-1">
+              <p className="text-sm capitalize">{info?.type}</p>
+              <p className="text-sm">room,</p>
+              <p className="text-sm">
+                {info.userCount} {info.userCount > 1 ? "members" : "member"}
+              </p>
+            </div>
+          </div>
+        </>
+      ) : (
+        <BarSkeleton />
+      )}
+      <BarMenu roomId={info?.roomId} />
+    </div>
+  );
+}
+
+function BarSkeleton() {
+  return (
+    <div className="h-14 flex items-center animate-pulse">
+      <div className="size-10 bg-slate-200 rounded-full"></div>
+      <div className="ml-4 h-full flex flex-col justify-center gap-2">
+        <div className="w-64 h-6 rounded-md bg-slate-200" />
+        <div className="w-36 h-4 rounded-md bg-slate-200" />
       </div>
-      <button className="py-2 rounded-xl hover:bg-slate-200 duration-200">
+    </div>
+  );
+}
+
+function BarMenu({ roomId }: { roomId?: RoomId }) {
+  const [isMenuOpened, setIsMenuOpened] = useState(false);
+
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  const closeMenu = () => {
+    setIsMenuOpened((isMenuOpened) => (isMenuOpened ? false : isMenuOpened));
+  };
+
+  const handleClickOutside = useCallback(
+    (event: MouseEvent) => {
+      if (
+        contentRef.current &&
+        buttonRef.current &&
+        !contentRef.current.contains(event.target as Node) &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        closeMenu();
+      }
+    },
+    [contentRef.current, buttonRef.current],
+  );
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const queryLeave = useQueryLeaveRoom();
+  const navigate = useNavigate();
+  const callbacks = useCallbackStore();
+
+  async function onClickHandler(type: "info" | "leave") {
+    if (roomId) {
+      if (type === "info") {
+        navigate({ pathname: routes.rooms.path + roomId + "/info" });
+      }
+      if (type === "leave") {
+        const { success } = await queryLeave.run(roomId);
+        if (success) {
+          callbacks.reloadRooms();
+          navigate({ pathname: routes.rooms.path });
+        }
+      }
+    }
+  }
+
+  function Button({
+    type,
+    onClick,
+  }: {
+    type: "info" | "leave";
+    onClick: ReturnType<typeof Function>;
+  }) {
+    let Icon;
+    let text = "";
+    if (type === "info") {
+      Icon = (
+        <IconInfoCircle
+          className="text-slate-600"
+          strokeWidth="1.5"
+          size={24}
+        />
+      );
+      text = "View info";
+    }
+    if (type === "leave") {
+      Icon = (
+        <IconLogout className="text-red-600" strokeWidth="1.5" size={24} />
+      );
+      text = "Leave room";
+    }
+
+    return (
+      <button
+        onClick={() => onClick(type)}
+        className="flex flex-row items-center gap-4 p-2 px-4 hover:bg-slate-300 duration-100"
+      >
+        {Icon}
+        <p
+          className={`${type === "leave" ? "text-red-600" : "text-slate-600"}`}
+        >
+          {text}
+        </p>
+      </button>
+    );
+  }
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        onClick={() => setIsMenuOpened(!isMenuOpened)}
+        className="py-2 rounded-xl hover:bg-slate-200 duration-200"
+      >
         <IconDotsVertical
           className="text-slate-400"
           strokeWidth="1"
           size={32}
         />
       </button>
-    </div>
+
+      <div
+        style={{
+          opacity: isMenuOpened ? 1 : 0,
+          transform: isMenuOpened
+            ? "translateY(0%) scaleY(1)"
+            : "translateY(-50%) scaleY(0)",
+        }}
+        ref={contentRef}
+        className="absolute z-10 flex flex-col right-0 top-16 duration-300 ease-in-out border-t-2 border-slate-100 bg-slate-50 shadow-md font-normal"
+      >
+        <Button type="info" onClick={onClickHandler} />
+        <Button type="leave" onClick={onClickHandler} />
+      </div>
+    </>
   );
 }
 
 function Send({
-  messages,
   editAction,
   sendAction,
 }: {
-  messages?: MessageType[];
   editAction?: {
     onEdit: (message: MessageType) => void;
     closeEdit: () => void;

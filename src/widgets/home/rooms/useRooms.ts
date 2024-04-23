@@ -14,13 +14,15 @@ import {
   OVERSCREEN_ITEM_COUNT_TO_TRIGGER_FURTHER_LOADING,
   RELOAD_INTERVAL,
 } from "./constants";
+import { useCallbackStore } from "../../../shared/store/StoreProvider";
 
 export function useRooms() {
   const navigate = useNavigate();
   const { roomId } = useParams();
 
-  const storeAction = store();
-  const storedData = storeAction.rooms().read();
+  const callbacks = useCallbackStore();
+  const roomsUpdate = store().rooms().update;
+  const storedData = store().rooms().read();
   const storedRooms = storedData?.items;
 
   const isZeroItemCount = storedData?.allCount === 0;
@@ -34,7 +36,7 @@ export function useRooms() {
     async (max: number) => {
       const { success, data } = await query.run({ min: 0 as const, max });
       if (success && data) {
-        storeAction.rooms().update(data);
+        roomsUpdate(data);
       }
       if (!success) console.error("Rooms no success");
     },
@@ -58,7 +60,7 @@ export function useRooms() {
               return;
             }
           }
-          storeAction.rooms().update({
+          roomsUpdate({
             success: data.success,
             allCount: data.allCount,
             items: (storedRooms || []).concat(data.items || []),
@@ -71,17 +73,24 @@ export function useRooms() {
     [query, storedData],
   );
 
-  // Reload rooms
-  useInterval(() => {
-    if (storedRooms) queryFull(storedRooms.length);
-  }, RELOAD_INTERVAL);
-
   useEffect(() => {
     // wrong roomId protection
     if (roomId && !checkRoomId(roomId)) navigate(routes.rooms.path);
-    // Initial load data
-    if (!storedRooms) queryFull(ITEM_COUNT_FOR_INITIAL_LOADING);
-  }, [roomId, storedRooms]);
+    // Initial load
+    loadRooms();
+    // for access from other hooks
+    callbacks.reloadRooms = loadRooms;
+  }, [roomId]);
+
+  console.log(callbacks);
+
+  const loadRooms = useCallback(async () => {
+    if (!storedRooms) await queryFull(ITEM_COUNT_FOR_INITIAL_LOADING);
+    if (storedRooms) await queryFull(storedRooms.length);
+  }, [storedRooms]);
+
+  // Reload rooms
+  useInterval(() => loadRooms(), RELOAD_INTERVAL);
 
   const handleScroll = useCallback(
     async (e: React.UIEvent<HTMLElement>) => {
