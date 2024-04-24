@@ -239,7 +239,7 @@ function Message({
   return (
     <li
       onContextMenu={(e) => onContextHandler(e)}
-      className="flex flex-col mt-4 p-2 bg-slate-50 ring-slate-400 rounded-xl shadow w-fit max-w-full select-none"
+      className={`${isYourMessage ? "self-end" : "self-start"} flex flex-col mt-4 p-2 bg-slate-50 ring-slate-400 rounded-xl shadow w-fit max-w-full select-none`}
     >
       <div className="flex flex-row justify-between gap-4 min-w-32 max-w-full text-sm">
         <p className="text-green-500 max-w-full">

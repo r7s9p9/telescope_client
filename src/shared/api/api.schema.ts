@@ -239,3 +239,24 @@ export const createRoomFormSchema = z.object({
   name: roomNameSchema.min(4),
   about: roomAboutSchema,
 });
+
+export const searchRoomSchema = z
+  .object({
+    success: z.boolean(),
+    isEmpty: z.literal(false),
+    rooms: z.array(
+      z.object({
+        name: roomNameSchema,
+        userCount: z.number().finite(),
+        roomId: roomIdSchema,
+      }),
+    ),
+  })
+  .or(
+    z.object({
+      success: z.boolean(),
+      isEmpty: z.literal(true),
+    }),
+  );
+
+export type SearchRooms = z.infer<typeof searchRoomSchema>;

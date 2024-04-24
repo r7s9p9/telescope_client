@@ -44,6 +44,7 @@ export const serverRoute = {
   },
   room: {
     getRoomList: endpoint + "/api/room/overview-my-rooms",
+    search: endpoint + "/api/room/search",
     readInfo: endpoint + "/api/room/read",
     updateInfo: endpoint + "/api/room/update",
     create: endpoint + "/api/room/create",

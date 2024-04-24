@@ -25,6 +25,7 @@ import {
   RoomType,
   roomUpdateInfoSchema,
   RoomInfoUpdate,
+  searchRoomSchema,
 } from "./api.schema";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
@@ -41,13 +42,20 @@ const fetcher = async (route: string, body: any) => {
   return { status: result.status, payload: await result.json() };
 };
 
-function useQuery() {
+function useQuery(isCheckAuth: boolean) {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const run = async (route: string, body: any) => {
     setIsLoading(true);
     const response = await fetcher(route, body);
     setIsLoading(false);
+    if (isCheckAuth && !isAuth(response.status)) {
+      navigate(
+        { pathname: routes.login.path },
+        // { state: { isLoggedOut: true } }, // need other value for !isLogged
+      );
+    }
     return { response, request: { route, body } };
   };
   return { isLoading, run };
@@ -71,7 +79,14 @@ function accountDataValidator(payload: object) {
 
 function roomsValidator(payload: object) {
   const result = roomsSchema.safeParse(payload);
-  console.log(result);
+
+  if (!result.success) return { success: false as const, error: result.error };
+  return { success: true as const, data: result.data };
+}
+
+function searchRoomsValidator(payload: object) {
+  const result = searchRoomSchema.safeParse(payload);
+
   if (!result.success) return { success: false as const, error: result.error };
   return { success: true as const, data: result.data };
 }
@@ -118,21 +133,13 @@ function compareMessagesValidator(payload: object) {
 }
 
 export function useQuerySelfAccount() {
-  const query = useQuery();
-  const navigate = useNavigate();
+  const query = useQuery(true);
 
   const run = async () => {
     const { response } = await query.run(
       serverRoute.account.read,
       readAccountBody("self"),
     );
-    const isLogged = isAuth(response.status);
-    if (!isLogged) {
-      navigate(
-        { pathname: routes.login.path },
-        // { state: { isLoggedOut: true } }, // need other value for !isLogged
-      );
-    }
 
     const { success, data } = accountDataValidator(response.payload);
 
@@ -144,7 +151,7 @@ export function useQuerySelfAccount() {
 }
 
 export function useQueryLogout() {
-  const query = useQuery();
+  const query = useQuery(true);
 
   const run = async (sessionId: string | "self") => {
     const { response } = await query.run(serverRoute.session.remove, {
@@ -157,22 +164,13 @@ export function useQueryLogout() {
 }
 
 export function useQueryRooms() {
-  const query = useQuery();
-  const navigate = useNavigate();
+  const query = useQuery(true);
 
   const run = async (range: { min: number; max: number }) => {
     const { response } = await query.run(
       serverRoute.room.getRoomList,
       readRoomList(range),
     );
-
-    const isLogged = isAuth(response.status);
-    if (!isLogged) {
-      navigate(
-        { pathname: routes.login.path },
-        // { state: { isLoggedOut: true } }, // need other value for !isLogged
-      );
-    }
 
     const { success, data } = roomsValidator(response.payload);
     if (!success) return { success: false as const };
@@ -182,9 +180,26 @@ export function useQueryRooms() {
   return { run, isLoading: query.isLoading };
 }
 
+export function useQueryFindRooms() {
+  const query = useQuery(true);
+
+  const run = async (q: string, limit = 10, offset = 0) => {
+    const { response } = await query.run(serverRoute.room.search, {
+      limit,
+      offset,
+      q,
+    });
+
+    const { success, data } = searchRoomsValidator(response.payload);
+    if (!success) return { success: false as const };
+    return { success: true as const, data };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
 export function useQueryReadMessages() {
-  const query = useQuery();
-  const navigate = useNavigate();
+  const query = useQuery(true);
 
   const run = () => {
     const indexRange = async (
@@ -195,14 +210,6 @@ export function useQueryReadMessages() {
         serverRoute.message.read,
         readMessagesByIndexRange(roomId, indexRange),
       );
-
-      const isLogged = isAuth(response.status);
-      if (!isLogged) {
-        navigate(
-          { pathname: routes.login.path },
-          // { state: { isLoggedOut: true } }, // need other value for !isLogged
-        );
-      }
 
       const { success, data } = readMessagesValidator(response.payload);
 
@@ -218,14 +225,6 @@ export function useQueryReadMessages() {
         readMessagesByCreatedRange(roomId, createdRange),
       );
 
-      const isLogged = isAuth(response.status);
-      if (!isLogged) {
-        navigate(
-          { pathname: routes.login.path },
-          // { state: { isLoggedOut: true } }, // need other value for !isLogged
-        );
-      }
-
       const { success, data } = readMessagesValidator(response.payload);
       if (!success) return { success: false as const };
       return { success: true as const, data };
@@ -237,22 +236,13 @@ export function useQueryReadMessages() {
 }
 
 export function useQuerySendMessage() {
-  const query = useQuery();
-  const navigate = useNavigate();
+  const query = useQuery(true);
 
   const run = async (roomId: RoomId, content: SendMessageFormType) => {
     const { response } = await query.run(
       serverRoute.message.send,
       sendMessage(roomId, content),
     );
-
-    const isLogged = isAuth(response.status);
-    if (!isLogged) {
-      navigate(
-        { pathname: routes.login.path },
-        // { state: { isLoggedOut: true } }, // need other value for !isLogged
-      );
-    }
 
     const { success, data } = sendMessageValidator(response.payload);
 
@@ -264,8 +254,7 @@ export function useQuerySendMessage() {
 }
 
 export function useQueryUpdateMessage() {
-  const query = useQuery();
-  const navigate = useNavigate();
+  const query = useQuery(true);
 
   const run = async (
     roomId: RoomId,
@@ -277,14 +266,6 @@ export function useQueryUpdateMessage() {
       updateMessage(roomId, prevCreated, content),
     );
 
-    const isLogged = isAuth(response.status);
-    if (!isLogged) {
-      navigate(
-        { pathname: routes.login.path },
-        // { state: { isLoggedOut: true } }, // need other value for !isLogged
-      );
-    }
-
     const { success, data } = updateMessageValidator(response.payload);
 
     if (!success) return { success: false as const };
@@ -295,22 +276,13 @@ export function useQueryUpdateMessage() {
 }
 
 export function useQueryDeleteMessage() {
-  const query = useQuery();
-  const navigate = useNavigate();
+  const query = useQuery(true);
 
   const run = async (roomId: RoomId, created: MessageType["created"]) => {
     const { response } = await query.run(
       serverRoute.message.remove,
       deleteMessage(roomId, created),
     );
-
-    const isLogged = isAuth(response.status);
-    if (!isLogged) {
-      navigate(
-        { pathname: routes.login.path },
-        // { state: { isLoggedOut: true } }, // need other value for !isLogged
-      );
-    }
 
     const { success, data } = deleteMessageValidator(response.payload);
 
@@ -322,22 +294,13 @@ export function useQueryDeleteMessage() {
 }
 
 export function useQueryCompareMessages() {
-  const query = useQuery();
-  const navigate = useNavigate();
+  const query = useQuery(true);
 
   const run = async (roomId: RoomId, toCompare: MessageDates[]) => {
     const { response } = await query.run(
       serverRoute.message.compare,
       compareMessages(roomId, toCompare),
     );
-
-    const isLogged = isAuth(response.status);
-    if (!isLogged) {
-      navigate(
-        { pathname: routes.login.path },
-        // { state: { isLoggedOut: true } }, // need other value for !isLogged
-      );
-    }
 
     const { success, data } = compareMessagesValidator(response.payload);
     if (!success) return { success: false as const };
@@ -348,7 +311,7 @@ export function useQueryCompareMessages() {
 }
 
 export function useQueryLogin() {
-  const query = useQuery();
+  const query = useQuery(false);
 
   const run = async (payload: { email: string; password: string }) => {
     const { response } = await query.run(serverRoute.auth.login, payload);
@@ -363,7 +326,7 @@ export function useQueryLogin() {
 }
 
 export function useQueryCode() {
-  const query = useQuery();
+  const query = useQuery(false);
   const run = async (payload: { email: string; code: string }) => {
     const { response } = await query.run(serverRoute.auth.code, payload);
     return { success: !!response.payload.success };
@@ -373,7 +336,7 @@ export function useQueryCode() {
 }
 
 export function useQueryRegister() {
-  const query = useQuery();
+  const query = useQuery(false);
   const run = async (payload: {
     email: string;
     username: string;
@@ -395,7 +358,7 @@ export function useQueryRegister() {
 }
 
 export function useQueryCreateRoom() {
-  const query = useQuery();
+  const query = useQuery(true);
 
   const run = async (
     name: string,
@@ -421,7 +384,7 @@ export function useQueryCreateRoom() {
 }
 
 export function useQueryUpdateRoom() {
-  const query = useQuery();
+  const query = useQuery(true);
 
   const run = async (roomId: RoomId, info: RoomInfoUpdate) => {
     const { success, data } = updateRoomValidator(info);
@@ -442,7 +405,7 @@ export function useQueryUpdateRoom() {
 }
 
 export function useQueryDeleteRoom() {
-  const query = useQuery();
+  const query = useQuery(true);
 
   const run = async (roomId: RoomId) => {
     const { response } = await query.run(serverRoute.room.delete, {
@@ -460,7 +423,7 @@ export function useQueryDeleteRoom() {
 }
 
 export function useQueryLeaveRoom() {
-  const query = useQuery();
+  const query = useQuery(true);
 
   const run = async (roomId: RoomId) => {
     const { response } = await query.run(serverRoute.room.leave, {
