@@ -2,7 +2,7 @@ import { ReactNode, createContext, useContext, useRef, useState } from "react";
 import { CallbackType, StoreState, StoreType } from "./types";
 
 const storeInit = {
-  store: { rooms: undefined, chats: undefined },
+  store: { rooms: Object.create(null), chats: Object.create(null) },
   setStore: () => {},
 };
 
@@ -11,20 +11,20 @@ const callbackInit = {
 };
 
 const StoreContext = createContext<StoreState>(storeInit);
-const CallbackContext = createContext(callbackInit);
+const ActionContext = createContext(callbackInit);
 
 export const useStore = () => useContext(StoreContext);
-export const useCallbackStore = () => useContext(CallbackContext);
+export const useActionStore = () => useContext(ActionContext);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [store, setStore] = useState<StoreType>(storeInit["store"]);
-  const callbackStore = useRef<CallbackType>(callbackInit);
+  const actionStore = useRef<CallbackType>(callbackInit);
 
   return (
     <StoreContext.Provider value={{ store, setStore }}>
-      <CallbackContext.Provider value={callbackStore.current}>
+      <ActionContext.Provider value={actionStore.current}>
         {children}
-      </CallbackContext.Provider>
+      </ActionContext.Provider>
     </StoreContext.Provider>
   );
 }

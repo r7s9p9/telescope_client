@@ -47,7 +47,6 @@ export function Rooms() {
   useEffect(() => {
     const action = async () => {
       const { success, data } = await querySearch.run(searchValue);
-      console.log(success);
       if (success) setFoundRooms(data);
     };
     if (isSearch) action();

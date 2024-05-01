@@ -1,18 +1,4 @@
-import {
-  IconCactus,
-  IconCheck,
-  IconCircle,
-  IconCircleMinus,
-  IconCirclePlus,
-  IconCopy,
-  IconEdit,
-  IconGavel,
-  IconInfoCircle,
-  IconMessageReply,
-  IconPlus,
-  IconTrash,
-  IconX,
-} from "@tabler/icons-react";
+import { IconCheck, IconEdit, IconPlus, IconX } from "@tabler/icons-react";
 import {
   ChangeEvent,
   ReactNode,
@@ -31,7 +17,7 @@ import {
   useQueryUpdateRoom,
 } from "../../../shared/api/api";
 import { RoomId, UserId } from "../../../types";
-import { useCallbackStore } from "../../../shared/store/StoreProvider";
+import { useActionStore } from "../../../shared/store/StoreProvider";
 import { checkUserId } from "../../../shared/lib/uuid";
 
 export function ChatInfo() {
@@ -130,7 +116,7 @@ function Info({
   const [info, setInfo] = useState(defaultInfo);
 
   const navigate = useNavigate();
-  const callbacks = useCallbackStore();
+  const action = useActionStore();
   const queryUpdate = useQueryUpdateRoom();
   const queryDelete = useQueryDeleteRoom();
 
@@ -173,7 +159,7 @@ function Info({
       const { isUpdated, info } = sendHandler();
       if (isUpdated) {
         const { success } = await queryUpdate.run(roomId, info);
-        if (success) callbacks.reloadRooms();
+        if (success) action.reloadRooms();
       }
       setIsEdit(false);
     }

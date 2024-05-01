@@ -1,6 +1,7 @@
 import { RoomId } from "../../types";
 import { useStore } from "./StoreProvider";
-import { MessageListType, MessageType, RoomsType } from "../api/api.schema";
+import { MessageType, RoomsType } from "../api/api.schema";
+import { StoreType } from "./types";
 
 export type StoreActionType = ReturnType<typeof store>;
 
@@ -12,15 +13,13 @@ export const store = () => {
       return store.chats?.[roomId];
     };
 
-    const create = (data?: MessageListType) => {
+    const create = (data: Partial<StoreType["chats"][RoomId]>) => {
       setStore((store) => ({
         ...store,
         chats: {
           ...store.chats,
           [roomId]: {
             ...data,
-            scrollPosition: 0 as const,
-            selected: { isSelected: false, created: 0 },
           },
         },
       }));
@@ -40,20 +39,7 @@ export const store = () => {
         }));
       };
 
-      const messages = (messages: MessageType[]) => {
-        setStore((store) => ({
-          ...store,
-          chats: {
-            ...store.chats,
-            [roomId]: {
-              ...store.chats?.[roomId],
-              messages: messages,
-            },
-          },
-        }));
-      };
-
-      const data = (data: MessageListType) => {
+      const data = (data: Partial<StoreType["chats"][RoomId]>) => {
         setStore((store) => ({
           ...store,
           chats: {
@@ -79,7 +65,7 @@ export const store = () => {
         }));
       };
 
-      return { editable, data, messages, scrollPosition };
+      return { editable, data, scrollPosition };
     };
 
     const flagAsBad = () => {

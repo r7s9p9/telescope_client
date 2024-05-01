@@ -157,7 +157,7 @@ function Button({
           ? () => handleClick()
           : () => undefined
       }
-      className="font-light text-lg flex justify-center items-center gap-2 px-2 py-2 w-32 bg-slate-100 outline-none shadow shadow-slate-200 ring-slate-300 border-slate-300 focus:ring-2 focus:shadow-slate-800 focus:bg-slate-50 focus:border-slate-50 active:ring-0 border-2 shadow-sm shadow-slate-400 border-slate-400 rounded-xl hover:ring-4 active:shadow-inner active:shadow-slate-700 active:bg-slate-200 active:border-slate-400 duration-300"
+      className="font-light text-lg flex justify-center items-center gap-2 px-2 py-2 w-32 bg-slate-100 outline-none ring-slate-300 focus:ring-2 focus:shadow-slate-800 focus:bg-slate-50 focus:border-slate-50 active:ring-0 border-2 shadow-sm shadow-slate-400 border-slate-400 rounded-xl hover:ring-4 active:shadow-inner active:shadow-slate-700 active:bg-slate-200 active:border-slate-400 duration-300"
       formNoValidate={true} // disable stock html validation
       disabled={isDisabled}
     >
@@ -202,7 +202,6 @@ function LoginForm({
   useResetForm(isShow, reset);
   const query = useQueryLogin();
   const navigate = useNavigate();
-
   const onSubmit: SubmitHandler<IFormValues> = async (data) => {
     const { success, isCodeNeeded } = await query.run(data);
 

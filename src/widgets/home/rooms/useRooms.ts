@@ -14,13 +14,13 @@ import {
   OVERSCREEN_ITEM_COUNT_TO_TRIGGER_FURTHER_LOADING,
   RELOAD_INTERVAL,
 } from "./constants";
-import { useCallbackStore } from "../../../shared/store/StoreProvider";
+import { useActionStore } from "../../../shared/store/StoreProvider";
 
 export function useRooms() {
   const navigate = useNavigate();
   const { roomId } = useParams();
 
-  const callbacks = useCallbackStore();
+  const action = useActionStore();
   const roomsUpdate = store().rooms().update;
   const storedData = store().rooms().read();
   const storedRooms = storedData?.items;
@@ -79,10 +79,8 @@ export function useRooms() {
     // Initial load
     loadRooms();
     // for access from other hooks
-    callbacks.reloadRooms = loadRooms;
+    action.reloadRooms = loadRooms;
   }, [roomId]);
-
-  console.log(callbacks);
 
   const loadRooms = useCallback(async () => {
     if (!storedRooms) await queryFull(ITEM_COUNT_FOR_INITIAL_LOADING);

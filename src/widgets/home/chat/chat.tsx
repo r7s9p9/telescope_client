@@ -1,7 +1,6 @@
 import {
   IconArrowDown,
   IconCopy,
-  IconDoorExit,
   IconDotsVertical,
   IconEdit,
   IconInfoCircle,
@@ -11,15 +10,8 @@ import {
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
-import {
-  Dispatch,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { MessageType, RoomType } from "../../../shared/api/api.schema";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { MessageType } from "../../../shared/api/api.schema";
 import { formatDate, isSameDay } from "../../../shared/lib/date";
 import React from "react";
 import { useChat } from "./useChat";
@@ -29,12 +21,31 @@ import { useQueryLeaveRoom } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
 import { Outlet, useNavigate } from "react-router-dom";
 import { routes } from "../../../constants";
-import { useCallbackStore } from "../../../shared/store/StoreProvider";
+import { useActionStore } from "../../../shared/store/StoreProvider";
+
+function messageParser(items: ReturnType<typeof useChat>["messages"]["items"], dateBubble: (created: number) => JSX.Element, message: (content: MessageType) => JSX.Element) {
+  if (!items || items.length === 0) return { isEmpty: true as const }
+
+  const readyMessages: JSX.Element[] = [];
+  let prevMessageCreated;
+
+  for (let i = items.length - 1; i >= 0; i--) {
+    const isSameCreatedDay =
+      prevMessageCreated && isSameDay(items[i].created, prevMessageCreated);
+    if (!isSameCreatedDay) {
+      prevMessageCreated = items[i].created;
+      readyMessages.push(dateBubble(items[i].created));
+    }
+    readyMessages.push(message(items[i]));
+  }
+
+  return { isEmpty: false as const, readyMessages}
+}
 
 export function Chat() {
   const {
+    roomId,
     info,
-    messagesRef,
     messages,
     debouncedHandleScroll,
     isUnreadMessage,
@@ -49,47 +60,40 @@ export function Chat() {
   const deleteAction = useDelete();
   const editAction = useEdit();
 
-  if (!messages) {
+  if (messages.isInitialLoading) {
     return (
       <Wrapper>
-        <Bar info={info} />
+        <TopBar info={info} roomId={roomId} />
         <Spinner />
-        <Send sendAction={sendAction} />
+        {info.isInitialLoading && <BottomBarSkeleton />}
+        {!info.isInitialLoading && !info.isMember && <BottomBarNoMember />}
+        {!info.isInitialLoading && info.isMember && (
+          <BottomBar sendAction={sendAction} />
+        )}
       </Wrapper>
     );
   }
 
-  const readyMessages: JSX.Element[] = [];
-  let prevMessageCreated;
-
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const isSameCreatedDay =
-      prevMessageCreated && isSameDay(messages[i].created, prevMessageCreated);
-    if (!isSameCreatedDay) {
-      prevMessageCreated = messages[i].created;
-      readyMessages.push(
-        <DateBubble
-          key={`date-${messages[i].created}`}
-          date={messages[i].created}
-        />,
-      );
-    }
-
-    readyMessages.push(
-      <Message
-        key={`message-${messages[i].created}`}
-        message={messages[i]}
-        deleteAction={deleteAction}
-        editAction={editAction}
-      />,
-    );
+  const messageJSX = (content: MessageType) => { return <Message
+  key={`message-${content.created}`}
+  message={content}
+  deleteAction={deleteAction}
+  editAction={editAction}
+/> }
+  const dateBubbleJSX = (created: number) => {
+    return  <DateBubble
+    key={`date-${created}`}
+    date={created}
+  />
   }
+
+  const { readyMessages, isEmpty } = messageParser(messages.items, dateBubbleJSX, messageJSX)
 
   return (
     <Wrapper>
-      <Bar info={info} />
+      <TopBar info={info} roomId={roomId as RoomId} />
       <Messages
-        listRef={messagesRef}
+        listRef={messages.ref}
         isUnreadMessage={isUnreadMessage}
         isShowScrollToBottom={isShowScrollToBottom}
         scrollToBottom={scrollToBottom}
@@ -97,7 +101,11 @@ export function Chat() {
       >
         {readyMessages}
       </Messages>
-      <Send editAction={editAction} sendAction={sendAction} />
+      {info.isInitialLoading && <BottomBarSkeleton />}
+      {!info.isInitialLoading && !info?.isMember && <BottomBarNoMember />}
+      {!info.isInitialLoading && info?.isMember && (
+        <BottomBar sendAction={sendAction} />
+      )}
     </Wrapper>
   );
 }
@@ -341,29 +349,44 @@ function MessageContextMenu({
   );
 }
 
-function Bar({ info }: { info?: RoomType }) {
+function TopBar({
+  info,
+  roomId,
+}: {
+  info: ReturnType<typeof useChat>["info"];
+  roomId: RoomId;
+}) {
+  const userCountStr = () => {
+    if (info.userCount === 0) {
+      return <p className="text-sm">no members</p>;
+    }
+    if (info.userCount === 1) {
+      return <p className="text-sm">1 member</p>;
+    }
+    if (info.userCount && info.userCount > 1) {
+      return <p className="text-sm">{info.userCount} members</p>;
+    }
+  };
+
   return (
     <div className="shrink-0 w-full h-16 px-4 font-light flex justify-between items-center border-x-2 border-slate-100 bg-slate-50 select-none">
-      {info ? (
+      {!info.isInitialLoading && (
         <>
           <div className="size-10 flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
-            {info.name.at(0)}
+            {info?.name?.at(0)}
           </div>
           <div className="flex flex-col ml-4 grow">
             <p className="text-xl">{info.name}</p>
             <div className="flex flex-row gap-1">
               <p className="text-sm capitalize">{info?.type}</p>
               <p className="text-sm">room,</p>
-              <p className="text-sm">
-                {info.userCount} {info.userCount > 1 ? "members" : "member"}
-              </p>
+              {userCountStr()}
             </div>
           </div>
         </>
-      ) : (
-        <BarSkeleton />
       )}
-      <BarMenu roomId={info?.roomId} />
+      {info.isInitialLoading && <BarSkeleton />}
+      <BarMenu roomId={roomId} />
     </div>
   );
 }
@@ -380,7 +403,7 @@ function BarSkeleton() {
   );
 }
 
-function BarMenu({ roomId }: { roomId?: RoomId }) {
+function BarMenu({ roomId }: { roomId: RoomId }) {
   const [isMenuOpened, setIsMenuOpened] = useState(false);
 
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -413,7 +436,7 @@ function BarMenu({ roomId }: { roomId?: RoomId }) {
 
   const queryLeave = useQueryLeaveRoom();
   const navigate = useNavigate();
-  const callbacks = useCallbackStore();
+  const action = useActionStore();
 
   async function onClickHandler(type: "info" | "leave") {
     if (roomId) {
@@ -423,7 +446,7 @@ function BarMenu({ roomId }: { roomId?: RoomId }) {
       if (type === "leave") {
         const { success } = await queryLeave.run(roomId);
         if (success) {
-          callbacks.reloadRooms();
+          action.reloadRooms();
           navigate({ pathname: routes.rooms.path });
         }
       }
@@ -502,7 +525,25 @@ function BarMenu({ roomId }: { roomId?: RoomId }) {
   );
 }
 
-function Send({
+function BottomBarSkeleton() {
+  return (
+    <div className="shrink-0 relative h-24 w-full flex items-center justify-center border-x-2 border-slate-100 bg-slate-50">
+      <div className="p-8 absolute rounded-full border-slate-300 border-x-2 animate-spin"></div>
+    </div>
+  );
+}
+
+function BottomBarNoMember() {
+  return (
+    <div className="shrink-0 relative h-24 w-full flex items-center justify-center border-x-2 border-slate-100 bg-slate-50">
+      <button className="px-6 py-2 text-xl font-light tracking-widest uppercase rounded-lg hover:bg-slate-200 duration-300">
+        Join
+      </button>
+    </div>
+  );
+}
+
+function BottomBar({
   editAction,
   sendAction,
 }: {
@@ -551,7 +592,7 @@ function Send({
       )}
       <form
         onSubmit={sendAction.onSubmit}
-        className="shrink-0 relative p-4 w-full flex items-center border-x-2 border-slate-100 bg-slate-50"
+        className="shrink-0 relative h-24 p-4 w-full flex items-center border-x-2 border-slate-100 bg-slate-50"
       >
         <textarea
           {...register("text")}

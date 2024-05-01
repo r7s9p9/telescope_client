@@ -12,7 +12,6 @@ export default function Home() {
   return (
     <div className="w-full h-full flex flex-row bg-slate-200">
       <NotifyStack />
-      {/* <HomeHeader /> */}
       <LeftPanel />
       <Outlet />
     </div>

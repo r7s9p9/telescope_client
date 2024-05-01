@@ -155,6 +155,22 @@ export const roomUpdateInfoSchema = z.object({
 
 export type RoomInfoUpdate = z.infer<typeof roomUpdateInfoSchema>;
 
+export const roomInfoSchema = z.object({
+  success: successSchema,
+  roomId: roomIdSchema,
+  info: z.object({
+    name: roomNameSchema,
+    type: roomTypeSchema,
+    about: roomAboutSchema,
+    created: roomCreatedSchema,
+    creatorId: z.union([userIdSchema, selfIdSchema, serviceIdSchema]),
+    userCount: z.number(),
+    isMember: z.boolean(),
+  }),
+});
+
+export type RoomInfoType = z.infer<typeof roomInfoSchema>;
+
 const roomSchema = z.object({
   roomId: roomIdSchema,
   name: roomNameSchema,
@@ -164,6 +180,7 @@ const roomSchema = z.object({
   creatorId: z.union([userIdSchema, selfIdSchema, serviceIdSchema]),
   unreadCount: z.number(),
   userCount: z.number(),
+  isMember: z.boolean(),
   lastMessage: messageSchema.optional(),
 });
 
@@ -180,7 +197,6 @@ export const messageReadSchema = z.object({
   access: accessSchema,
   success: successSchema,
   roomId: roomIdSchema,
-  name: z.string().optional(), // from useRooms
   allCount: allCountSchema.optional(),
   messages: z.array(messageSchema).optional(),
   dev: devSchema,

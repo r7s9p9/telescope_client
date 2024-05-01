@@ -12,7 +12,7 @@ import { Dispatch, useState } from "react";
 import { useQueryCreateRoom } from "../../../shared/api/api";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../../constants";
-import { useCallbackStore } from "../../../shared/store/StoreProvider";
+import { useActionStore } from "../../../shared/store/StoreProvider";
 
 export interface IFormValues {
   name: string;
@@ -37,7 +37,7 @@ export function CreateRoom() {
   });
 
   const query = useQueryCreateRoom();
-  const callbacks = useCallbackStore();
+  const action = useActionStore();
   const navigate = useNavigate();
 
   const [roomType, setRoomType] = useState<"public" | "private" | "single">(
@@ -51,7 +51,7 @@ export function CreateRoom() {
       data.about,
     );
     if (success) {
-      callbacks.reloadRooms();
+      action.reloadRooms();
       navigate({ pathname: routes.rooms.path + roomId });
     }
   };

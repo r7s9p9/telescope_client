@@ -26,6 +26,7 @@ import {
   roomUpdateInfoSchema,
   RoomInfoUpdate,
   searchRoomSchema,
+  roomInfoSchema,
 } from "./api.schema";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
@@ -79,6 +80,13 @@ function accountDataValidator(payload: object) {
 
 function roomsValidator(payload: object) {
   const result = roomsSchema.safeParse(payload);
+
+  if (!result.success) return { success: false as const, error: result.error };
+  return { success: true as const, data: result.data };
+}
+
+function roomInfoValidator(payload: object) {
+  const result = roomInfoSchema.safeParse(payload);
 
   if (!result.success) return { success: false as const, error: result.error };
   return { success: true as const, data: result.data };
@@ -173,6 +181,20 @@ export function useQueryRooms() {
     );
 
     const { success, data } = roomsValidator(response.payload);
+    if (!success) return { success: false as const };
+    return { success: true as const, data };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryRoomInfo() {
+  const query = useQuery(true);
+
+  const run = async (roomId: RoomId) => {
+    const { response } = await query.run(serverRoute.room.readInfo, { roomId });
+
+    const { success, data } = roomInfoValidator(response.payload);
     if (!success) return { success: false as const };
     return { success: true as const, data };
   };
