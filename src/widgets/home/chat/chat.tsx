@@ -14,14 +14,17 @@ import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { MessageType } from "../../../shared/api/api.schema";
 import { formatDate, isSameDay } from "../../../shared/lib/date";
 import React from "react";
-import { useChat } from "./useChat";
+import { useChat, useDelete, useEdit, useSend } from "./useChat";
 import { useMenuContext } from "../../context-menu/ContextMenu";
-import { UseFormRegister } from "react-hook-form";
-import { useQueryLeaveRoom } from "../../../shared/api/api";
+import { useQueryJoinRoom, useQueryLeaveRoom } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
 import { Outlet, useNavigate } from "react-router-dom";
 import { routes } from "../../../constants";
 import { useActionStore } from "../../../shared/store/StoreProvider";
+
+const noMessagesElement = <li className="flex flex-col h-fit p-2 mt-4 self-center bg-slate-50 rounded-xl ring-2 ring-slate-200 select-none">
+  <p className="text-sm text-justify">There are no messages here yet...</p>
+</li>
 
 function messageParser(items: ReturnType<typeof useChat>["messages"]["items"], dateBubble: (created: number) => JSX.Element, message: (content: MessageType) => JSX.Element) {
   if (!items || items.length === 0) return { isEmpty: true as const }
@@ -51,43 +54,31 @@ export function Chat() {
     isUnreadMessage,
     isShowScrollToBottom,
     scrollToBottom,
-    useSend,
-    useDelete,
-    useEdit,
   } = useChat();
-
-  const sendAction = useSend();
-  const deleteAction = useDelete();
-  const editAction = useEdit();
 
   if (messages.isInitialLoading) {
     return (
       <Wrapper>
         <TopBar info={info} roomId={roomId} />
         <Spinner />
-        {info.isInitialLoading && <BottomBarSkeleton />}
-        {!info.isInitialLoading && !info.isMember && <BottomBarNoMember />}
-        {!info.isInitialLoading && info.isMember && (
-          <BottomBar sendAction={sendAction} />
-        )}
+        <BottomBarWrapper roomId={roomId} isInitialLoading={info.isInitialLoading} isMember={info.isMember} />
       </Wrapper>
     );
   }
 
-  const messageJSX = (content: MessageType) => { return <Message
+  const messageElement = (content: MessageType) => { return <Message
   key={`message-${content.created}`}
   message={content}
-  deleteAction={deleteAction}
-  editAction={editAction}
 /> }
-  const dateBubbleJSX = (created: number) => {
+
+  const dateBubbleElement = (created: number) => {
     return  <DateBubble
     key={`date-${created}`}
     date={created}
   />
   }
 
-  const { readyMessages, isEmpty } = messageParser(messages.items, dateBubbleJSX, messageJSX)
+  const { readyMessages, isEmpty } = messageParser(messages.items, dateBubbleElement, messageElement)
 
   return (
     <Wrapper>
@@ -99,13 +90,10 @@ export function Chat() {
         scrollToBottom={scrollToBottom}
         onScroll={debouncedHandleScroll}
       >
-        {readyMessages}
+        { isEmpty ? noMessagesElement : readyMessages}
+        
       </Messages>
-      {info.isInitialLoading && <BottomBarSkeleton />}
-      {!info.isInitialLoading && !info?.isMember && <BottomBarNoMember />}
-      {!info.isInitialLoading && info?.isMember && (
-        <BottomBar sendAction={sendAction} />
-      )}
+      <BottomBarWrapper roomId={roomId} isInitialLoading={info.isInitialLoading} isMember={info.isMember} />
     </Wrapper>
   );
 }
@@ -201,21 +189,13 @@ function ScrollButton({
 }
 
 function Message({
-  message,
-  deleteAction,
-  editAction,
+  message
 }: {
   message: MessageType;
-  deleteAction: {
-    onDelete: (created: number) => Promise<{
-      success: boolean;
-    }>;
-    isLoading: boolean;
-  };
-  editAction: {
-    onEdit: (message: MessageType) => void;
-  };
 }) {
+  const editAction = useEdit()
+  const deleteAction = useDelete()
+
   const text = message.content.text;
   const date = formatDate().message(message.created, message.modified);
   if (message.authorId === "service") {
@@ -385,13 +365,13 @@ function TopBar({
           </div>
         </>
       )}
-      {info.isInitialLoading && <BarSkeleton />}
-      <BarMenu roomId={roomId} />
+      {info.isInitialLoading && <TopBarSkeleton />}
+      <TopBarMenu roomId={roomId} />
     </div>
   );
 }
 
-function BarSkeleton() {
+function TopBarSkeleton() {
   return (
     <div className="h-14 flex items-center animate-pulse">
       <div className="size-10 bg-slate-200 rounded-full"></div>
@@ -403,7 +383,7 @@ function BarSkeleton() {
   );
 }
 
-function BarMenu({ roomId }: { roomId: RoomId }) {
+function TopBarMenu({ roomId }: { roomId: RoomId }) {
   const [isMenuOpened, setIsMenuOpened] = useState(false);
 
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -436,7 +416,7 @@ function BarMenu({ roomId }: { roomId: RoomId }) {
 
   const queryLeave = useQueryLeaveRoom();
   const navigate = useNavigate();
-  const action = useActionStore();
+  const { reloadRooms, reloadChatInfo } = useActionStore();
 
   async function onClickHandler(type: "info" | "leave") {
     if (roomId) {
@@ -446,7 +426,8 @@ function BarMenu({ roomId }: { roomId: RoomId }) {
       if (type === "leave") {
         const { success } = await queryLeave.run(roomId);
         if (success) {
-          action.reloadRooms();
+          reloadRooms();
+          reloadChatInfo();
           navigate({ pathname: routes.rooms.path });
         }
       }
@@ -525,6 +506,12 @@ function BarMenu({ roomId }: { roomId: RoomId }) {
   );
 }
 
+function BottomBarWrapper({roomId, isInitialLoading, isMember}: {roomId: RoomId, isInitialLoading: boolean, isMember?: boolean}) {
+  if (isInitialLoading) return <BottomBarSkeleton />
+  if (isMember) return <BottomBar />
+  return <BottomBarNoMember roomId={roomId} />
+}
+
 function BottomBarSkeleton() {
   return (
     <div className="shrink-0 relative h-24 w-full flex items-center justify-center border-x-2 border-slate-100 bg-slate-50">
@@ -533,43 +520,32 @@ function BottomBarSkeleton() {
   );
 }
 
-function BottomBarNoMember() {
-  return (
-    <div className="shrink-0 relative h-24 w-full flex items-center justify-center border-x-2 border-slate-100 bg-slate-50">
-      <button className="px-6 py-2 text-xl font-light tracking-widest uppercase rounded-lg hover:bg-slate-200 duration-300">
+function BottomBarNoMember({roomId}: {roomId: RoomId}) {
+  const joinQuery = useQueryJoinRoom();
+  const { reloadRooms, reloadChatInfo } = useActionStore();
+  const joinAction = async () => {
+    const { success } = await joinQuery.run(roomId);
+    if (success) { reloadRooms(), reloadChatInfo() }
+  }
+
+  return (<>
+    { !joinQuery.isLoading && <div className="shrink-0 relative h-24 w-full flex items-center justify-center border-x-2 border-slate-100 bg-slate-50">
+     <button onClick={joinAction} className="px-6 py-2 text-xl font-light tracking-widest uppercase rounded-lg hover:bg-slate-200 duration-300">
         Join
       </button>
-    </div>
+    </div>}
+    { joinQuery.isLoading && <BottomBarSkeleton />}
+    </>
   );
 }
 
-function BottomBar({
-  editAction,
-  sendAction,
-}: {
-  editAction?: {
-    onEdit: (message: MessageType) => void;
-    closeEdit: () => void;
-    editable?: {
-      isExist: boolean;
-      message?: MessageType;
-    };
-  };
-  sendAction: {
-    register: UseFormRegister<{
-      text?: string | undefined;
-    }>;
-    onSubmit: (
-      e?: React.BaseSyntheticEvent<object, any, any> | undefined,
-    ) => Promise<void>;
-    isLoading: boolean;
-  };
-}) {
-  const { register, isLoading } = sendAction;
+function BottomBar() {
+  const editAction = useEdit();
+  const { register, isLoading, onSubmit } = useSend();
 
   return (
     <>
-      {editAction?.editable?.isExist && editAction.editable.message && (
+      {editAction.editable?.isExist && (
         <div className="w-full px-4 border-x-2 border-b-2 border-slate-100 bg-slate-50 flex flex-row items-center">
           <IconEdit
             className="shrink-0 text-slate-400"
@@ -591,14 +567,14 @@ function BottomBar({
         </div>
       )}
       <form
-        onSubmit={sendAction.onSubmit}
+        onSubmit={onSubmit}
         className="shrink-0 relative h-24 p-4 w-full flex items-center border-x-2 border-slate-100 bg-slate-50"
       >
         <textarea
           {...register("text")}
           rows={2}
           defaultValue={
-            editAction?.editable?.message?.content.text
+            editAction.editable?.isExist
               ? editAction.editable.message?.content.text
               : ""
           }

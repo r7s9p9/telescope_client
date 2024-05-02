@@ -461,3 +461,21 @@ export function useQueryLeaveRoom() {
 
   return { run, isLoading: query.isLoading };
 }
+
+export function useQueryJoinRoom() {
+  const query = useQuery(true);
+
+  const run = async (roomId: RoomId) => {
+    const { response } = await query.run(serverRoute.room.join, {
+      roomId,
+    });
+    if (response.payload.success && response.payload.access)
+      return {
+        success: true as const,
+        roomId: response.payload.roomId as RoomId,
+      };
+    return { success: false as const };
+  };
+
+  return { run, isLoading: query.isLoading };
+}

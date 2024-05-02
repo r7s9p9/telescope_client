@@ -8,6 +8,8 @@ const storeInit = {
 
 const callbackInit = {
   reloadRooms: () => {},
+  reloadChatInfo: () => {},
+  loadNewerMessages: () => {}
 };
 
 const StoreContext = createContext<StoreState>(storeInit);

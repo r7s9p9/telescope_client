@@ -37,7 +37,7 @@ export function CreateRoom() {
   });
 
   const query = useQueryCreateRoom();
-  const action = useActionStore();
+  const { reloadRooms } = useActionStore();
   const navigate = useNavigate();
 
   const [roomType, setRoomType] = useState<"public" | "private" | "single">(
@@ -51,7 +51,7 @@ export function CreateRoom() {
       data.about,
     );
     if (success) {
-      action.reloadRooms();
+      reloadRooms();
       navigate({ pathname: routes.rooms.path + roomId });
     }
   };

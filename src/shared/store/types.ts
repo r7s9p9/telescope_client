@@ -24,6 +24,8 @@ export type StoreType = {
 
 export type CallbackType = {
   reloadRooms: () => void;
+  reloadChatInfo: () => void,
+  loadNewerMessages: () => void
 };
 
 export type StoreState = {

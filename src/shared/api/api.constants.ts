@@ -50,6 +50,7 @@ export const serverRoute = {
     create: endpoint + "/api/room/create",
     delete: endpoint + "/api/room/delete",
     leave: endpoint + "/api/room/leave",
+    join: endpoint + "/api/room/join"
   },
   message: {
     read: endpoint + "/api/message/read",

@@ -23,6 +23,7 @@ import { routes } from "../../../constants";
 import { getRandomArray, getRandomBoolean } from "../../../shared/lib/random";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useActionStore } from "../../../shared/store/StoreProvider";
 
 const INFO_UPDATE_INTERVAL = 10000 as const;
 
@@ -42,17 +43,22 @@ const THRESHOLD_FOR_HIDE_SCROLL_BUTTON = 50 as const;
 const DEBOUNCE_SCROLL_INTERVAL = 200 as const;
 const SCROLL_HEIGHT_TO_TRIGGER_FURTHER_LOADING = 0.75 as const;
 
-const calcScrollBottom = (target: HTMLElement) => {
+const getScrollPosition = (target: HTMLElement) => {
   return target.scrollHeight - (target.offsetHeight + target.scrollTop);
 };
 
-const calcScrollTop = (target: HTMLElement, scrollBottom: number) => {
+const setScrollPosition = (target: HTMLElement, scrollBottom: number) => {
   if (!isFinite(scrollBottom)) {
     console.error("scrollBottom must be finite number");
-    return 0;
+    return;
   }
-  return target.scrollHeight - (target.offsetHeight + scrollBottom);
+  target.scrollTop = target.scrollHeight - (target.offsetHeight + scrollBottom);
 };
+
+const resetScrollPosition = (target: HTMLElement) => {
+  target.scrollTop = target.scrollHeight;
+  return target.scrollHeight;
+}
 
 const compareGenerator = (storedMessages: MessageDates[]) => {
   if (storedMessages.length === 0) {
@@ -145,6 +151,7 @@ const compareUpdater = (
 export function useChat() {
   const navigate = useNavigate();
   const { roomId } = useParams();
+  const action = useActionStore();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isRestoredScroll, setIsRestoredScroll] = useState(false);
@@ -249,16 +256,43 @@ export function useChat() {
         console.error("queryCompare !success");
       }
     }
-  }, [queryCompare, storedMessages, compareGenerator]);
-
-  // Update messages
-  useInterval(() => useLoadNewerMessages(), CHAT_UPDATE_INTERVAL);
+  }, [queryCompare, storedMessages ]);
 
   // Update info
   useInterval(() => useLoadInfo(), INFO_UPDATE_INTERVAL);
 
+  // Update messages
+  useInterval(() => useLoadNewerMessages(), CHAT_UPDATE_INTERVAL);
+
   // Compare existing messages
   useInterval(() => useCompareMessages(), CHAT_COMPARE_INTERVAL);
+
+  const initStoredChat = () => {
+    storeAction.create({
+      messages: { allCount: 0 },
+      scrollPosition: 0,
+      isFirstLoad: true,
+      editable: { isExist: false },
+    });
+  };
+
+  // Initial actions
+  useEffect(() => {
+    // wrong roomId protection
+    if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
+    // for access from other hooks
+    action.reloadChatInfo = useLoadInfo
+    action.loadNewerMessages = useLoadNewerMessages
+  }, []);
+
+  useEffect(() => {
+    // Initial load data if no chat in store
+    if (!storedChat) {
+      initStoredChat();
+      useLoadOlderMessages(0, CHAT_ITEM_COUNT_FOR_INITIAL_LOADING - 1);
+      useLoadInfo();
+    }
+  }, [storedChat]);
 
   const onScrollLoader = async () => {
     if (
@@ -286,191 +320,61 @@ export function useChat() {
         scrollPercent >= SCROLL_HEIGHT_TO_TRIGGER_FURTHER_LOADING;
       if (isLoadNeeded) onScrollLoader();
 
-      // Showing scroll to bottom button
-      const scrollBottom = calcScrollBottom(target);
-      if (scrollBottom >= THRESHOLD_FOR_SHOW_SCROLL_BUTTON) {
+      // Save scroll position
+      const scrollPosition = getScrollPosition(target);
+      storeAction.update().scrollPosition(scrollPosition);
+
+      // Scroll down button logic
+      if (scrollPosition >= THRESHOLD_FOR_SHOW_SCROLL_BUTTON) {
         setIsShowScrollToBottom(true);
       }
-      if (scrollBottom <= THRESHOLD_FOR_HIDE_SCROLL_BUTTON) {
+      if (scrollPosition <= THRESHOLD_FOR_HIDE_SCROLL_BUTTON) {
         setIsShowScrollToBottom(false);
         setIsUnreadMessage(false);
-      }
-
-      // Save scroll position (calc offset from bottom)
-      const scrollPosition = calcScrollBottom(target);
-
-      if (scrollPosition !== storedChat?.scrollPosition) {
-        storeAction.update().scrollPosition(scrollPosition);
       }
     },
     [isAllLoaded, isLoading, roomId, storedMessages],
   );
 
-  const debouncedHandleScroll = useMemo(
-    () => debounce(handleScroll, DEBOUNCE_SCROLL_INTERVAL),
-    [handleScroll, roomId],
-  );
+  const debouncedHandleScroll = debounce(handleScroll, DEBOUNCE_SCROLL_INTERVAL)
 
-  const initStoredChat = () => {
-    storeAction.create({
-      messages: { allCount: 0 },
-      scrollPosition: 0,
-      isFirstLoad: true,
-      editable: { isExist: false },
-    });
-  };
-
-  // Initial actions
+  // Restoring scroll position
   useEffect(() => {
-    // wrong roomId protection
-    if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
-  }, []);
-
-  useEffect(() => {
-    // Initial load data if no chat in store
-    if (!storedChat) {
-      initStoredChat();
-      useLoadOlderMessages(0, CHAT_ITEM_COUNT_FOR_INITIAL_LOADING - 1);
-      useLoadInfo();
-    }
-  }, [roomId, storedChat]);
-
-
-  if (messagesRef.current) console.log(messagesRef.current.scrollTop);
-
-  useEffect(() => {
-    // Restoring scroll
-    if (storedChat && messagesRef.current) {
-      console.log(storedChat.isFirstLoad)
-      if (!isRestoredScroll) {
-        if (!storedChat.isFirstLoad) {
-          messagesRef.current.scrollTop = calcScrollTop(
+    if (storedChat && messagesRef.current && !isRestoredScroll) {
+        if (storedChat.isFirstLoad) {
+          // Chat is loaded for the first time, the scroll position has not been set before
+          const scrollPosition = resetScrollPosition(messagesRef.current);
+          storeAction.update().scrollPosition(scrollPosition);
+          storeAction.update().data({ isFirstLoad: false })
+        } else {
+          // The chat has already been loaded and the scroll position was saved before
+          setScrollPosition(
             messagesRef.current,
             storedChat.scrollPosition,
           );
         }
-        if (storedChat.isFirstLoad) {
-          // First chat opening
-          messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-        }
-        storeAction.update().scrollPosition(calcScrollBottom(messagesRef.current))
-        storeAction.update().data({ isFirstLoad: false })
         setIsRestoredScroll(true);
-      }
-      // Scroll To Bottom if new messages
-      if (
-        !isShowScrollToBottom &&
-        isUnreadMessage
-      ) {
-        messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-        setIsShowScrollToBottom(false);
-        setIsUnreadMessage(false);
-      }
     }
   }, [messagesRef, storedChat, isRestoredScroll]);
+
+  // Scroll down the list if a new message appears and the button is not shown
+  useEffect(() => {
+    if (messagesRef.current && !isShowScrollToBottom && isUnreadMessage) {
+        const scrollPosition = resetScrollPosition(messagesRef.current);
+        storeAction.update().scrollPosition(scrollPosition);
+        setIsShowScrollToBottom(false);
+        setIsUnreadMessage(false);
+    }
+  }, [messagesRef, isShowScrollToBottom, isUnreadMessage]);
 
   // Handle click on ScrollBottom button
   const scrollToBottom = useCallback(() => {
     if (messagesRef.current) {
       setIsShowScrollToBottom(false);
       setIsUnreadMessage(false);
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      resetScrollPosition(messagesRef.current);
     }
   }, [messagesRef.current]);
-
-  const useSend = () => {
-    const { register, reset, handleSubmit } = useForm<SendMessageFormType>({
-      resolver: zodResolver(sendMessageFormSchema),
-    });
-
-    const querySend = useQuerySendMessage();
-    const queryUpdate = useQueryUpdateMessage();
-
-    const editable = storedChat?.editable;
-
-    const onSubmit = handleSubmit(async (data) => {
-      if (
-        data.text &&
-        !querySend.isLoading &&
-        !queryUpdate.isLoading &&
-        storedMessages
-      ) {
-        // If message edited
-        if (editable?.isExist) {
-          const result = await queryUpdate.run(
-            roomId as RoomId,
-            editable.message.created,
-            data,
-          );
-          if (result.success && result.access) {
-            const updatedMessages = storedMessages.map((message) => {
-              if (message.created === editable.message.created) {
-                return {
-                  ...message,
-                  content: data,
-                  modified: result.dates.modified,
-                };
-              }
-              return message;
-            }) as MessageType[];
-            storeAction.update().data({
-              ...storedChat,
-              messages: {
-                allCount: storedMessagesAllCount ? storedMessagesAllCount : 0,
-                items: updatedMessages,
-              },
-            });
-            storeAction.update().editable(false);
-          }
-        } else {
-          // If new message writed
-          const result = await querySend.run(roomId as RoomId, data);
-          if (result.success) {
-            useLoadNewerMessages();
-          }
-        }
-        reset();
-      }
-    });
-
-    return {
-      register,
-      onSubmit,
-      isLoading: querySend.isLoading || queryUpdate.isLoading,
-    };
-  };
-
-  const useDelete = () => {
-    const query = useQueryDeleteMessage();
-
-    const onDelete = async (created: MessageType["created"]) => {
-      const { success } = await query.run(roomId as RoomId, created);
-      if (success && storedMessages) {
-        const messages = storedMessages?.filter(
-          (message) => message.created !== created,
-        );
-        storeAction.update().data({
-          ...storedChat,
-          messages: { ...storedChat.messages, items: messages },
-        });
-      }
-      return { success };
-    };
-    return { onDelete, isLoading: query.isLoading };
-  };
-
-  const useEdit = () => {
-    const editable = storedChat?.editable;
-
-    const onEdit = (message: MessageType) => {
-      storeAction.update().editable(true, message);
-    };
-
-    const closeEdit = () => {
-      storeAction.update().editable(false);
-    };
-    return { onEdit, closeEdit, editable };
-  };
 
   return {
     roomId: roomId as RoomId,
@@ -486,9 +390,120 @@ export function useChat() {
     debouncedHandleScroll,
     isUnreadMessage,
     isShowScrollToBottom,
-    scrollToBottom,
-    useSend,
-    useDelete,
-    useEdit,
+    scrollToBottom
   };
 }
+
+export function useSend() {
+  const { register, reset, handleSubmit } = useForm<SendMessageFormType>({
+    resolver: zodResolver(sendMessageFormSchema),
+  });
+  const { roomId } = useParams();
+  const { loadNewerMessages } = useActionStore();
+  const storeAction = store().chat(roomId as RoomId);
+  const storedChat = store()
+    .chat(roomId as RoomId)
+    .read();
+  const storedMessages = storedChat?.messages?.items;
+  const storedMessagesAllCount = storedChat?.messages?.allCount;
+
+  const querySend = useQuerySendMessage();
+  const queryUpdate = useQueryUpdateMessage();
+
+  const editable = storedChat?.editable;
+
+  const onSubmit = handleSubmit(async (data) => {
+    if (
+      data.text &&
+      !querySend.isLoading &&
+      !queryUpdate.isLoading &&
+      storedMessages
+    ) {
+      // If message edited
+      if (editable?.isExist) {
+        const result = await queryUpdate.run(
+          roomId as RoomId,
+          editable.message.created,
+          data,
+        );
+        if (result.success && result.access) {
+          const updatedMessages = storedMessages.map((message) => {
+            if (message.created === editable.message.created) {
+              return {
+                ...message,
+                content: data,
+                modified: result.dates.modified,
+              };
+            }
+            return message;
+          }) as MessageType[];
+          storeAction.update().data({
+            ...storedChat,
+            messages: {
+              allCount: storedMessagesAllCount ? storedMessagesAllCount : 0,
+              items: updatedMessages,
+            },
+          });
+          storeAction.update().editable(false);
+        }
+      } else {
+        // If new message writed
+        const result = await querySend.run(roomId as RoomId, data);
+        if (result.success) {
+          loadNewerMessages();
+        }
+      }
+      reset();
+    }
+  });
+
+  return {
+    register,
+    onSubmit,
+    isLoading: querySend.isLoading || queryUpdate.isLoading,
+  };
+};
+
+export function useEdit() {
+  const { roomId } = useParams();
+  const storeAction = store().chat(roomId as RoomId);
+  const storedChat = store()
+    .chat(roomId as RoomId)
+    .read();
+
+  const editable = storedChat?.editable;
+
+  const onEdit = (message: MessageType) => {
+    storeAction.update().editable(true, message);
+  };
+
+  const closeEdit = () => {
+    storeAction.update().editable(false);
+  };
+  return { onEdit, closeEdit, editable };
+}
+
+export function useDelete() {
+  const { roomId } = useParams();
+  const storeAction = store().chat(roomId as RoomId);
+  const storedChat = store()
+    .chat(roomId as RoomId)
+    .read();
+  const storedMessages = storedChat?.messages?.items;
+  const query = useQueryDeleteMessage();
+
+  const onDelete = async (created: MessageType["created"]) => {
+    const { success } = await query.run(roomId as RoomId, created);
+    if (success && storedMessages) {
+      const messages = storedMessages?.filter(
+        (message) => message.created !== created,
+      );
+      storeAction.update().data({
+        ...storedChat,
+        messages: { ...storedChat.messages, items: messages },
+      });
+    }
+    return { success };
+  };
+  return { onDelete, isLoading: query.isLoading };
+};
