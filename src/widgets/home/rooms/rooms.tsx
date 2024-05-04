@@ -51,7 +51,8 @@ export function Rooms() {
     };
     if (isSearch) action();
     if (!isSearch) setFoundRooms(null);
-  }, [searchValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchValue, isSearch]);
 
   if (searchValue !== "") {
     return (

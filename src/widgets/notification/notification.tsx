@@ -22,6 +22,7 @@ const NotifyViewContext = createContext<NotifyState["data"]>({
   type: "info",
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useNotify = () => useContext(NotifyContext);
 
 export function NotifyProvider({ children }: { children: ReactNode }) {
@@ -49,6 +50,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
     </NotifyContext.Provider>
   );
 }
+
 export const NotifyStack = () => {
   const data = useContext(NotifyViewContext);
 

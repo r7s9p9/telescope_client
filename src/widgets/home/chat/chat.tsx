@@ -14,20 +14,33 @@ import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { MessageType } from "../../../shared/api/api.schema";
 import { formatDate, isSameDay } from "../../../shared/lib/date";
 import React from "react";
-import { useChat, useDelete, useEdit, useSend } from "./useChat";
+import {
+  useChat,
+  useDelete,
+  useEdit,
+  useInfo,
+  useLoadInfo,
+  useSend,
+} from "./useChat";
 import { useMenuContext } from "../../context-menu/ContextMenu";
 import { useQueryJoinRoom, useQueryLeaveRoom } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
 import { Outlet, useNavigate } from "react-router-dom";
 import { routes } from "../../../constants";
-import { useActionStore } from "../../../shared/store/StoreProvider";
+import { useLoadRooms } from "../rooms/useRooms";
 
-const noMessagesElement = <li className="flex flex-col h-fit p-2 mt-4 self-center bg-slate-50 rounded-xl ring-2 ring-slate-200 select-none">
-  <p className="text-sm text-justify">There are no messages here yet...</p>
-</li>
+const noMessagesElement = (
+  <li className="flex flex-col h-fit p-2 mt-4 self-center bg-slate-50 rounded-xl ring-2 ring-slate-200 select-none">
+    <p className="text-sm text-justify">There are no messages here yet...</p>
+  </li>
+);
 
-function messageParser(items: ReturnType<typeof useChat>["messages"]["items"], dateBubble: (created: number) => JSX.Element, message: (content: MessageType) => JSX.Element) {
-  if (!items || items.length === 0) return { isEmpty: true as const }
+function messageParser(
+  items: ReturnType<typeof useChat>["messages"],
+  dateBubble: (created: number) => JSX.Element,
+  message: (content: MessageType) => JSX.Element,
+) {
+  if (!items || items.length === 0) return { isEmpty: true as const };
 
   const readyMessages: JSX.Element[] = [];
   let prevMessageCreated;
@@ -42,58 +55,44 @@ function messageParser(items: ReturnType<typeof useChat>["messages"]["items"], d
     readyMessages.push(message(items[i]));
   }
 
-  return { isEmpty: false as const, readyMessages}
+  return { isEmpty: false as const, readyMessages };
 }
 
 export function Chat() {
-  const {
-    roomId,
-    info,
-    messages,
-    debouncedHandleScroll,
-    isUnreadMessage,
-    isShowScrollToBottom,
-    scrollToBottom,
-  } = useChat();
+  const chat = useChat();
 
-  if (messages.isInitialLoading) {
+  const info = useInfo();
+
+  if (chat?.isInitialLoading) {
     return (
       <Wrapper>
-        <TopBar info={info} roomId={roomId} />
+        <TopBar data={info} />
         <Spinner />
-        <BottomBarWrapper roomId={roomId} isInitialLoading={info.isInitialLoading} isMember={info.isMember} />
+        <BottomBarWrapper data={info} />
       </Wrapper>
     );
   }
 
-  const messageElement = (content: MessageType) => { return <Message
-  key={`message-${content.created}`}
-  message={content}
-/> }
-
+  const messageElement = (content: MessageType) => {
+    return <Message key={`message-${content.created}`} message={content} />;
+  };
   const dateBubbleElement = (created: number) => {
-    return  <DateBubble
-    key={`date-${created}`}
-    date={created}
-  />
-  }
+    return <DateBubble key={`date-${created}`} date={created} />;
+  };
 
-  const { readyMessages, isEmpty } = messageParser(messages.items, dateBubbleElement, messageElement)
+  const { readyMessages, isEmpty } = messageParser(
+    chat.messages,
+    dateBubbleElement,
+    messageElement,
+  );
 
   return (
     <Wrapper>
-      <TopBar info={info} roomId={roomId as RoomId} />
-      <Messages
-        listRef={messages.ref}
-        isUnreadMessage={isUnreadMessage}
-        isShowScrollToBottom={isShowScrollToBottom}
-        scrollToBottom={scrollToBottom}
-        onScroll={debouncedHandleScroll}
-      >
-        { isEmpty ? noMessagesElement : readyMessages}
-        
+      <TopBar data={info} />
+      <Messages chat={chat}>
+        {isEmpty ? noMessagesElement : readyMessages}
       </Messages>
-      <BottomBarWrapper roomId={roomId} isInitialLoading={info.isInitialLoading} isMember={info.isMember} />
+      <BottomBarWrapper data={info} />
     </Wrapper>
   );
 }
@@ -128,32 +127,24 @@ function DateBubble({ date }: { date: number }) {
 
 function Messages({
   children,
-  listRef,
-  isUnreadMessage,
-  isShowScrollToBottom,
-  scrollToBottom,
-  onScroll,
+  chat,
 }: {
   children: ReactNode;
-  listRef: React.RefObject<HTMLUListElement>;
-  isUnreadMessage: boolean;
-  isShowScrollToBottom: boolean;
-  scrollToBottom: ReturnType<typeof Function>;
-  onScroll: (e: React.UIEvent<HTMLElement>) => void;
+  chat: ReturnType<typeof useChat>;
 }) {
   return (
     <>
       <ul
-        ref={listRef}
-        onScroll={onScroll}
+        ref={chat.messagesRef}
+        onScroll={chat.debouncedHandleScroll}
         className="relative overflow-y-scroll will-change-scroll overscroll-none scroll-auto grow w-full p-4 flex flex-col bg-slate-200"
       >
         {children}
       </ul>
       <ScrollButton
-        isUnreadMessage={isUnreadMessage}
-        isShowScrollToBottom={isShowScrollToBottom}
-        scrollToBottom={scrollToBottom}
+        isUnreadMessage={chat?.isUnreadMessage}
+        isShowScrollToBottom={chat.isShowScrollToBottom}
+        scrollToBottom={chat.scrollToBottom}
       />
     </>
   );
@@ -164,7 +155,7 @@ function ScrollButton({
   isShowScrollToBottom,
   scrollToBottom,
 }: {
-  isUnreadMessage: boolean;
+  isUnreadMessage?: boolean;
   isShowScrollToBottom: boolean;
   scrollToBottom: ReturnType<typeof Function>;
 }) {
@@ -188,13 +179,10 @@ function ScrollButton({
   );
 }
 
-function Message({
-  message
-}: {
-  message: MessageType;
-}) {
-  const editAction = useEdit()
-  const deleteAction = useDelete()
+function Message({ message }: { message: MessageType }) {
+  const editAction = useEdit();
+  const deleteAction = useDelete();
+  const { openMenu, closeMenu } = useMenuContext();
 
   const text = message.content.text;
   const date = formatDate().message(message.created, message.modified);
@@ -208,8 +196,6 @@ function Message({
   }
 
   const isYourMessage = message.authorId === "self";
-
-  const { openMenu, closeMenu } = useMenuContext();
 
   function onContextHandler(e: React.MouseEvent<HTMLElement, MouseEvent>) {
     openMenu(
@@ -303,8 +289,8 @@ function MessageContextMenu({
   }
 
   async function onClickHandler(type: "reply" | "edit" | "copy" | "delete") {
-    if (type === "reply") {
-    }
+    // if (type === "reply") {
+    // }
     if (type === "edit") {
       editAction.onEdit(message);
       closeMenu();
@@ -329,44 +315,38 @@ function MessageContextMenu({
   );
 }
 
-function TopBar({
-  info,
-  roomId,
-}: {
-  info: ReturnType<typeof useChat>["info"];
-  roomId: RoomId;
-}) {
+function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
   const userCountStr = () => {
-    if (info.userCount === 0) {
+    if (data.info.userCount === 0) {
       return <p className="text-sm">no members</p>;
     }
-    if (info.userCount === 1) {
+    if (data.info.userCount === 1) {
       return <p className="text-sm">1 member</p>;
     }
-    if (info.userCount && info.userCount > 1) {
-      return <p className="text-sm">{info.userCount} members</p>;
+    if (data.info.userCount && data.info.userCount > 1) {
+      return <p className="text-sm">{data.info.userCount} members</p>;
     }
   };
 
   return (
     <div className="shrink-0 w-full h-16 px-4 font-light flex justify-between items-center border-x-2 border-slate-100 bg-slate-50 select-none">
-      {!info.isInitialLoading && (
+      {!data.info.isInitialLoading && (
         <>
           <div className="size-10 flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
-            {info?.name?.at(0)}
+            {data.info?.name?.at(0)}
           </div>
           <div className="flex flex-col ml-4 grow">
-            <p className="text-xl">{info.name}</p>
+            <p className="text-xl">{data.info.name}</p>
             <div className="flex flex-row gap-1">
-              <p className="text-sm capitalize">{info?.type}</p>
+              <p className="text-sm capitalize">{data.info?.type}</p>
               <p className="text-sm">room,</p>
               {userCountStr()}
             </div>
           </div>
         </>
       )}
-      {info.isInitialLoading && <TopBarSkeleton />}
-      <TopBarMenu roomId={roomId} />
+      {data.info.isInitialLoading && <TopBarSkeleton />}
+      <TopBarMenu roomId={data.roomId} isMember={data.info.isMember} />
     </div>
   );
 }
@@ -383,7 +363,13 @@ function TopBarSkeleton() {
   );
 }
 
-function TopBarMenu({ roomId }: { roomId: RoomId }) {
+function TopBarMenu({
+  roomId,
+  isMember,
+}: {
+  roomId: RoomId;
+  isMember?: boolean;
+}) {
   const [isMenuOpened, setIsMenuOpened] = useState(false);
 
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -404,7 +390,7 @@ function TopBarMenu({ roomId }: { roomId: RoomId }) {
         closeMenu();
       }
     },
-    [contentRef.current, buttonRef.current],
+    [contentRef, buttonRef],
   );
 
   useEffect(() => {
@@ -412,11 +398,14 @@ function TopBarMenu({ roomId }: { roomId: RoomId }) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const queryLeave = useQueryLeaveRoom();
   const navigate = useNavigate();
-  const { reloadRooms, reloadChatInfo } = useActionStore();
+
+  const loadInfo = useLoadInfo();
+  const loadRooms = useLoadRooms();
 
   async function onClickHandler(type: "info" | "leave") {
     if (roomId) {
@@ -426,8 +415,8 @@ function TopBarMenu({ roomId }: { roomId: RoomId }) {
       if (type === "leave") {
         const { success } = await queryLeave.run(roomId);
         if (success) {
-          reloadRooms();
-          reloadChatInfo();
+          loadRooms.run();
+          loadInfo.run();
           navigate({ pathname: routes.rooms.path });
         }
       }
@@ -500,16 +489,16 @@ function TopBarMenu({ roomId }: { roomId: RoomId }) {
         className="absolute z-10 flex flex-col right-0 top-16 duration-300 ease-in-out border-t-2 border-slate-100 bg-slate-50 shadow-md font-normal"
       >
         <Button type="info" onClick={onClickHandler} />
-        <Button type="leave" onClick={onClickHandler} />
+        {isMember && <Button type="leave" onClick={onClickHandler} />}
       </div>
     </>
   );
 }
 
-function BottomBarWrapper({roomId, isInitialLoading, isMember}: {roomId: RoomId, isInitialLoading: boolean, isMember?: boolean}) {
-  if (isInitialLoading) return <BottomBarSkeleton />
-  if (isMember) return <BottomBar />
-  return <BottomBarNoMember roomId={roomId} />
+function BottomBarWrapper({ data }: { data: ReturnType<typeof useInfo> }) {
+  if (data.info?.isInitialLoading) return <BottomBarSkeleton />;
+  if (data.info?.isMember) return <BottomBar />;
+  return <BottomBarNoMember roomId={data.roomId} />;
 }
 
 function BottomBarSkeleton() {
@@ -520,21 +509,31 @@ function BottomBarSkeleton() {
   );
 }
 
-function BottomBarNoMember({roomId}: {roomId: RoomId}) {
+function BottomBarNoMember({ roomId }: { roomId: RoomId }) {
   const joinQuery = useQueryJoinRoom();
-  const { reloadRooms, reloadChatInfo } = useActionStore();
+  const loadInfo = useLoadInfo();
+  const loadRooms = useLoadRooms();
   const joinAction = async () => {
     const { success } = await joinQuery.run(roomId);
-    if (success) { reloadRooms(), reloadChatInfo() }
-  }
+    if (success) {
+      loadRooms.run();
+      loadInfo.run();
+    }
+  };
 
-  return (<>
-    { !joinQuery.isLoading && <div className="shrink-0 relative h-24 w-full flex items-center justify-center border-x-2 border-slate-100 bg-slate-50">
-     <button onClick={joinAction} className="px-6 py-2 text-xl font-light tracking-widest uppercase rounded-lg hover:bg-slate-200 duration-300">
-        Join
-      </button>
-    </div>}
-    { joinQuery.isLoading && <BottomBarSkeleton />}
+  return (
+    <>
+      {!joinQuery.isLoading && (
+        <div className="shrink-0 relative h-24 w-full flex items-center justify-center border-x-2 border-slate-100 bg-slate-50">
+          <button
+            onClick={joinAction}
+            className="px-6 py-2 text-xl font-light tracking-widest uppercase rounded-lg hover:bg-slate-200 duration-300"
+          >
+            Join
+          </button>
+        </div>
+      )}
+      {joinQuery.isLoading && <BottomBarSkeleton />}
     </>
   );
 }

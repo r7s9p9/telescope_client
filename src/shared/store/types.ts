@@ -15,17 +15,12 @@ export type StoreType = {
         messages: { allCount: number; items?: MessageListType["messages"] };
         info: RoomInfoType["info"];
         isFirstLoad: boolean;
+        isNewMessages: boolean;
         scrollPosition: number;
         editable: { isExist: true; message: MessageType } | { isExist: false };
       }
     | undefined
   >;
-};
-
-export type CallbackType = {
-  reloadRooms: () => void;
-  reloadChatInfo: () => void,
-  loadNewerMessages: () => void
 };
 
 export type StoreState = {

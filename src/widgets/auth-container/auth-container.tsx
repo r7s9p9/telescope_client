@@ -31,7 +31,7 @@ import { message } from "./constants";
 const useResetForm = (isShow: boolean, reset: UseFormReset<IFormValues>) =>
   useEffect(() => {
     if (isShow) reset();
-  }, [isShow]);
+  }, [isShow, reset]);
 
 export function AuthContainer({ type }: { type: "login" | "register" }) {
   const [showItem, setShowItem] = useState<ShowItemState["showItem"]>(type);
@@ -47,14 +47,14 @@ export function AuthContainer({ type }: { type: "login" | "register" }) {
       // remove state from location
       navigate({ pathname: location.pathname });
     }
-  }, [location.state]);
+  }, [location, navigate, notify.show]);
 
   // /login/code route protection
   useEffect(() => {
     if (location.pathname === routes.code.path && showItem !== "code") {
       navigate({ pathname: routes.login.path });
     }
-  }, [location]);
+  }, [location, navigate, showItem]);
 
   function handleCodeRequired(email: string) {
     setShowItem("code");

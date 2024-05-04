@@ -33,6 +33,7 @@ const MenuContext = createContext<{
   closeMenu: () => {},
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useMenuContext = () => useContext(MenuContext);
 
 export const ContextMenuProvider = ({
@@ -100,7 +101,7 @@ export const ContextMenuProvider = ({
       document.removeEventListener("click", handleClickOutside);
       document.removeEventListener("contextmenu", handleContextMenu);
     };
-  }, [data, targetRef.current]);
+  }, [data, targetRef]);
 
   return (
     <MenuContext.Provider

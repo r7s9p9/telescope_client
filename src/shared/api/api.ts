@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RoomId, UserId } from "../../types";
+import { RoomId } from "../../types";
 import {
   compareMessages,
   deleteMessage,
@@ -31,7 +31,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
 
-const fetcher = async (route: string, body: any) => {
+const fetcher = async (route: string, body: object) => {
   const result = await fetch(route, {
     method: "POST",
     headers: {
@@ -47,7 +47,7 @@ function useQuery(isCheckAuth: boolean) {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const run = async (route: string, body: any) => {
+  const run = async (route: string, body: object) => {
     setIsLoading(true);
     const response = await fetcher(route, body);
     setIsLoading(false);

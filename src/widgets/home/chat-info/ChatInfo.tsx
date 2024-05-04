@@ -17,13 +17,13 @@ import {
   useQueryUpdateRoom,
 } from "../../../shared/api/api";
 import { RoomId, UserId } from "../../../types";
-import { useActionStore } from "../../../shared/store/StoreProvider";
 import { checkUserId } from "../../../shared/lib/uuid";
+import { useLoadInfo } from "../chat/useChat";
 
 export function ChatInfo() {
   const { roomId } = useParams();
   const navigate = useNavigate();
-  // TODO make rooms stored in objects
+
   let storedInfo: RoomType | undefined;
 
   const roomsInfo = store().rooms().read()?.items;
@@ -38,9 +38,9 @@ export function ChatInfo() {
 
   const isAdmin = storedInfo?.creatorId === "self";
 
-  function close() {
+  const close = useCallback(() => {
     navigate({ pathname: routes.rooms.path + roomId });
-  }
+  }, [navigate, roomId]);
 
   const contentRef = useRef<HTMLDivElement | null>(null);
 
@@ -53,7 +53,7 @@ export function ChatInfo() {
         close();
       }
     },
-    [contentRef.current],
+    [contentRef, close],
   );
 
   useEffect(() => {
@@ -61,6 +61,7 @@ export function ChatInfo() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -105,7 +106,7 @@ function Info({
   data: RoomType;
   isAdmin: boolean;
 }) {
-  let defaultInfo = {
+  const defaultInfo = {
     name: data.name,
     creatorId: data.creatorId,
     type: data.type,
@@ -116,7 +117,7 @@ function Info({
   const [info, setInfo] = useState(defaultInfo);
 
   const navigate = useNavigate();
-  const action = useActionStore();
+  const loadInfo = useLoadInfo();
   const queryUpdate = useQueryUpdateRoom();
   const queryDelete = useQueryDeleteRoom();
 
@@ -159,7 +160,7 @@ function Info({
       const { isUpdated, info } = sendHandler();
       if (isUpdated) {
         const { success } = await queryUpdate.run(roomId, info);
-        if (success) action.reloadRooms();
+        if (success) loadInfo.run();
       }
       setIsEdit(false);
     }

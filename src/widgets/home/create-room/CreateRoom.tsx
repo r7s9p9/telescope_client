@@ -12,7 +12,7 @@ import { Dispatch, useState } from "react";
 import { useQueryCreateRoom } from "../../../shared/api/api";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../../constants";
-import { useActionStore } from "../../../shared/store/StoreProvider";
+import { useLoadRooms } from "../rooms/useRooms";
 
 export interface IFormValues {
   name: string;
@@ -29,7 +29,6 @@ export type InputProps = {
 export function CreateRoom() {
   const {
     register,
-    reset,
     formState: { errors },
     handleSubmit,
   } = useForm<IFormValues>({
@@ -37,7 +36,7 @@ export function CreateRoom() {
   });
 
   const query = useQueryCreateRoom();
-  const { reloadRooms } = useActionStore();
+  const loadRooms = useLoadRooms();
   const navigate = useNavigate();
 
   const [roomType, setRoomType] = useState<"public" | "private" | "single">(
@@ -51,7 +50,7 @@ export function CreateRoom() {
       data.about,
     );
     if (success) {
-      reloadRooms();
+      loadRooms.run();
       navigate({ pathname: routes.rooms.path + roomId });
     }
   };

@@ -14,36 +14,44 @@ import {
   OVERSCREEN_ITEM_COUNT_TO_TRIGGER_FURTHER_LOADING,
   RELOAD_INTERVAL,
 } from "./constants";
-import { useActionStore } from "../../../shared/store/StoreProvider";
 
-export function useRooms() {
-  const navigate = useNavigate();
-  const { roomId } = useParams();
-
-  const action = useActionStore();
-  const roomsUpdate = store().rooms().update;
+export function useLoadRooms() {
+  const query = useQueryRooms();
+  const storeAction = store().rooms();
   const storedData = store().rooms().read();
   const storedRooms = storedData?.items;
 
-  const isZeroItemCount = storedData?.allCount === 0;
-  const isAllLoaded = !!(
-    storedData && storedData.allCount === storedRooms?.length
-  );
+  const run = useCallback(
+    async (max?: number) => {
+      if (!max) {
+        if (storedRooms && storedRooms?.length !== 0) {
+          max = storedRooms?.length;
+        } else {
+          max = ITEM_COUNT_FOR_INITIAL_LOADING;
+        }
+      }
 
-  const query = useQueryRooms();
-
-  const queryFull = useCallback(
-    async (max: number) => {
       const { success, data } = await query.run({ min: 0 as const, max });
       if (success && data) {
-        roomsUpdate(data);
+        storeAction.update(data);
       }
       if (!success) console.error("Rooms no success");
     },
-    [query, storedData],
+    [query, storeAction, storedRooms],
   );
 
-  const queryRange = useCallback(
+  return { run };
+}
+
+function usePartiallyLoadRooms() {
+  const query = useQueryRooms();
+  const storedData = store().rooms().read();
+  const storedRooms = storedData?.items;
+  const storeAction = store().rooms();
+
+  const loadRooms = useLoadRooms();
+
+  const run = useCallback(
     async (min: number, max: number) => {
       const { success, data } = await query.run({
         min,
@@ -56,39 +64,53 @@ export function useRooms() {
               storedRooms[i + min] &&
               storedRooms[i + min].roomId !== data.items[i].roomId
             ) {
-              await queryFull(max);
+              await loadRooms.run(max);
               return;
             }
           }
-          roomsUpdate({
+          storeAction.update({
             success: data.success,
             allCount: data.allCount,
             items: (storedRooms || []).concat(data.items || []),
           });
         }
-        if (storedData.allCount !== data.allCount) await queryFull(max);
+        if (storedData.allCount !== data.allCount) await loadRooms.run(max);
       }
       if (!success) console.error("Rooms no success");
     },
-    [query, storedData],
+    [query, loadRooms, storeAction, storedData, storedRooms],
   );
+
+  return { run };
+}
+
+export function useRooms() {
+  const navigate = useNavigate();
+  const { roomId } = useParams();
+
+  const storedData = store().rooms().read();
+  const storedRooms = storedData?.items;
+
+  const isZeroItemCount = storedData?.allCount === 0;
+  const isAllLoaded = !!(
+    storedData && storedData.allCount === storedRooms?.length
+  );
+
+  const loadRooms = useLoadRooms();
+  const partialLoadRooms = usePartiallyLoadRooms();
+
+  // Reload rooms
+  useInterval(() => {
+    if (storedRooms) loadRooms.run(storedRooms.length);
+  }, RELOAD_INTERVAL);
 
   useEffect(() => {
     // wrong roomId protection
     if (roomId && !checkRoomId(roomId)) navigate(routes.rooms.path);
     // Initial load
-    loadRooms();
-    // for access from other hooks
-    action.reloadRooms = loadRooms;
-  }, [roomId]);
-
-  const loadRooms = useCallback(async () => {
-    if (!storedRooms) await queryFull(ITEM_COUNT_FOR_INITIAL_LOADING);
-    if (storedRooms) await queryFull(storedRooms.length);
-  }, [storedRooms]);
-
-  // Reload rooms
-  useInterval(() => loadRooms(), RELOAD_INTERVAL);
+    loadRooms.run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleScroll = useCallback(
     async (e: React.UIEvent<HTMLElement>) => {
@@ -107,23 +129,23 @@ export function useRooms() {
             lastLoadedIndex + OVERSCREEN_ITEM_COUNT_FOR_FURTHER_LOADING >
             storedData.allCount
           ) {
-            await queryRange(lastLoadedIndex, storedData.allCount);
+            await partialLoadRooms.run(lastLoadedIndex, storedData.allCount);
           }
           if (lastVisibleIndex > lastLoadedIndex) {
             const stopItem =
               lastVisibleIndex + OVERSCREEN_ITEM_COUNT_FOR_FURTHER_LOADING;
             stopItem > storedData.allCount
-              ? await queryRange(lastLoadedIndex, storedData.allCount)
-              : await queryRange(lastLoadedIndex, stopItem);
+              ? await partialLoadRooms.run(lastLoadedIndex, storedData.allCount)
+              : await partialLoadRooms.run(lastLoadedIndex, stopItem);
           } else {
             const stopItem =
               lastLoadedIndex + OVERSCREEN_ITEM_COUNT_FOR_FURTHER_LOADING;
-            await queryRange(lastLoadedIndex, stopItem);
+            await partialLoadRooms.run(lastLoadedIndex, stopItem);
           }
         }
       }
     },
-    [storedData, queryRange],
+    [storedData, partialLoadRooms, isAllLoaded, isZeroItemCount, storedRooms],
   );
 
   const debouncedHandleScroll = useMemo(
