@@ -89,10 +89,13 @@ export const store = () => {
       return store.rooms;
     };
 
-    const update = (data: RoomsType) => {
+    const update = (data: Partial<RoomsType>) => {
       setStore((store) => ({
         ...store,
-        rooms: data,
+        rooms: {
+          ...store.rooms,
+          ...data,
+        },
       }));
     };
 
