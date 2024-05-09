@@ -1,6 +1,6 @@
 import { RoomId } from "../../types";
 import {
-  MessageListType,
+  MessageReadType,
   MessageType,
   RoomInfoType,
   RoomsType,
@@ -12,7 +12,7 @@ export type StoreType = {
     RoomId,
     | {
         roomId: RoomId;
-        messages: { allCount: number; items?: MessageListType["messages"] };
+        messages: { allCount: number; items?: MessageReadType["messages"] };
         info: RoomInfoType["info"];
         isFirstLoad: boolean;
         isNewMessages: boolean;

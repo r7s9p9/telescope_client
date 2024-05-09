@@ -57,6 +57,28 @@ export const registerFormSchema = z.object({
   password: passwordSchema,
 });
 
+export const authLoginSchema = z.object({
+  success: z.boolean(),
+  code: z.boolean(),
+});
+export type AuthLoginType = z.infer<typeof authLoginSchema>;
+
+export const authCodeSchema = z.object({
+  success: z.boolean(),
+});
+export type AuthCodeType = z.infer<typeof authCodeSchema>;
+
+export const authRegisterSchema = z.object({
+  success: z.boolean(),
+  errorCode: z
+    .union([
+      z.literal("EMAIL_ALREADY_EXISTS"),
+      z.literal("USERNAME_ALREADY_EXISTS"),
+    ])
+    .optional(),
+});
+export type AuthRegisterType = z.infer<typeof authRegisterSchema>;
+
 const accessSchema = z.boolean();
 const successSchema = z.boolean();
 const allCountSchema = z.number();
@@ -98,6 +120,11 @@ export const accountReadSchema = z.object({
 });
 
 export type AccountReadType = z.infer<typeof accountReadSchema>;
+
+export const logoutSchema = z.object({
+  success: z.boolean(),
+});
+export type LogoutType = z.infer<typeof logoutSchema>;
 
 const messageContent = z.object({ text: z.string().min(1) });
 const messageAuthorId = z.union([userIdSchema, selfIdSchema, serviceIdSchema]);
@@ -197,12 +224,11 @@ export const messageReadSchema = z.object({
   access: accessSchema,
   success: successSchema,
   roomId: roomIdSchema,
-  allCount: allCountSchema.optional(),
+  allCount: allCountSchema,
   messages: z.array(messageSchema).optional(),
-  dev: devSchema,
 });
 
-export type MessageListType = z.infer<typeof messageReadSchema>;
+export type MessageReadType = z.infer<typeof messageReadSchema>;
 
 export const messageCompareSchema = z.object({
   access: accessSchema,
@@ -213,6 +239,7 @@ export const messageCompareSchema = z.object({
   toUpdate: z.array(messageSchema).optional(),
   dev: devSchema,
 });
+export type MessageCompareType = z.infer<typeof messageCompareSchema>;
 
 export const sendMessageFormSchema = z.object({
   text: z.string().trim().optional(),
@@ -232,6 +259,7 @@ export const messageSendSchema = z
       created: messageCreated,
     }),
   );
+export type MessageSendType = z.infer<typeof messageSendSchema>;
 
 export const messageUpdateSchema = z
   .object({
@@ -246,17 +274,52 @@ export const messageUpdateSchema = z
     }),
   );
 
+export type MessageUpdateType = z.infer<typeof messageUpdateSchema>;
+
 export const messageDeleteSchema = z.object({
   access: z.boolean(),
   success: z.boolean(),
 });
+
+export type MessageDeleteType = z.infer<typeof messageDeleteSchema>;
 
 export const createRoomFormSchema = z.object({
   name: roomNameSchema.min(4),
   about: roomAboutSchema,
 });
 
-export const searchRoomSchema = z
+export const roomCreateSchema = z.object({
+  success: z.boolean(),
+  roomId: roomIdSchema.optional(),
+});
+export type RoomCreateType = z.infer<typeof roomCreateSchema>;
+
+export const roomUpdateSchema = z.object({
+  success: z.boolean(),
+  roomId: roomIdSchema.optional(),
+});
+export type RoomUpdateType = z.infer<typeof roomUpdateSchema>;
+
+export const roomDeleteSchema = z.object({
+  success: z.boolean(),
+  roomId: roomIdSchema,
+});
+export type RoomDeleteType = z.infer<typeof roomDeleteSchema>;
+
+export const roomLeaveSchema = z.object({
+  success: z.boolean(),
+  roomId: roomIdSchema,
+});
+export type RoomLeaveType = z.infer<typeof roomLeaveSchema>;
+
+export const roomJoinSchema = z.object({
+  success: z.boolean(),
+  access: z.boolean(),
+  roomId: roomIdSchema,
+});
+export type RoomJoinType = z.infer<typeof roomJoinSchema>;
+
+export const searchRoomsSchema = z
   .object({
     success: z.boolean(),
     isEmpty: z.literal(false),
@@ -275,4 +338,4 @@ export const searchRoomSchema = z
     }),
   );
 
-export type SearchRooms = z.infer<typeof searchRoomSchema>;
+export type SearchRoomsType = z.infer<typeof searchRoomsSchema>;

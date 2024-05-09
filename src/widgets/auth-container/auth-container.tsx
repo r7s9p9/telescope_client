@@ -202,13 +202,14 @@ function LoginForm({
   useResetForm(isShow, reset);
   const query = useQueryLogin();
   const navigate = useNavigate();
-  const onSubmit: SubmitHandler<IFormValues> = async (data) => {
-    const { success, isCodeNeeded } = await query.run(data);
-
+  const onSubmit: SubmitHandler<IFormValues> = async (formData) => {
+    const { success, data } = await query.run(formData);
+    // TODO make warning 500
+    if (!success) return;
     if (!query.isLoading) {
-      if (!success && !isCodeNeeded) notify.show.error(message.badAuth);
-      if (success && isCodeNeeded) handleCodeRequired(data.email);
-      if (success && !isCodeNeeded) navigate({ pathname: routes.home.path });
+      if (!data.success && !data.code) notify.show.error(message.badAuth);
+      if (data.success && data.code) handleCodeRequired(formData.email);
+      if (data.success && !data.code) navigate({ pathname: routes.home.path });
     }
   };
 
@@ -297,11 +298,11 @@ function CodeForm({
   const navigate = useNavigate();
   const query = useQueryCode();
 
-  const onSubmit: SubmitHandler<IFormValues> = async (data) => {
-    const { success } = await query.run({ ...data, email });
+  const onSubmit: SubmitHandler<IFormValues> = async (formData) => {
+    const { success, data } = await query.run({ ...formData, email });
 
     if (!query.isLoading) {
-      if (!success) notify.show.error(message.badCode);
+      if (!success || !data.success) notify.show.error(message.badCode);
       if (success) navigate({ pathname: routes.home.path });
     }
   };
@@ -385,10 +386,12 @@ function RegisterForm({
   const navigate = useNavigate();
   const query = useQueryRegister();
 
-  const onSubmit: SubmitHandler<IFormValues> = async (data) => {
-    const result = await query.run(data);
-    if (!result.success) {
-      switch (result.errorCode) {
+  const onSubmit: SubmitHandler<IFormValues> = async (formData) => {
+    const { success, data } = await query.run(formData);
+    // TODO make warning 500
+    if (!success) return;
+    if (!data.success) {
+      switch (data.errorCode) {
         case "EMAIL_ALREADY_EXISTS":
           notify.show.error(message.badRegisterEmailExists);
           break;

@@ -43,15 +43,16 @@ export function CreateRoom() {
     "private",
   );
 
-  const onSubmit: SubmitHandler<IFormValues> = async (data) => {
-    const { success, roomId } = await query.run(
-      data.name,
+  const onSubmit: SubmitHandler<IFormValues> = async (formData) => {
+    const { success, data } = await query.run(
+      formData.name,
       roomType,
-      data.about,
+      formData.about,
     );
-    if (success) {
+    // TODO 500 error
+    if (success && data.success) {
       loadRooms.run();
-      navigate({ pathname: routes.rooms.path + roomId });
+      navigate({ pathname: routes.rooms.path + data.roomId });
     }
   };
 

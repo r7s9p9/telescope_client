@@ -1,7 +1,5 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useCallback, useEffect, useMemo } from "react";
-import { checkRoomId } from "../../../shared/lib/uuid";
-import { routes } from "../../../constants";
 import { useQueryRooms } from "../../../shared/api/api";
 import { store } from "../../../shared/store/store";
 import { useInterval } from "../../../shared/lib/useInterval";
@@ -69,7 +67,6 @@ export function useLoadMoreRooms() {
 }
 
 export function useRooms() {
-  const navigate = useNavigate();
   const { roomId } = useParams();
 
   const storedData = store().rooms().read();
@@ -88,10 +85,8 @@ export function useRooms() {
     if (storedRooms) loadRooms.run();
   }, RELOAD_INTERVAL);
 
+  // Initial load
   useEffect(() => {
-    // wrong roomId protection
-    if (roomId && !checkRoomId(roomId)) navigate(routes.rooms.path);
-    // Initial load
     loadRooms.run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

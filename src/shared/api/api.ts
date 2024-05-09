@@ -25,11 +25,38 @@ import {
   RoomType,
   roomUpdateInfoSchema,
   RoomInfoUpdate,
-  searchRoomSchema,
   roomInfoSchema,
+  AccountReadType,
+  logoutSchema,
+  LogoutType,
+  RoomsType,
+  RoomInfoType,
+  searchRoomsSchema,
+  SearchRoomsType,
+  MessageReadType,
+  MessageSendType,
+  MessageUpdateType,
+  MessageDeleteType,
+  MessageCompareType,
+  authLoginSchema,
+  AuthLoginType,
+  authCodeSchema,
+  AuthCodeType,
+  authRegisterSchema,
+  AuthRegisterType,
+  roomCreateSchema,
+  RoomCreateType,
+  roomUpdateSchema,
+  RoomUpdateType,
+  roomDeleteSchema,
+  RoomDeleteType,
+  roomLeaveSchema,
+  roomJoinSchema,
+  RoomJoinType,
 } from "./api.schema";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
+import { z } from "zod";
 
 const fetcher = async (route: string, body: object) => {
   const result = await fetch(route, {
@@ -43,21 +70,38 @@ const fetcher = async (route: string, body: object) => {
   return { status: result.status, payload: await result.json() };
 };
 
-function useQuery(isCheckAuth: boolean) {
+function useQuery({
+  shouldCheckAuth,
+  schema,
+}: {
+  shouldCheckAuth: boolean;
+  schema: z.ZodTypeAny;
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const run = async (route: string, body: object) => {
     setIsLoading(true);
     const response = await fetcher(route, body);
-    setIsLoading(false);
-    if (isCheckAuth && !isAuth(response.status)) {
+    const { success, data, error } = validatorFactory(response.payload, schema);
+    if (!success) {
+      console.error(
+        `Response validation error on route ${route}`,
+        "\nResponse:",
+        response.payload,
+        "\nError:",
+        error,
+      );
+      return { validationSuccess: false as const };
+    }
+    if (shouldCheckAuth && !isAuth(response.status)) {
       navigate(
         { pathname: routes.login.path },
         // { state: { isLoggedOut: true } }, // need other value for !isLogged
       );
     }
-    return { response, request: { route, body } };
+    setIsLoading(false);
+    return { validationSuccess: true as const, response: data };
   };
   return { isLoading, run };
 }
@@ -71,185 +115,176 @@ function isAuth(status: number) {
   }
 }
 
-function accountDataValidator(payload: object) {
-  const result = accountReadSchema.safeParse(payload);
+function validatorFactory(data: object, schema: z.ZodTypeAny) {
+  const result = schema.safeParse(data);
 
   if (!result.success) return { success: false as const, error: result.error };
   return { success: true as const, data: result.data };
 }
 
-function roomsValidator(payload: object) {
-  const result = roomsSchema.safeParse(payload);
-
-  if (!result.success) return { success: false as const, error: result.error };
-  return { success: true as const, data: result.data };
-}
-
-function roomInfoValidator(payload: object) {
-  const result = roomInfoSchema.safeParse(payload);
-
-  if (!result.success) return { success: false as const, error: result.error };
-  return { success: true as const, data: result.data };
-}
-
-function searchRoomsValidator(payload: object) {
-  const result = searchRoomSchema.safeParse(payload);
-
-  if (!result.success) return { success: false as const, error: result.error };
-  return { success: true as const, data: result.data };
-}
-
+// TODO make request validation factory
 function updateRoomValidator(payload: object) {
   const result = roomUpdateInfoSchema.safeParse(payload);
   if (!result.success) return { success: false as const, error: result.error };
   return { success: true as const, data: result.data };
 }
 
-function readMessagesValidator(payload: object) {
-  const result = messageReadSchema.safeParse(payload);
+export function useQueryLogin() {
+  const query = useQuery({ shouldCheckAuth: false, schema: authLoginSchema });
 
-  if (!result.success) return { success: false as const, error: result.error };
-  return { success: true as const, data: result.data };
-}
-
-function sendMessageValidator(payload: object) {
-  const result = messageSendSchema.safeParse(payload);
-
-  if (!result.success) return { success: false as const, error: result.error };
-  return { success: true as const, data: result.data };
-}
-
-function updateMessageValidator(payload: object) {
-  const result = messageUpdateSchema.safeParse(payload);
-
-  if (!result.success) return { success: false as const, error: result.error };
-  return { success: true as const, data: result.data };
-}
-
-function deleteMessageValidator(payload: object) {
-  const result = messageDeleteSchema.safeParse(payload);
-
-  if (!result.success) return { success: false as const, error: result.error };
-  return { success: true as const, data: result.data };
-}
-
-function compareMessagesValidator(payload: object) {
-  const result = messageCompareSchema.safeParse(payload);
-
-  if (!result.success) return { success: false as const, error: result.error };
-  return { success: true as const, data: result.data };
-}
-
-export function useQuerySelfAccount() {
-  const query = useQuery(true);
-
-  const run = async () => {
-    const { response } = await query.run(
-      serverRoute.account.read,
-      readAccountBody("self"),
+  const run = async (payload: { email: string; password: string }) => {
+    const { validationSuccess, response } = await query.run(
+      serverRoute.auth.login,
+      payload,
     );
-
-    const { success, data } = accountDataValidator(response.payload);
-
-    if (!success) return { success: false as const };
-    return { success: true as const, data };
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as AuthLoginType };
   };
 
   return { run, isLoading: query.isLoading };
 }
 
+export function useQueryCode() {
+  const query = useQuery({ shouldCheckAuth: false, schema: authCodeSchema });
+  const run = async (payload: { email: string; code: string }) => {
+    const { validationSuccess, response } = await query.run(
+      serverRoute.auth.code,
+      payload,
+    );
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as AuthCodeType };
+  };
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryRegister() {
+  const query = useQuery({
+    shouldCheckAuth: false,
+    schema: authRegisterSchema,
+  });
+  const run = async (payload: {
+    email: string;
+    username: string;
+    password: string;
+  }) => {
+    const { validationSuccess, response } = await query.run(
+      serverRoute.auth.register,
+      payload,
+    );
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as AuthRegisterType };
+  };
+  return { run, isLoading: query.isLoading };
+}
+
 export function useQueryLogout() {
-  const query = useQuery(true);
+  const query = useQuery({ shouldCheckAuth: true, schema: logoutSchema });
 
   const run = async (sessionId: string | "self") => {
-    const { response } = await query.run(serverRoute.session.remove, {
-      sessionId: sessionId,
-    });
-    return { success: !!response.payload.success };
+    const { validationSuccess, response } = await query.run(
+      serverRoute.session.remove,
+      {
+        sessionId: sessionId,
+      },
+    );
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as LogoutType };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQuerySelfAccount() {
+  const query = useQuery({ shouldCheckAuth: true, schema: accountReadSchema });
+
+  const run = async () => {
+    const { validationSuccess, response } = await query.run(
+      serverRoute.account.read,
+      readAccountBody("self"),
+    );
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as AccountReadType };
   };
 
   return { run, isLoading: query.isLoading };
 }
 
 export function useQueryRooms() {
-  const query = useQuery(true);
+  const query = useQuery({ shouldCheckAuth: true, schema: roomsSchema });
 
   const run = async (range: { min: number; max: number }) => {
-    const { response } = await query.run(
+    const { validationSuccess, response } = await query.run(
       serverRoute.room.getRoomList,
       readRoomList(range),
     );
-
-    const { success, data } = roomsValidator(response.payload);
-    if (!success) return { success: false as const };
-    return { success: true as const, data };
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as RoomsType };
   };
 
   return { run, isLoading: query.isLoading };
 }
 
 export function useQueryRoomInfo() {
-  const query = useQuery(true);
+  const query = useQuery({ shouldCheckAuth: true, schema: roomInfoSchema });
 
   const run = async (roomId: RoomId) => {
-    const { response } = await query.run(serverRoute.room.readInfo, { roomId });
-
-    const { success, data } = roomInfoValidator(response.payload);
-    if (!success) return { success: false as const };
-    return { success: true as const, data };
+    const { validationSuccess, response } = await query.run(
+      serverRoute.room.readInfo,
+      {
+        roomId,
+      },
+    );
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as RoomInfoType };
   };
 
   return { run, isLoading: query.isLoading };
 }
 
 export function useQueryFindRooms() {
-  const query = useQuery(true);
+  const query = useQuery({ shouldCheckAuth: true, schema: searchRoomsSchema });
 
   const run = async (q: string, limit = 10, offset = 0) => {
-    const { response } = await query.run(serverRoute.room.search, {
-      limit,
-      offset,
-      q,
-    });
-
-    const { success, data } = searchRoomsValidator(response.payload);
-    if (!success) return { success: false as const };
-    return { success: true as const, data };
+    const { validationSuccess, response } = await query.run(
+      serverRoute.room.search,
+      {
+        limit,
+        offset,
+        q,
+      },
+    );
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as SearchRoomsType };
   };
 
   return { run, isLoading: query.isLoading };
 }
 
 export function useQueryReadMessages() {
-  const query = useQuery(true);
+  const query = useQuery({ shouldCheckAuth: true, schema: messageReadSchema });
 
   const run = () => {
     const indexRange = async (
       roomId: RoomId,
       indexRange: { min: number; max: number },
     ) => {
-      const { response } = await query.run(
+      const { validationSuccess, response } = await query.run(
         serverRoute.message.read,
         readMessagesByIndexRange(roomId, indexRange),
       );
-
-      const { success, data } = readMessagesValidator(response.payload);
-
-      if (!success) return { success: false as const };
-      return { success: true as const, data };
+      if (!validationSuccess) return { success: false as const };
+      return { success: true as const, data: response as MessageReadType };
     };
     const createdRange = async (
       roomId: RoomId,
       createdRange: { min: number; max?: number },
     ) => {
-      const { response } = await query.run(
+      const { validationSuccess, response } = await query.run(
         serverRoute.message.read,
         readMessagesByCreatedRange(roomId, createdRange),
       );
-
-      const { success, data } = readMessagesValidator(response.payload);
-      if (!success) return { success: false as const };
-      return { success: true as const, data };
+      if (!validationSuccess) return { success: false as const };
+      return { success: true as const, data: response as MessageReadType };
     };
     return { indexRange, createdRange };
   };
@@ -258,223 +293,171 @@ export function useQueryReadMessages() {
 }
 
 export function useQuerySendMessage() {
-  const query = useQuery(true);
+  const query = useQuery({ shouldCheckAuth: true, schema: messageSendSchema });
 
   const run = async (roomId: RoomId, content: SendMessageFormType) => {
-    const { response } = await query.run(
+    const { validationSuccess, response } = await query.run(
       serverRoute.message.send,
       sendMessage(roomId, content),
     );
-
-    const { success, data } = sendMessageValidator(response.payload);
-
-    if (!success) return { success: false as const };
-    return data;
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as MessageSendType };
   };
 
   return { run, isLoading: query.isLoading };
 }
 
 export function useQueryUpdateMessage() {
-  const query = useQuery(true);
+  const query = useQuery({
+    shouldCheckAuth: true,
+    schema: messageUpdateSchema,
+  });
 
   const run = async (
     roomId: RoomId,
     prevCreated: MessageType["created"],
     content: SendMessageFormType,
   ) => {
-    const { response } = await query.run(
+    const { validationSuccess, response } = await query.run(
       serverRoute.message.update,
       updateMessage(roomId, prevCreated, content),
     );
-
-    const { success, data } = updateMessageValidator(response.payload);
-
-    if (!success) return { success: false as const };
-    return data;
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as MessageUpdateType };
   };
 
   return { run, isLoading: query.isLoading };
 }
 
 export function useQueryDeleteMessage() {
-  const query = useQuery(true);
+  const query = useQuery({
+    shouldCheckAuth: true,
+    schema: messageDeleteSchema,
+  });
 
   const run = async (roomId: RoomId, created: MessageType["created"]) => {
-    const { response } = await query.run(
+    const { validationSuccess, response } = await query.run(
       serverRoute.message.remove,
       deleteMessage(roomId, created),
     );
-
-    const { success, data } = deleteMessageValidator(response.payload);
-
-    if (!success) return { success: false as const };
-    return data;
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as MessageDeleteType };
   };
 
   return { run, isLoading: query.isLoading };
 }
 
 export function useQueryCompareMessages() {
-  const query = useQuery(true);
+  const query = useQuery({
+    shouldCheckAuth: true,
+    schema: messageCompareSchema,
+  });
 
   const run = async (roomId: RoomId, toCompare: MessageDates[]) => {
-    const { response } = await query.run(
+    const { validationSuccess, response } = await query.run(
       serverRoute.message.compare,
       compareMessages(roomId, toCompare),
     );
-
-    const { success, data } = compareMessagesValidator(response.payload);
-    if (!success) return { success: false as const };
-    return { success: true as const, data };
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as MessageCompareType };
   };
 
-  return { run, isLoading: query.isLoading };
-}
-
-export function useQueryLogin() {
-  const query = useQuery(false);
-
-  const run = async (payload: { email: string; password: string }) => {
-    const { response } = await query.run(serverRoute.auth.login, payload);
-    if (!response.payload.success)
-      return { success: false as const, isCodeNeeded: false as const };
-    if (response.payload.code)
-      return { success: true as const, isCodeNeeded: true as const };
-    return { success: true as const, isCodeNeeded: false as const };
-  };
-
-  return { run, isLoading: query.isLoading };
-}
-
-export function useQueryCode() {
-  const query = useQuery(false);
-  const run = async (payload: { email: string; code: string }) => {
-    const { response } = await query.run(serverRoute.auth.code, payload);
-    return { success: !!response.payload.success };
-    // Without !! no work
-  };
-  return { run, isLoading: query.isLoading };
-}
-
-export function useQueryRegister() {
-  const query = useQuery(false);
-  const run = async (payload: {
-    email: string;
-    username: string;
-    password: string;
-  }) => {
-    const { response } = await query.run(serverRoute.auth.register, payload);
-    if (!response.payload.success) {
-      if (response.payload.errorCode) {
-        return {
-          success: false as const,
-          errorCode: response.payload.errorCode,
-        };
-      }
-      return { success: false as const };
-    }
-    return { success: true as const };
-  };
   return { run, isLoading: query.isLoading };
 }
 
 export function useQueryCreateRoom() {
-  const query = useQuery(true);
+  const query = useQuery({ shouldCheckAuth: true, schema: roomCreateSchema });
 
   const run = async (
     name: string,
     type: Omit<RoomType["type"], "service">,
     about: string,
   ) => {
-    const { response } = await query.run(serverRoute.room.create, {
-      roomInfo: {
-        name,
-        type,
-        about,
+    const { validationSuccess, response } = await query.run(
+      serverRoute.room.create,
+      {
+        roomInfo: {
+          name,
+          type,
+          about,
+        },
       },
-    });
-    if (response.payload.success)
-      return {
-        success: true as const,
-        roomId: response.payload.roomId as RoomId,
-      };
-    return { success: false as const };
+    );
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as RoomCreateType };
   };
 
   return { run, isLoading: query.isLoading };
 }
 
 export function useQueryUpdateRoom() {
-  const query = useQuery(true);
+  const query = useQuery({ shouldCheckAuth: true, schema: roomUpdateSchema });
 
   const run = async (roomId: RoomId, info: RoomInfoUpdate) => {
-    const { success, data } = updateRoomValidator(info);
-    if (!success) return { success: false as const };
-    const { response } = await query.run(serverRoute.room.updateInfo, {
-      roomId,
-      info: data,
-    });
-    if (response.payload.success)
-      return {
-        success: true as const,
-        roomId: response.payload.roomId as RoomId,
-      };
-    return { success: false as const };
+    // TODO make request validation factory
+    const request = updateRoomValidator(info);
+    if (!request.success) return { success: false as const };
+
+    const { validationSuccess, response } = await query.run(
+      serverRoute.room.updateInfo,
+      {
+        roomId,
+        info: request.data,
+      },
+    );
+    if (!validationSuccess) return { success: false as const };
+    return { success: false as const, data: response as RoomUpdateType };
   };
 
   return { run, isLoading: query.isLoading };
 }
 
 export function useQueryDeleteRoom() {
-  const query = useQuery(true);
+  const query = useQuery({ shouldCheckAuth: true, schema: roomDeleteSchema });
 
   const run = async (roomId: RoomId) => {
-    const { response } = await query.run(serverRoute.room.delete, {
-      roomId,
-    });
-    if (response.payload.success)
-      return {
-        success: true as const,
-        roomId: response.payload.roomId as RoomId,
-      };
-    return { success: false as const };
+    const { validationSuccess, response } = await query.run(
+      serverRoute.room.delete,
+      {
+        roomId,
+      },
+    );
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as RoomDeleteType };
   };
 
   return { run, isLoading: query.isLoading };
 }
 
 export function useQueryLeaveRoom() {
-  const query = useQuery(true);
+  const query = useQuery({ shouldCheckAuth: true, schema: roomLeaveSchema });
 
   const run = async (roomId: RoomId) => {
-    const { response } = await query.run(serverRoute.room.leave, {
-      roomId,
-    });
-    if (response.payload.success)
-      return {
-        success: true as const,
-        roomId: response.payload.roomId as RoomId,
-      };
-    return { success: false as const };
+    const { validationSuccess, response } = await query.run(
+      serverRoute.room.leave,
+      {
+        roomId,
+      },
+    );
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as RoomDeleteType };
   };
 
   return { run, isLoading: query.isLoading };
 }
 
 export function useQueryJoinRoom() {
-  const query = useQuery(true);
+  const query = useQuery({ shouldCheckAuth: true, schema: roomJoinSchema });
 
   const run = async (roomId: RoomId) => {
-    const { response } = await query.run(serverRoute.room.join, {
-      roomId,
-    });
-    if (response.payload.success && response.payload.access)
-      return {
-        success: true as const,
-        roomId: response.payload.roomId as RoomId,
-      };
-    return { success: false as const };
+    const { validationSuccess, response } = await query.run(
+      serverRoute.room.join,
+      {
+        roomId,
+      },
+    );
+    if (!validationSuccess) return { success: false as const };
+    return { success: true as const, data: response as RoomJoinType };
   };
 
   return { run, isLoading: query.isLoading };

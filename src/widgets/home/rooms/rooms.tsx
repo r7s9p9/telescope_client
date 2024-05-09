@@ -6,7 +6,7 @@ import { routes } from "../../../constants";
 import { IconCirclePlus, IconSearch } from "@tabler/icons-react";
 import { useRooms } from "./useRooms";
 import { ITEM_HEIGHT } from "./constants";
-import { RoomType, SearchRooms } from "../../../shared/api/api.schema";
+import { RoomType, SearchRoomsType } from "../../../shared/api/api.schema";
 import { useQueryFindRooms } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
 
@@ -38,7 +38,7 @@ export function Rooms() {
   const storedRooms = storedData?.items;
 
   const [searchValue, setSearchValue] = useState("");
-  const [foundRooms, setFoundRooms] = useState<SearchRooms | null>(null);
+  const [foundRooms, setFoundRooms] = useState<SearchRoomsType | null>(null);
 
   const querySearch = useQueryFindRooms();
 
@@ -132,7 +132,7 @@ function FoundRooms({
   data,
   openedRoomId,
 }: {
-  data: SearchRooms | null;
+  data: SearchRoomsType | null;
   openedRoomId: RoomId;
 }) {
   if (data && !data.isEmpty) {

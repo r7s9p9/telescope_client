@@ -478,27 +478,31 @@ export function useSend() {
 
   const editable = storedChat?.editable;
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (formData) => {
     if (
-      data.text &&
+      formData.text &&
       !querySend.isLoading &&
       !queryUpdate.isLoading &&
       storedMessages
     ) {
       // If message edited
       if (editable?.isExist) {
-        const result = await queryUpdate.run(
+        const { success, data } = await queryUpdate.run(
           roomId as RoomId,
           editable.message.created,
-          data,
+          formData,
         );
-        if (result.success && result.access) {
+        // TODO 500 error
+        if (!success) return;
+        //
+        console.log(data);
+        if (data.success && data.access) {
           const updatedMessages = storedMessages.map((message) => {
             if (message.created === editable.message.created) {
               return {
                 ...message,
-                content: data,
-                modified: result.dates.modified,
+                content: formData,
+                modified: data.dates.modified,
               };
             }
             return message;
@@ -515,8 +519,9 @@ export function useSend() {
         }
       } else {
         // If new message writed
-        const result = await querySend.run(roomId as RoomId, data);
-        if (result.success) {
+        const { success } = await querySend.run(roomId as RoomId, formData);
+        // TODO 500 error
+        if (success) {
           loadNewerMessages.run();
         }
       }
