@@ -58,7 +58,7 @@ import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
 import { z } from "zod";
 
-const fetcher = async (route: string, body: object) => {
+export const fetcher = async (route: string, body: object) => {
   const result = await fetch(route, {
     method: "POST",
     headers: {
@@ -70,7 +70,7 @@ const fetcher = async (route: string, body: object) => {
   return { status: result.status, payload: await result.json() };
 };
 
-function useQuery({
+export function useQuery({
   shouldCheckAuth,
   schema,
 }: {
@@ -241,7 +241,7 @@ export function useQueryRoomInfo() {
   return { run, isLoading: query.isLoading };
 }
 
-export function useQueryFindRooms() {
+export function useQuerySearchRooms() {
   const query = useQuery({ shouldCheckAuth: true, schema: searchRoomsSchema });
 
   const run = async (q: string, limit = 10, offset = 0) => {

@@ -1,12 +1,12 @@
 import { RoomId } from "../../types";
-import { useStore } from "./StoreProvider";
+import { useStoreProvider } from "./StoreProvider";
 import { MessageType, RoomsType } from "../api/api.schema";
 import { StoreType } from "./types";
 
-export type StoreActionType = ReturnType<typeof store>;
+export type StoreActionType = ReturnType<typeof useStore>;
 
-export const store = () => {
-  const { store, setStore } = useStore();
+export const useStore = () => {
+  const { store, setStore } = useStoreProvider();
 
   const chat = (roomId: RoomId) => {
     const read = () => {
@@ -86,7 +86,7 @@ export const store = () => {
 
   const rooms = () => {
     const read = () => {
-      return store.rooms;
+      return store.rooms as StoreType["rooms"];
     };
 
     const update = (data: Partial<RoomsType>) => {

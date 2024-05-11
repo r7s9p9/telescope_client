@@ -12,8 +12,9 @@ export type StoreType = {
     RoomId,
     | {
         roomId: RoomId;
-        messages: { allCount: number; items?: MessageReadType["messages"] };
+        messages?: MessageReadType["messages"];
         info: RoomInfoType["info"];
+        allCount: number;
         isFirstLoad: boolean;
         isNewMessages: boolean;
         scrollPosition: number;

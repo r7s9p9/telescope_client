@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { RoomInfoUpdate, RoomType } from "../../../shared/api/api.schema";
-import { store } from "../../../shared/store/store";
+import { useStore } from "../../../shared/store/store";
 import { routes } from "../../../constants";
 import { formatDate } from "../../../shared/lib/date";
 import {
@@ -26,7 +26,7 @@ export function ChatInfo() {
 
   let storedInfo: RoomType | undefined;
 
-  const roomsInfo = store().rooms().read()?.items;
+  const roomsInfo = useStore().rooms().read()?.items;
   if (roomsInfo) {
     for (const info of roomsInfo) {
       if (info.roomId === roomId) {

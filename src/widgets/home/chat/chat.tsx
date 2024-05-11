@@ -601,7 +601,7 @@ function SendButton({ isLoading }: { isLoading: boolean }) {
         <IconSend2 className="text-slate-400" size={24} />
       </button>
       {isLoading && (
-        <div className="absolute size-8 rounded-full border-y-2 border-slate-300 animate-spin" />
+        <div className="self-center absolute size-9 rounded-full border-x-2 border-slate-300 animate-spin" />
       )}
     </div>
   );

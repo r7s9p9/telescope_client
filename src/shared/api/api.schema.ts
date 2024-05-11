@@ -97,6 +97,7 @@ const privacyRuleLimitedSchema = z.union([
 ]);
 
 export const accountReadSchema = z.object({
+  targetUserId: z.union([selfIdSchema, userIdSchema]),
   general: z
     .object({
       username: usernameSchema.optional(),

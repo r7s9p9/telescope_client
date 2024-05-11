@@ -7,7 +7,7 @@ import { IconCirclePlus, IconSearch } from "@tabler/icons-react";
 import { useRooms } from "./useRooms";
 import { ITEM_HEIGHT } from "./constants";
 import { RoomType, SearchRoomsType } from "../../../shared/api/api.schema";
-import { useQueryFindRooms } from "../../../shared/api/api";
+import { useQuerySearchRooms } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
 
 const itemHeightStyle = { height: ITEM_HEIGHT + "px" };
@@ -40,7 +40,7 @@ export function Rooms() {
   const [searchValue, setSearchValue] = useState("");
   const [foundRooms, setFoundRooms] = useState<SearchRoomsType | null>(null);
 
-  const querySearch = useQueryFindRooms();
+  const querySearch = useQuerySearchRooms();
 
   const isSearch = searchValue !== "";
 

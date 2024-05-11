@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useCallback, useEffect, useMemo } from "react";
 import { useQueryRooms } from "../../../shared/api/api";
-import { store } from "../../../shared/store/store";
+import { useStore } from "../../../shared/store/store";
 import { useInterval } from "../../../shared/lib/useInterval";
 import { debounce } from "../../../shared/lib/debounce";
 import {
@@ -16,16 +16,11 @@ import {
 // Load for the first time and refresh
 export function useLoadRooms() {
   const query = useQueryRooms();
-  const storeAction = store().rooms();
+  const storeAction = useStore().rooms();
   const storedRooms = storeAction.read().items;
 
   const run = useCallback(async () => {
-    let max: number;
-    if (!storedRooms || storedRooms.length === 0) {
-      max = ITEM_COUNT_FOR_INITIAL_LOADING;
-    } else {
-      max = storedRooms.length;
-    }
+    const max = storedRooms?.length || ITEM_COUNT_FOR_INITIAL_LOADING;
     const { success, data } = await query.run({ min: 0 as const, max });
     if (success && data) {
       storeAction.update(data);
@@ -39,7 +34,7 @@ export function useLoadRooms() {
 // On scroll
 export function useLoadMoreRooms() {
   const query = useQueryRooms();
-  const storeAction = store().rooms();
+  const storeAction = useStore().rooms();
   const storedData = storeAction.read();
 
   const run = useCallback(
@@ -69,7 +64,7 @@ export function useLoadMoreRooms() {
 export function useRooms() {
   const { roomId } = useParams();
 
-  const storedData = store().rooms().read();
+  const storedData = useStore().rooms().read();
   const storedRooms = storedData?.items;
 
   const isZeroItemCount = storedData?.allCount === 0;

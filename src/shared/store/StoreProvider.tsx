@@ -9,7 +9,7 @@ const storeInit = {
 const StoreContext = createContext<StoreState>(storeInit);
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useStore = () => useContext(StoreContext);
+export const useStoreProvider = () => useContext(StoreContext);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [store, setStore] = useState<StoreType>(storeInit["store"]);

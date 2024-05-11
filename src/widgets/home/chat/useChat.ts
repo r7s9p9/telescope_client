@@ -15,7 +15,7 @@ import {
   sendMessageFormSchema,
 } from "../../../shared/api/api.schema";
 import { useInterval } from "../../../shared/lib/useInterval";
-import { store } from "../../../shared/store/store";
+import { useStore } from "../../../shared/store/store";
 import { debounce } from "../../../shared/lib/debounce";
 import { checkRoomId } from "../../../shared/lib/uuid";
 import { useNavigate, useParams } from "react-router-dom";
@@ -150,9 +150,9 @@ const compareUpdater = (
 export function useLoadNewerMessages() {
   const queryRead = useQueryReadMessages();
   const { roomId } = useParams();
-  const storeAction = store().chat(roomId as RoomId);
+  const storeAction = useStore().chat(roomId as RoomId);
   const storedChat = storeAction.read();
-  const storedMessages = storedChat?.messages?.items;
+  const storedMessages = storedChat?.messages;
 
   const loadNewerMessages = useCallback(async () => {
     if (storedMessages) {
@@ -165,10 +165,8 @@ export function useLoadNewerMessages() {
 
       if (success && data.messages) {
         storeAction.update().data({
-          messages: {
-            allCount: data.allCount ? data.allCount : 0,
-            items: data.messages.concat(storedMessages),
-          },
+          allCount: data.allCount ? data.allCount : 0,
+          messages: data.messages.concat(storedMessages),
           isNewMessages: true,
         });
       }
@@ -185,9 +183,9 @@ export function useLoadNewerMessages() {
 function useLoadOlderMessages() {
   const queryRead = useQueryReadMessages();
   const { roomId } = useParams();
-  const storeAction = store().chat(roomId as RoomId);
+  const storeAction = useStore().chat(roomId as RoomId);
   const storedChat = storeAction.read();
-  const storedMessages = storedChat?.messages?.items;
+  const storedMessages = storedChat?.messages;
 
   const loadOlderMessages = useCallback(
     async (min: number, max: number) => {
@@ -197,10 +195,8 @@ function useLoadOlderMessages() {
 
       if (success && data) {
         storeAction.update().data({
-          messages: {
-            allCount: data.allCount ? data.allCount : 0,
-            items: (storedMessages || []).concat(data.messages || []),
-          },
+          allCount: data.allCount ? data.allCount : 0,
+          messages: (storedMessages || []).concat(data.messages || []),
         });
       }
       if (!success) storeAction.flagAsBad();
@@ -214,9 +210,9 @@ function useLoadOlderMessages() {
 function useCompareMessages() {
   const queryCompare = useQueryCompareMessages();
   const { roomId } = useParams();
-  const storeAction = store().chat(roomId as RoomId);
+  const storeAction = useStore().chat(roomId as RoomId);
   const storedChat = storeAction.read();
-  const storedMessages = storedChat?.messages?.items;
+  const storedMessages = storedChat?.messages;
 
   const compareMessages = useCallback(async () => {
     if (storedMessages) {
@@ -233,10 +229,10 @@ function useCompareMessages() {
         );
         if (isUpdateNeeded) {
           storeAction.update().data({
-            messages: {
-              allCount: storedChat.messages?.allCount,
-              items: updatedMessages,
-            },
+            allCount: data.toRemove?.length
+              ? storedChat.allCount - data.toRemove.length
+              : storedChat.allCount,
+            messages: updatedMessages,
           });
         }
       }
@@ -245,13 +241,7 @@ function useCompareMessages() {
         console.error("queryCompare !success");
       }
     }
-  }, [
-    queryCompare,
-    storedMessages,
-    roomId,
-    storeAction,
-    storedChat?.messages?.allCount,
-  ]);
+  }, [queryCompare, storedMessages, roomId, storeAction, storedChat?.allCount]);
 
   return { run: compareMessages };
 }
@@ -259,7 +249,7 @@ function useCompareMessages() {
 export function useLoadInfo() {
   const queryInfo = useQueryRoomInfo();
   const { roomId } = useParams();
-  const storeAction = store().chat(roomId as RoomId);
+  const storeAction = useStore().chat(roomId as RoomId);
 
   const loadInfo = useCallback(async () => {
     const { success, data } = await queryInfo.run(roomId as RoomId);
@@ -284,22 +274,15 @@ export function useChat() {
 
   const messagesRef = useRef<HTMLUListElement>(null);
 
-  const storeAction = store().chat(roomId as RoomId);
+  const storeAction = useStore().chat(roomId as RoomId);
   const storedChat = storeAction.read();
-  const storedMessages = storedChat?.messages?.items;
-  const storedMessagesAllCount = storedChat?.messages?.allCount;
+  const storedMessages = storedChat?.messages;
   const isAllLoaded =
-    storedMessages && storedMessages.length === storedMessagesAllCount;
+    storedMessages && storedMessages.length === storedChat.allCount;
 
   const loadOlderMessages = useLoadOlderMessages();
   const loadNewerMessages = useLoadNewerMessages();
   const compareMessages = useCompareMessages();
-
-  // Update messages
-  useInterval(() => loadNewerMessages.run(), CHAT_UPDATE_INTERVAL);
-
-  // Compare existing messages
-  useInterval(() => compareMessages.run(), CHAT_COMPARE_INTERVAL);
 
   // Initial actions
   useEffect(() => {
@@ -313,7 +296,7 @@ export function useChat() {
     if (!storedChat) {
       const initStoredChat = () => {
         storeAction.create({
-          messages: { allCount: 0 },
+          allCount: 0,
           scrollPosition: 0,
           isFirstLoad: true,
           editable: { isExist: false },
@@ -324,18 +307,19 @@ export function useChat() {
     }
   }, [storedChat, storeAction, loadOlderMessages]);
 
+  // Update messages
+  useInterval(() => loadNewerMessages.run(), CHAT_UPDATE_INTERVAL);
+
+  // Compare existing messages
+  useInterval(() => compareMessages.run(), CHAT_COMPARE_INTERVAL);
+
   const onScrollLoader = useCallback(async () => {
-    if (
-      !isLoading &&
-      !isAllLoaded &&
-      storedMessages &&
-      storedMessagesAllCount
-    ) {
+    if (!isLoading && !isAllLoaded && storedMessages && storedChat.allCount) {
       setIsLoading(true);
       const min = storedMessages.length;
       const max =
-        storedMessagesAllCount < min + ITEM_COUNT_TO_FURTHER_LOADING
-          ? storedMessagesAllCount
+        storedChat.allCount < min + ITEM_COUNT_TO_FURTHER_LOADING
+          ? storedChat.allCount
           : min + ITEM_COUNT_TO_FURTHER_LOADING;
       await loadOlderMessages.run(min, max);
       setIsLoading(false);
@@ -344,7 +328,7 @@ export function useChat() {
     isLoading,
     isAllLoaded,
     storedMessages,
-    storedMessagesAllCount,
+    storedChat?.allCount,
     loadOlderMessages,
   ]);
 
@@ -434,16 +418,14 @@ export function useChat() {
 
 export function useInfo() {
   const { roomId } = useParams();
-  const storedInfo = store()
+  const storedInfo = useStore()
     .chat(roomId as RoomId)
     .read()?.info;
   const loadInfo = useLoadInfo();
 
   useEffect(() => {
     // Initial load data if no chat in store
-    if (!storedInfo) {
-      loadInfo.run();
-    }
+    if (!storedInfo) loadInfo.run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storedInfo]);
 
@@ -466,17 +448,13 @@ export function useSend() {
   const { roomId } = useParams();
   const loadNewerMessages = useLoadNewerMessages();
 
-  const storeAction = store().chat(roomId as RoomId);
-  const storedChat = store()
-    .chat(roomId as RoomId)
-    .read();
-  const storedMessages = storedChat?.messages?.items;
-  const storedMessagesAllCount = storedChat?.messages?.allCount;
+  const storeAction = useStore().chat(roomId as RoomId);
+  const storedChat = storeAction.read();
+  const storedMessages = storedChat?.messages;
+  const editable = storedChat?.editable;
 
   const querySend = useQuerySendMessage();
   const queryUpdate = useQueryUpdateMessage();
-
-  const editable = storedChat?.editable;
 
   const onSubmit = handleSubmit(async (formData) => {
     if (
@@ -510,10 +488,7 @@ export function useSend() {
 
           storeAction.update().data({
             ...storedChat,
-            messages: {
-              allCount: storedMessagesAllCount ? storedMessagesAllCount : 0,
-              items: updatedMessages,
-            },
+            messages: updatedMessages,
           });
           storeAction.update().editable(false);
         }
@@ -521,9 +496,7 @@ export function useSend() {
         // If new message writed
         const { success } = await querySend.run(roomId as RoomId, formData);
         // TODO 500 error
-        if (success) {
-          loadNewerMessages.run();
-        }
+        if (success) loadNewerMessages.run();
       }
       reset();
     }
@@ -538,12 +511,8 @@ export function useSend() {
 
 export function useEdit() {
   const { roomId } = useParams();
-  const storeAction = store().chat(roomId as RoomId);
-  const storedChat = store()
-    .chat(roomId as RoomId)
-    .read();
-
-  const editable = storedChat?.editable;
+  const storeAction = useStore().chat(roomId as RoomId);
+  const editable = storeAction.read()?.editable;
 
   const onEdit = (message: MessageType) => {
     storeAction.update().editable(true, message);
@@ -557,11 +526,8 @@ export function useEdit() {
 
 export function useDelete() {
   const { roomId } = useParams();
-  const storeAction = store().chat(roomId as RoomId);
-  const storedChat = store()
-    .chat(roomId as RoomId)
-    .read();
-  const storedMessages = storedChat?.messages?.items;
+  const storeAction = useStore().chat(roomId as RoomId);
+  const storedMessages = storeAction.read()?.messages;
   const query = useQueryDeleteMessage();
 
   const onDelete = async (created: MessageType["created"]) => {
@@ -571,8 +537,7 @@ export function useDelete() {
         (message) => message.created !== created,
       );
       storeAction.update().data({
-        ...storedChat,
-        messages: { ...storedChat.messages, items: messages },
+        messages,
       });
     }
     return { success };
