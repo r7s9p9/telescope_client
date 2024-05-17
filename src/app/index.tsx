@@ -17,6 +17,7 @@ import { StoreProvider } from "../shared/store/StoreProvider.tsx";
 import { ContextMenuProvider } from "../widgets/context-menu/ContextMenu.tsx";
 import { CreateRoom } from "../widgets/home/create-room/CreateRoom.tsx";
 import { ChatInfo } from "../widgets/home/chat-info/ChatInfo.tsx";
+import { Profile } from "../widgets/home/profile/Profile.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -37,7 +38,7 @@ const router = createBrowserRouter(
         <Route
           path={routes.profile.path}
           id={routes.profile.id}
-          element={<Rooms />}
+          element={<Profile />}
         />
         <Route
           path={routes.rooms.path}

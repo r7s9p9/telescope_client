@@ -27,9 +27,19 @@ export type ReadRoomInfoValues = (typeof roomInfoFields)[
   | "type"
   | "about"];
 
-export const endpoint = "http://localhost:3000" as const;
+const endpoint = "http://localhost:3000" as const;
 
 export const serverRoute = {
+  // for tests only
+  test: {
+    401: endpoint + "/api/401",
+    403: endpoint + "/api/403",
+    404: endpoint + "/api/404",
+    500: endpoint + "/api/500",
+    empty: endpoint + "/api/empty",
+    null: endpoint + "/api/null",
+  },
+  //
   auth: {
     register: endpoint + "/api/auth/register",
     login: endpoint + "/api/auth/login",

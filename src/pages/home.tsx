@@ -7,6 +7,7 @@ import {
   IconUsersGroup,
 } from "@tabler/icons-react";
 import { routes } from "../constants";
+import { Button } from "../shared/ui/Button/Button";
 
 export default function Home() {
   return (
@@ -21,37 +22,30 @@ export default function Home() {
 function LeftPanel() {
   return (
     <div className="shrink-0 h-full p-2 bg-slate-600 flex flex-col items-center gap-2">
-      <button
-        title="Account"
-        className="size-12 p-2 rounded-full hover:bg-slate-500 duration-200"
-      >
-        <IconUserCircle strokeWidth="1" className="text-slate-50" size={32} />
-      </button>
-      <Link
-        to={routes.rooms.path}
-        title="Rooms"
-        className="size-12 p-2 rounded-full hover:bg-slate-500 duration-200"
-      >
-        <IconMessageCircle
-          strokeWidth="1"
-          className="text-slate-50"
-          size={32}
-        />
+      <Link to={routes.profile.path}>
+        <Button title="Profile" rounded="full" noHover>
+          <IconUserCircle strokeWidth="1" className="text-slate-50" size={32} />
+        </Button>
       </Link>
-      <Link
-        to={routes.friends.path}
-        title="Friends"
-        className="size-12 p-2 rounded-full hover:bg-slate-500 duration-200"
-      >
-        <IconUsersGroup strokeWidth="1" className="text-slate-50" size={32} />
+      <Link to={routes.rooms.path}>
+        <Button title="Rooms" rounded="full" noHover>
+          <IconMessageCircle
+            strokeWidth="1"
+            className="text-slate-50"
+            size={32}
+          />
+        </Button>
+      </Link>
+      <Link to={routes.friends.path}>
+        <Button title="Friends" rounded="full" noHover>
+          <IconUsersGroup strokeWidth="1" className="text-slate-50" size={32} />
+        </Button>
       </Link>
       <div className="grow"></div>
-      <Link
-        to={routes.settings.path}
-        title="Settings"
-        className="size-12 p-2 rounded-full hover:bg-slate-500 duration-200 justify-self-end"
-      >
-        <IconSettings strokeWidth="1" className="text-slate-50" size={32} />
+      <Link to={routes.settings.path}>
+        <Button title="Settings" rounded="full" noHover>
+          <IconSettings strokeWidth="1" className="text-slate-50" size={32} />
+        </Button>
       </Link>
     </div>
   );

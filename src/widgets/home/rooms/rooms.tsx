@@ -9,10 +9,15 @@ import { ITEM_HEIGHT } from "./constants";
 import { RoomType, SearchRoomsType } from "../../../shared/api/api.schema";
 import { useQuerySearchRooms } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
+import { Button } from "../../../shared/ui/Button/Button";
+import { Input } from "../../../shared/ui/input/input";
+import { Text } from "../../../shared/ui/text/text";
 
 const itemHeightStyle = { height: ITEM_HEIGHT + "px" };
 
-const SkeletonList = React.memo(({ count }: { count: number }) => {
+const SkeletonList = React.memo(({ count }: { count?: number }) => {
+  if (!count) count = getRandomInt(4, 12);
+
   if (count > 0) {
     const skeletonItems = Array(count)
       .fill(1)
@@ -69,11 +74,10 @@ export function Rooms() {
       </Wrapper>
     );
 
-  const skeletonCount = getRandomInt(4, 12);
   if (!storedRooms) {
     return (
       <Wrapper searchValue={searchValue} setSearchValue={setSearchValue}>
-        <SkeletonList count={skeletonCount} />
+        <SkeletonList />
       </Wrapper>
     );
   }
@@ -114,7 +118,19 @@ function Wrapper({
       <div className="h-full flex flex-col w-1/2 min-w-52 max-w-xs bg-slate-50">
         <div className="pb-4 px-4 flex flex-col items-center">
           <Title />
-          <Search value={searchValue} setValue={setSearchValue} />
+          <Input
+            value={searchValue}
+            setValue={setSearchValue}
+            placeholder="Search..."
+            size="md"
+            rightSection={
+              <IconSearch
+                className="text-slate-400"
+                strokeWidth="1"
+                size={24}
+              />
+            }
+          />
         </div>
         <ul
           onScroll={onScroll}
@@ -173,19 +189,17 @@ function FoundItem({
 function Title() {
   return (
     <div className="h-16 py-2 w-full flex justify-between items-center">
-      <p className="font-thin tracking-widest uppercase text-3xl select-none">
+      <Text size="xl" font="thin" uppercase letterSpacing>
         Rooms
-      </p>
-      <Link
-        to={routes.createRoom.path}
-        title="Create new room"
-        className="size-8 rounded-full hover:bg-slate-200 duration-200 justify-self-end flex justify-center items-center"
-      >
-        <IconCirclePlus
-          strokeWidth="0.5"
-          className="text-slate-600"
-          size={32}
-        />
+      </Text>
+      <Link to={routes.createRoom.path}>
+        <Button title={"Create new room"} rounded={"full"} noHover>
+          <IconCirclePlus
+            strokeWidth="1"
+            className="text-slate-600"
+            size={32}
+          />
+        </Button>
       </Link>
     </div>
   );
@@ -268,28 +282,4 @@ function UnreadCount({ count }: { count: number }) {
       </p>
     );
   }
-}
-
-function Search({
-  value,
-  setValue,
-}: {
-  value: string;
-  setValue: Dispatch<React.SetStateAction<string>>;
-}) {
-  return (
-    <div className="relative">
-      <div className="shrink-0 relative h-12 w-full flex items-center">
-        <input
-          value={value}
-          onChange={(e) => setValue(e.currentTarget.value)}
-          placeholder="Search..."
-          className="h-full w-full pl-4 pr-16 outline-none font-light text-gray-800 text-xl bg-slate-100 ring-2 ring-slate-200 rounded-xl focus:ring-slate-300 focus:bg-slate-50 duration-300 ease-in-out"
-        ></input>
-        <div className="absolute right-4 flex items-center">
-          <IconSearch className="text-slate-400" strokeWidth="1" size={24} />
-        </div>
-      </div>
-    </div>
-  );
 }

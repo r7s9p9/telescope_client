@@ -102,5 +102,23 @@ export const useStore = () => {
     return { read, update };
   };
 
-  return { chat, rooms };
+  const routesState = () => {
+    const read = (route: keyof StoreType["routesState"]) => {
+      return store.routesState[route];
+    };
+
+    const update = (data: Partial<StoreType["routesState"]>) => {
+      setStore((store) => ({
+        ...store,
+        routesState: {
+          ...store.routesState,
+          ...data,
+        },
+      }));
+    };
+
+    return { read, update };
+  };
+
+  return { chat, rooms, routesState };
 };

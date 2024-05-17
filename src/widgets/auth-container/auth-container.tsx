@@ -27,6 +27,7 @@ import { routes } from "../../constants";
 import { useNotify } from "../notification/notification";
 import { NotifyType } from "../notification/types";
 import { message } from "./constants";
+import { Spinner } from "../../shared/ui/spinner/spinner";
 
 const useResetForm = (isShow: boolean, reset: UseFormReset<IFormValues>) =>
   useEffect(() => {
@@ -166,16 +167,6 @@ function Button({
   );
 }
 
-export function Spinner({ size }: { size: number }) {
-  return (
-    <div className="relative flex justify-center items-center animate-spin">
-      <div
-        className={`p-${size} absolute rounded-full border-slate-300 border-x-2`}
-      ></div>
-    </div>
-  );
-}
-
 function LoginForm({
   isShow,
   handleCodeRequired,
@@ -260,7 +251,7 @@ function LoginForm({
               <IconComet className="text-slate-600" size={24} />
               Sign-up
             </Button>
-            {query.isLoading && <Spinner size={6} />}
+            {query.isLoading && <Spinner size={4} />}
             <Button type={"submit"} isDisabled={!isShow || query.isLoading}>
               <IconKey className="text-slate-600" size={24} />
               <p>Login</p>
@@ -349,7 +340,7 @@ function CodeForm({
             <IconArrowBack className="text-slate-600" size={24} />
             Cancel
           </Button>
-          {query.isLoading && <Spinner size={6} />}
+          {query.isLoading && <Spinner size={4} />}
           <Button type={"submit"} isDisabled={!isShow}>
             <IconSend2 className="text-slate-600" size={18} />
             Send
@@ -463,7 +454,7 @@ function RegisterForm({
               <IconLogin className="text-slate-600" size={24} />
               Sign-in
             </Button>
-            {query.isLoading && <Spinner size={6} />}
+            {query.isLoading && <Spinner size={4} />}
             <Button type={"submit"} isDisabled={!isShow || query.isLoading}>
               <IconKey className="text-slate-600" size={24} />
               <p>Register</p>

@@ -13,10 +13,11 @@ const server = setupServer(...handlers);
 beforeAll(() => {
   // The error is thrown whenever there is a request that does not have a corresponding request handler
   server.listen({ onUnhandledRequest: "error" });
+  // Simple outgoing request listener
+  server.events.on("request:start", ({ request }) => {
+    console.log("MSW intercepted:", request.method, request.url);
+  });
 });
-
-// Close server after all tests (msw)
-afterAll(() => server.close());
 
 afterEach(() => {
   // Clearing the DOM after each test
@@ -24,3 +25,6 @@ afterEach(() => {
   // Reset handlers after each test (msw)
   server.resetHandlers();
 });
+
+// Close server after all tests (msw)
+afterAll(() => server.close());
