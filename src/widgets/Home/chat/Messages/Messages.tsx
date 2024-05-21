@@ -90,7 +90,9 @@ function ScrollButton({
       onClick={() => scrollToBottom()}
       style={{
         transform:
-          isShowScrollToBottom || isUnreadMessage ? "" : "translateY(200%)",
+          isShowScrollToBottom || isUnreadMessage
+            ? ""
+            : "translateY(200%) scale(0)",
       }}
       className={`sticky bottom-0 self-end border-2 rounded-full bg-slate-100 text-slate-600 p-2 hover:bg-slate-200 duration-500 ease-in-out`}
     >
