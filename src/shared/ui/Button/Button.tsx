@@ -9,7 +9,9 @@ export function Button({
   disabled,
   loading,
   loaderType,
+  className,
   buttonRef,
+  style,
   onClick,
 }: {
   children: ReactNode;
@@ -21,7 +23,9 @@ export function Button({
   loading?: boolean;
   loaderType?: "pulse" | "outside" | "replace";
   // outside loaderType only for icons
+  className?: string;
   buttonRef?: React.MutableRefObject<HTMLButtonElement | null>;
+  style?: React.CSSProperties;
   onClick?: () => void;
 }) {
   const Loader = (
@@ -39,7 +43,8 @@ export function Button({
 
   return (
     <div
-      className={`${loaderType === "pulse" && loading ? "animate-pulse" : ""} relative flex justify-center items-center`}
+      style={style}
+      className={`${loaderType === "pulse" && loading ? "animate-pulse" : ""} flex justify-center items-center duration-300 ease-in-out`}
     >
       <button
         title={title}
@@ -47,7 +52,7 @@ export function Button({
         type={type}
         ref={buttonRef}
         onClick={onClick}
-        className={`${loading || disabled ? "" : "cursor-pointer"} ${rounded === "default" ? "rounded-lg" : ""} ${rounded === "full" ? "rounded-full" : ""} ${!noHover ? "hover:bg-slate-200 p-1" : ""} h-full flex items-center opacity-75 hover:opacity-100 duration-300 ease-in-out`}
+        className={`${loading || disabled ? "" : "cursor-pointer"} ${rounded === "default" ? "rounded-lg" : ""} ${rounded === "full" ? "rounded-full" : ""} ${!noHover ? "hover:bg-slate-200 p-1" : ""} h-full flex items-center opacity-75 hover:opacity-100 duration-300 ease-in-out ${className || ""}`}
       >
         {Content}
       </button>

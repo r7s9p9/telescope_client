@@ -8,12 +8,7 @@ import {
   useQueryUpdateMessage,
 } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
-import {
-  MessageDates,
-  MessageType,
-  SendMessageFormType,
-  sendMessageFormSchema,
-} from "../../../shared/api/api.schema";
+import { MessageDates, MessageType } from "../../../shared/api/api.schema";
 import { useInterval } from "../../../shared/lib/useInterval";
 import { useStore } from "../../../shared/store/store";
 import { debounce } from "../../../shared/lib/debounce";
@@ -21,8 +16,6 @@ import { checkRoomId } from "../../../shared/lib/uuid";
 import { useNavigate, useParams } from "react-router-dom";
 import { routes } from "../../../constants";
 import { getRandomArray, getRandomBoolean } from "../../../shared/lib/random";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 
 const INFO_UPDATE_INTERVAL = 10000 as const;
 
@@ -442,9 +435,6 @@ export function useInfo() {
 }
 
 export function useSend() {
-  const { register, reset, handleSubmit } = useForm<SendMessageFormType>({
-    resolver: zodResolver(sendMessageFormSchema),
-  });
   const { roomId } = useParams();
   const loadNewerMessages = useLoadNewerMessages();
 
@@ -456,7 +446,16 @@ export function useSend() {
   const querySend = useQuerySendMessage();
   const queryUpdate = useQueryUpdateMessage();
 
-  const onSubmit = handleSubmit(async (formData) => {
+  const [formData, setFormData] = useState({ text: "" });
+  const resetFormData = () => setFormData({ text: "" });
+
+  useEffect(() => {
+    if (editable?.isExist && editable.message.content.text) {
+      setFormData({ text: editable.message.content.text });
+    }
+  }, [editable]);
+
+  const onSubmit = async () => {
     if (
       formData.text &&
       !querySend.isLoading &&
@@ -498,12 +497,13 @@ export function useSend() {
         // TODO 500 error
         if (success) loadNewerMessages.run();
       }
-      reset();
+      resetFormData();
     }
-  });
+  };
 
   return {
-    register,
+    formData,
+    setFormData,
     onSubmit,
     isLoading: querySend.isLoading || queryUpdate.isLoading,
   };

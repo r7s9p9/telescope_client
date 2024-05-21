@@ -1,4 +1,4 @@
-import { NotifyStack } from "../widgets/notification/notification";
+import { NotifyStack } from "../widgets/Notification/Notification";
 import { Link, Outlet } from "react-router-dom";
 import {
   IconMessageCircle,
@@ -21,30 +21,30 @@ export default function Home() {
 
 function LeftPanel() {
   return (
-    <div className="shrink-0 h-full p-2 bg-slate-600 flex flex-col items-center gap-2">
+    <div className="shrink-0 h-full bg-slate-600 px-2 flex flex-col items-center gap-2">
       <Link to={routes.profile.path}>
-        <Button title="Profile" rounded="full" noHover>
-          <IconUserCircle strokeWidth="1" className="text-slate-50" size={32} />
+        <Button title="Profile" rounded="full" noHover className="pt-2">
+          <IconUserCircle strokeWidth="1" className="text-slate-50" size={36} />
         </Button>
       </Link>
       <Link to={routes.rooms.path}>
-        <Button title="Rooms" rounded="full" noHover>
+        <Button title="Rooms" rounded="full" noHover className="pt-2">
           <IconMessageCircle
             strokeWidth="1"
             className="text-slate-50"
-            size={32}
+            size={36}
           />
         </Button>
       </Link>
       <Link to={routes.friends.path}>
-        <Button title="Friends" rounded="full" noHover>
-          <IconUsersGroup strokeWidth="1" className="text-slate-50" size={32} />
+        <Button title="Friends" rounded="full" noHover className="pt-2">
+          <IconUsersGroup strokeWidth="1" className="text-slate-50" size={36} />
         </Button>
       </Link>
       <div className="grow"></div>
       <Link to={routes.settings.path}>
-        <Button title="Settings" rounded="full" noHover>
-          <IconSettings strokeWidth="1" className="text-slate-50" size={32} />
+        <Button title="Settings" rounded="full" noHover className="pb-2">
+          <IconSettings strokeWidth="1" className="text-slate-50" size={36} />
         </Button>
       </Link>
     </div>

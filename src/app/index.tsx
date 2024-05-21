@@ -6,18 +6,18 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
-import Home from "../pages/home.tsx";
+import Home from "../pages/Home.tsx";
 import "./index.css";
-import Auth from "../pages/auth.tsx";
+import Auth from "../pages/Auth.tsx";
 import { routes } from "../constants.ts";
-import { NotifyProvider } from "../widgets/notification/notification.tsx";
-import { Chat } from "../widgets/home/chat/chat.tsx";
-import { Rooms } from "../widgets/home/rooms/rooms.tsx";
+import { NotifyProvider } from "../widgets/Notification/Notification.tsx";
+import { Chat } from "../widgets/Home/chat/Chat.tsx";
+import { Rooms } from "../widgets/Home/Rooms/Rooms.tsx";
 import { StoreProvider } from "../shared/store/StoreProvider.tsx";
-import { ContextMenuProvider } from "../widgets/context-menu/ContextMenu.tsx";
-import { CreateRoom } from "../widgets/home/create-room/CreateRoom.tsx";
-import { ChatInfo } from "../widgets/home/chat-info/ChatInfo.tsx";
-import { Profile } from "../widgets/home/profile/Profile.tsx";
+import { ContextMenuProvider } from "../widgets/ContextMenu/ContextMenu.tsx";
+import { CreateRoom } from "../widgets/Home/CreateRoom/CreateRoom.tsx";
+import { ChatInfo } from "../widgets/Home/ChatInfo/ChatInfo.tsx";
+import { Profile } from "../widgets/Home/Profile/Profile.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(

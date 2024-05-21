@@ -12,10 +12,10 @@ import {
 import { RoomId, UserId } from "../../../types";
 import { checkUserId } from "../../../shared/lib/uuid";
 import { useLoadInfo } from "../chat/useChat";
-import { Input } from "../../../shared/ui/input/input";
-import { Select } from "../../../shared/ui/select/select";
+import { Input } from "../../../shared/ui/Input/Input";
+import { Select } from "../../../shared/ui/Select/Select";
 import { Button } from "../../../shared/ui/Button/Button";
-import { Text } from "../../../shared/ui/text/text";
+import { Text } from "../../../shared/ui/Text/Text";
 
 export function ChatInfo() {
   const { roomId } = useParams();
@@ -68,7 +68,7 @@ export function ChatInfo() {
         className="bg-slate-100 rounded-xl p-4 flex flex-col shadow-md"
       >
         <div className="flex justify-between items-center mb-2">
-          <Text size="xl" font="light" uppercase>
+          <Text size="xl" font="light" letterSpacing uppercase>
             Info
           </Text>
           <Button title="Exit" rounded="full" onClick={close}>
@@ -177,9 +177,9 @@ function Info({
       <div className="size-10 flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
         {data.name.at(0)}
       </div>
-      <div className="flex flex-col ml-4 gap-2 items-start">
-        <div className="flex flex-row items-center justify-between gap-2">
-          <Text size="sm" font="default" className="w-14">
+      <div className="flex flex-col ml-4 gap-2 items-start w-64 pr-20">
+        <div className="flex flex-row pt-1 items-center justify-between gap-2">
+          <Text size="sm" font="default" className="min-w-14">
             Name:
           </Text>
           <Input
@@ -193,7 +193,21 @@ function Info({
           />
         </div>
         <div className="flex flex-row items-center gap-2">
-          <Text size="sm" font="default" className="w-14">
+          <Text size="sm" font="default" className="min-w-14">
+            About:
+          </Text>
+          <Input
+            value={info.about}
+            setValue={(val) =>
+              setInfo((prevInfo) => ({ ...prevInfo, about: val }))
+            }
+            disabled={!isEdit}
+            unstyled={!isEdit}
+            size="sm"
+          />
+        </div>
+        <div className="flex flex-row items-center gap-2">
+          <Text size="sm" font="default" className="min-w-14">
             Type:
           </Text>
           <Select
@@ -214,21 +228,7 @@ function Info({
           </Select>
         </div>
         <div className="flex flex-row items-center gap-2">
-          <Text size="sm" font="default" className="w-14">
-            About:
-          </Text>
-          <Input
-            value={info.about}
-            setValue={(val) =>
-              setInfo((prevInfo) => ({ ...prevInfo, about: val }))
-            }
-            disabled={!isEdit}
-            unstyled={!isEdit}
-            size="sm"
-          />
-        </div>
-        <div className="flex flex-row items-center gap-2">
-          <Text size="sm" font="default" className="w-16">
+          <Text size="sm" font="default" className="min-w-16">
             Created:
           </Text>
           <Text size="sm" font="light">
@@ -236,7 +236,7 @@ function Info({
           </Text>
         </div>
         <div className="flex flex-row items-center gap-2">
-          <Text size="sm" font="default" className="w-16">
+          <Text size="sm" font="default" className="min-w-16">
             Creator:
           </Text>
           <Text size="sm" font="light">
@@ -265,7 +265,7 @@ function Members({ isAdmin }: { isAdmin: boolean }) {
   return (
     <div className="flex flex-col ">
       <div className="flex justify-between items-center gap-4">
-        <Text size="xl" font="light" uppercase>
+        <Text size="xl" font="light" letterSpacing uppercase>
           Members
         </Text>
         {isAdmin && <InviteButton />}
@@ -282,37 +282,42 @@ function EditGroup({
   isEdit: boolean;
 }) {
   return (
-    <div className="relative size-8">
-      <button
+    <div className="relative">
+      <Button
+        title="Edit"
+        rounded="full"
         onClick={() => handleClick("edit")}
         style={{
-          transform: isEdit ? "scale(0)" : "",
+          position: "absolute",
+          zIndex: isEdit ? 0 : 10,
           opacity: isEdit ? "0" : "1",
         }}
-        className={`${isEdit ? "z-0" : "z-10"} absolute size-8 flex items-center justify-center rounded-full hover:bg-slate-200 duration-300 ease-in-out"`}
+        disabled={isEdit}
       >
         <IconEdit strokeWidth="1" className="text-slate-600" size={24} />
-      </button>
-      <button
+      </Button>
+      <Button
+        title="Cancel edit"
+        rounded="full"
         onClick={() => handleClick("cancel")}
         style={{
-          transform: isEdit ? "" : "scale(0)",
-          opacity: isEdit ? "1" : "0",
+          opacity: !isEdit ? "0" : "1",
         }}
-        className="absolute size-8 flex items-center justify-center rounded-full hover:bg-slate-200 duration-300 ease-in-out"
+        disabled={!isEdit}
       >
         <IconX strokeWidth="1" className="text-slate-600" size={24} />
-      </button>
-      <button
+      </Button>
+      <Button
+        title="Update info"
+        rounded="full"
         onClick={() => handleClick("send")}
         style={{
-          transform: isEdit ? "" : "scale(0)",
-          opacity: isEdit ? "1" : "0",
+          opacity: !isEdit ? "0" : "1",
         }}
-        className="absolute top-8 size-8 flex items-center justify-center rounded-full hover:bg-slate-200 duration-300 ease-in-out"
+        disabled={!isEdit}
       >
         <IconCheck strokeWidth="1" className="text-slate-600" size={24} />
-      </button>
+      </Button>
     </div>
   );
 }

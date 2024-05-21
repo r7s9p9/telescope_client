@@ -24,10 +24,10 @@ import {
   useQueryRegister,
 } from "../../shared/api/api";
 import { routes } from "../../constants";
-import { useNotify } from "../notification/notification";
-import { NotifyType } from "../notification/types";
+import { useNotify } from "../Notification/Notification";
+import { NotifyType } from "../Notification/types";
 import { message } from "./constants";
-import { Spinner } from "../../shared/ui/spinner/spinner";
+import { Spinner } from "../../shared/ui/Spinner/Spinner";
 
 const useResetForm = (isShow: boolean, reset: UseFormReset<IFormValues>) =>
   useEffect(() => {
@@ -251,7 +251,7 @@ function LoginForm({
               <IconComet className="text-slate-600" size={24} />
               Sign-up
             </Button>
-            {query.isLoading && <Spinner size={4} />}
+            {!query.isLoading && <Spinner size={48} />}
             <Button type={"submit"} isDisabled={!isShow || query.isLoading}>
               <IconKey className="text-slate-600" size={24} />
               <p>Login</p>
@@ -340,7 +340,7 @@ function CodeForm({
             <IconArrowBack className="text-slate-600" size={24} />
             Cancel
           </Button>
-          {query.isLoading && <Spinner size={4} />}
+          {query.isLoading && <Spinner size={48} />}
           <Button type={"submit"} isDisabled={!isShow}>
             <IconSend2 className="text-slate-600" size={18} />
             Send
@@ -454,7 +454,7 @@ function RegisterForm({
               <IconLogin className="text-slate-600" size={24} />
               Sign-in
             </Button>
-            {query.isLoading && <Spinner size={4} />}
+            {query.isLoading && <Spinner size={48} />}
             <Button type={"submit"} isDisabled={!isShow || query.isLoading}>
               <IconKey className="text-slate-600" size={24} />
               <p>Register</p>

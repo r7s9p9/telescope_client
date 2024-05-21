@@ -1,10 +1,12 @@
 import { IconEdit, IconSend2, IconX } from "@tabler/icons-react";
 import { useLoadInfo, useSend, useEdit, useInfo } from "../useChat";
-import { useLoadRooms } from "../../rooms/useRooms";
+import { useLoadRooms } from "../../Rooms/useRooms";
 import { useQueryJoinRoom } from "../../../../shared/api/api";
 import { Button } from "../../../../shared/ui/Button/Button";
 import { RoomId } from "../../../../types";
-import { Spinner } from "../../../../shared/ui/spinner/spinner";
+import { Spinner } from "../../../../shared/ui/Spinner/Spinner";
+import { Text } from "../../../../shared/ui/Text/Text";
+import { TextArea } from "../../../../shared/ui/TextArea/TextArea";
 
 export function BottomBarWrapper({
   data,
@@ -19,7 +21,7 @@ export function BottomBarWrapper({
 function BottomBarSpinner() {
   return (
     <div className="shrink-0 h-24 w-full flex border-x-2 border-slate-100 bg-slate-50">
-      <Spinner size={16} />
+      <Spinner size={64} />
     </div>
   );
 }
@@ -40,12 +42,11 @@ function BottomBarNoMember({ roomId }: { roomId: RoomId }) {
     <>
       {!joinQuery.isLoading && (
         <div className="shrink-0 relative h-24 w-full flex items-center justify-center border-x-2 border-slate-100 bg-slate-50">
-          <button
-            onClick={joinAction}
-            className="px-6 py-2 text-xl font-light tracking-widest uppercase rounded-lg hover:bg-slate-200 duration-300"
-          >
-            Join
-          </button>
+          <Button title="Join room" rounded="default" onClick={joinAction}>
+            <Text size="xl" font="default" uppercase className="py-2 px-6">
+              Join
+            </Text>
+          </Button>
         </div>
       )}
       {joinQuery.isLoading && <BottomBarSpinner />}
@@ -55,7 +56,7 @@ function BottomBarNoMember({ roomId }: { roomId: RoomId }) {
 
 function BottomBar() {
   const editAction = useEdit();
-  const { register, isLoading, onSubmit } = useSend();
+  const { formData, setFormData, isLoading, onSubmit } = useSend();
 
   return (
     <>
@@ -67,10 +68,12 @@ function BottomBar() {
             size={24}
           />
           <div className="grow w-0 pl-4 h-12 flex flex-col justify-center text-sm">
-            <p className="font-light">Edit message</p>
-            <p className="w-full truncate">
+            <Text size="sm" font="light">
+              Edit message
+            </Text>
+            <Text size="sm" font="default" className="truncate">
               {editAction.editable.message.content.text}
-            </p>
+            </Text>
           </div>
           <Button
             onClick={() => editAction.closeEdit()}
@@ -81,36 +84,28 @@ function BottomBar() {
           </Button>
         </div>
       )}
-      <form
-        onSubmit={onSubmit}
-        className="shrink-0 relative h-24 p-4 w-full flex items-center border-x-2 border-slate-100 bg-slate-50"
-      >
-        <textarea
-          {...register("text")}
-          rows={2}
-          defaultValue={
-            editAction.editable?.isExist
-              ? editAction.editable.message?.content.text
-              : ""
+      <div className="shrink-0 relative min-h-24 p-4 w-full flex items-center border-x-2 border-slate-100 bg-slate-50">
+        <TextArea
+          value={formData.text}
+          setValue={(val) =>
+            setFormData((prevInfo) => ({ ...prevInfo, text: val }))
           }
-          aria-multiline={true}
-          aria-expanded={true}
-          autoComplete="off"
-          placeholder="Send message..."
-          className={`resize-none h-fit grow py-2 pl-4 pr-12 outline-none font-light text-gray-800 text-xl bg-slate-100 ring-2 ring-slate-200 rounded-xl focus:ring-slate-300 focus:bg-slate-50 duration-300 ease-in-out`}
+          minRows={2}
+          maxRows={6}
+          size="xl"
+          rightSection={
+            <Button
+              title={"Send message"}
+              rounded={"full"}
+              loading={isLoading}
+              loaderType={"outside"}
+              onClick={onSubmit}
+            >
+              <IconSend2 className="text-slate-400" size={24} />
+            </Button>
+          }
         />
-        <div className="absolute right-8">
-          <Button
-            title={"Send message"}
-            type={"submit"}
-            rounded={"full"}
-            loading={isLoading}
-            loaderType={"outside"}
-          >
-            <IconSend2 className="text-slate-400" size={24} />
-          </Button>
-        </div>
-      </form>
+      </div>
     </>
   );
 }

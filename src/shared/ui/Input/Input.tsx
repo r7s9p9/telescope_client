@@ -13,8 +13,8 @@ function getStyle(
 
   switch (size) {
     case "sm":
-      height = 32;
-      textSize = "text-md";
+      height = 24;
+      textSize = "text-sm";
       sectionOffset = 8;
       if (leftSection) {
         paddingLeft = 32;
@@ -29,7 +29,7 @@ function getStyle(
       break;
     case "md":
       height = 48;
-      textSize = "text-xl";
+      textSize = "text-lg";
       sectionOffset = 12;
       if (leftSection) {
         paddingLeft = 42;
@@ -61,20 +61,20 @@ function getStyle(
   return { height, textSize, sectionOffset, paddingLeft, paddingRight };
 }
 
-export function Select({
-  children,
+export function Input({
   value,
   setValue,
   size,
+  placeholder,
   leftSection,
   rightSection,
   unstyled,
   disabled,
 }: {
-  children: ReactNode;
   value: string;
   setValue: Dispatch<string>;
   size: "sm" | "md" | "xl";
+  placeholder?: string;
   leftSection?: ReactNode;
   rightSection?: ReactNode;
   unstyled?: boolean;
@@ -84,7 +84,7 @@ export function Select({
     getStyle(size, !!leftSection, !!rightSection);
 
   return (
-    <div style={{ height }} className="relative shrink-0 grow">
+    <div style={{ height }} className={`relative shrink-0 w-full`}>
       {leftSection && (
         <div
           style={{ left: sectionOffset }}
@@ -93,15 +93,14 @@ export function Select({
           {leftSection}
         </div>
       )}
-      <select
-        disabled={disabled}
+      <input
         value={value}
         onChange={(e) => setValue(e.currentTarget.value)}
+        disabled={disabled}
+        placeholder={placeholder}
         style={{ paddingLeft, paddingRight }}
-        className={`${textSize} ${unstyled ? "" : "ring-2 ring-slate-200"} appearance-none h-full w-full outline-none font-light text-gray-800 bg-slate-100 rounded-md enabled:hover:ring-slate-400 enabled:hover:bg-slate-50 enabled:hover:rounded-xl focus:ring-slate-400 focus:bg-slate-50 focus:rounded-xl duration-300 ease-in-out`}
-      >
-        {children}
-      </select>
+        className={`${textSize} ${unstyled ? "" : "ring-2 ring-slate-200"} h-full w-full outline-none font-light text-gray-800 bg-slate-100 rounded-md enabled:hover:ring-slate-400 enabled:hover:bg-slate-50 enabled:hover:rounded-xl focus:ring-slate-400 focus:bg-slate-50 focus:rounded-xl duration-300 ease-in-out`}
+      ></input>
       {rightSection && (
         <div
           style={{ right: sectionOffset }}

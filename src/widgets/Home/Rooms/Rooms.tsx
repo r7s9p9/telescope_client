@@ -10,8 +10,8 @@ import { RoomType, SearchRoomsType } from "../../../shared/api/api.schema";
 import { useQuerySearchRooms } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
 import { Button } from "../../../shared/ui/Button/Button";
-import { Input } from "../../../shared/ui/input/input";
-import { Text } from "../../../shared/ui/text/text";
+import { Input } from "../../../shared/ui/Input/Input";
+import { Text } from "../../../shared/ui/Text/Text";
 
 const itemHeightStyle = { height: ITEM_HEIGHT + "px" };
 
@@ -115,7 +115,7 @@ function Wrapper({
 }) {
   return (
     <>
-      <div className="h-full flex flex-col w-1/2 min-w-52 max-w-xs bg-slate-50">
+      <div className="h-full flex flex-col w-1/2 min-w-64 max-w-sm bg-slate-50">
         <div className="pb-4 px-4 flex flex-col items-center">
           <Title />
           <Input
@@ -180,15 +180,19 @@ function FoundItem({
       style={itemHeightStyle}
       className={`${isOpened ? "bg-slate-200 cursor-default" : "bg-slate-50"} w-full flex flex-col px-4 py-2 justify-between hover:bg-slate-200 duration-300 ease-out`}
     >
-      <p className="text-md text-green-600 font-light">{data.name}</p>
-      <p className="text-sm text-slate-600 font-light">{membersStr}</p>
+      <Text size="sm" font="light" className="text-green-600">
+        {data.name}
+      </Text>
+      <Text size="sm" font="light" className="text-slate-600">
+        {membersStr}
+      </Text>
     </Link>
   );
 }
 
 function Title() {
   return (
-    <div className="h-16 py-2 w-full flex justify-between items-center">
+    <div className="h-16 w-full flex justify-between items-center">
       <Text size="xl" font="thin" uppercase letterSpacing>
         Rooms
       </Text>
@@ -207,12 +211,17 @@ function Title() {
 
 function ListEmpty() {
   return (
-    <p
+    <div
       style={itemHeightStyle}
-      className="w-full text-center p-4 font-thin text-xl bg-slate-100"
+      className="flex flex-col justify-center items-center w-full h-full px-4 bg-slate-200"
     >
-      You have no rooms
-    </p>
+      <Text size="sm" font="light" className="text-center">
+        You don't have any rooms yet
+      </Text>
+      <Text size="sm" font="light" className="text-center">
+        Create your own room or find a public room and join it
+      </Text>
+    </div>
   );
 }
 
@@ -256,18 +265,22 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
       className={`${isOpened ? "bg-slate-200 cursor-default" : "bg-slate-50"} w-full flex flex-col px-4 py-2 justify-between items-center hover:bg-slate-200 duration-300 ease-out`}
     >
       <div className="w-full flex flex-row justify-between items-center gap-2">
-        <p className="text-md text-green-600 font-light">{data.name}</p>
-        <p className="text-sm text-slate-600 font-light">{date}</p>
+        <Text size="sm" font="light" className="text-green-600">
+          {data.name}
+        </Text>
+        <Text size="sm" font="light" className="text-slate-600">
+          {date}
+        </Text>
       </div>
       <div className="w-full flex flex-row gap-2 items-center">
         {lastUsername && (
-          <p className="text-sm shrink-0 text-blue-600 truncate">
+          <Text size="sm" font="default" className="text-blue-600">
             {lastUsername}:
-          </p>
+          </Text>
         )}
-        <p className="text-sm grow font-light text-left truncate">
+        <Text size="sm" font="light" className="text-slate-600 truncate">
           {lastMessage}
-        </p>
+        </Text>
         <UnreadCount count={data.unreadCount} />
       </div>
     </Link>

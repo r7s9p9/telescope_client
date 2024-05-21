@@ -2,8 +2,8 @@ import { useInfo, useLoadInfo } from "../useChat";
 import { routes } from "../../../../constants";
 import { useNavigate } from "react-router-dom";
 import { useQueryLeaveRoom } from "../../../../shared/api/api";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import { Text } from "../../../../shared/ui/text/text";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Text } from "../../../../shared/ui/Text/Text";
 import {
   IconDoorExit,
   IconDotsVertical,
@@ -11,7 +11,7 @@ import {
 } from "@tabler/icons-react";
 import { Button } from "../../../../shared/ui/Button/Button";
 import { RoomId } from "../../../../types";
-import { useLoadRooms } from "../../rooms/useRooms";
+import { useLoadRooms } from "../../Rooms/useRooms";
 
 export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
   const userCountStr = () => {
@@ -123,27 +123,6 @@ function TopBarMenu({
     }
   }
 
-  function ContentWrapper({
-    icon,
-    text,
-    type,
-  }: {
-    icon: ReactNode;
-    text: string;
-    type?: "default" | "warning";
-  }) {
-    return (
-      <div className="w-28 h-8 flex items-center">
-        <div className="w-12 flex justify-center">{icon}</div>
-        <p
-          className={`${type === "warning" ? "text-red-900" : "text-slate-900"}`}
-        >
-          {text}
-        </p>
-      </div>
-    );
-  }
-
   return (
     <>
       <Button
@@ -158,7 +137,6 @@ function TopBarMenu({
           size={32}
         />
       </Button>
-
       <div
         style={{
           opacity: isMenuOpened ? 1 : 0,
@@ -167,34 +145,32 @@ function TopBarMenu({
             : "translateY(-50%) scaleY(0)",
         }}
         ref={contentRef}
-        className="absolute z-10 flex flex-col right-0 top-16 duration-300 ease-in-out border-t-2 border-slate-100 bg-slate-50 shadow-md font-normal"
+        className="absolute z-10 flex flex-col right-0 top-16 duration-300 ease-in-out border-t-2 border-slate-100 bg-slate-50 shadow-md rounded-b-lg"
       >
         <Button title={"Info"} onClick={() => onClickHandler("info")}>
-          <ContentWrapper
-            icon={
-              <IconInfoCircle
-                className="text-slate-600"
-                strokeWidth="2"
-                size={18}
-              />
-            }
-            text="Info"
-            type="default"
-          />
+          <div className="w-28 h-8 flex items-center">
+            <IconInfoCircle
+              className="w-12 text-slate-600"
+              strokeWidth="2"
+              size={18}
+            />
+            <Text size="md" font="default" className="text-slate-600">
+              Info
+            </Text>
+          </div>
         </Button>
         {isMember && (
           <Button title={"Leave"} onClick={() => onClickHandler("leave")}>
-            <ContentWrapper
-              icon={
-                <IconDoorExit
-                  className="text-red-600"
-                  strokeWidth="2"
-                  size={18}
-                />
-              }
-              text="Leave"
-              type="warning"
-            />
+            <div className="w-28 h-8 flex items-center">
+              <IconDoorExit
+                className="w-12 text-red-600"
+                strokeWidth="2"
+                size={18}
+              />
+              <Text size="md" font="default" className="text-red-600">
+                Leave
+              </Text>
+            </div>
           </Button>
         )}
       </div>

@@ -24,10 +24,10 @@ export function Text({
       textSize = "text-sm";
       break;
     case "md":
-      textSize = "text-xl";
+      textSize = "text-lg";
       break;
     case "xl":
-      textSize = "text-3xl";
+      textSize = "text-2xl";
       break;
   }
   switch (font) {

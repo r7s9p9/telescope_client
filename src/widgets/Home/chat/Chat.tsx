@@ -3,14 +3,14 @@ import { MessageType } from "../../../shared/api/api.schema";
 import { isSameDay } from "../../../shared/lib/date";
 import { useChat, useInfo } from "./useChat";
 import { Outlet } from "react-router-dom";
-import { TopBar } from "./topBar/topBar";
+import { TopBar } from "./TopBar/TopBar";
 import {
   Message,
   Messages,
   DateBubble,
   MessagesSkeleton,
-} from "./messages/messages";
-import { BottomBarWrapper } from "./bottomBar/bottomBar";
+} from "./Messages/Messages";
+import { BottomBarWrapper } from "./BottomBar/BottomBar";
 
 const noMessagesElement = (
   <li className="flex flex-col h-fit p-2 mt-4 self-center bg-slate-50 rounded-xl ring-2 ring-slate-200 select-none">

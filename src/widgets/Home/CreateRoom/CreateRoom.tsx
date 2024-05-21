@@ -12,7 +12,8 @@ import { Dispatch, useState } from "react";
 import { useQueryCreateRoom } from "../../../shared/api/api";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../../constants";
-import { useLoadRooms } from "../rooms/useRooms";
+import { useLoadRooms } from "../Rooms/useRooms";
+import { Text } from "../../../shared/ui/Text/Text";
 
 export interface IFormValues {
   name: string;
@@ -59,9 +60,9 @@ export function CreateRoom() {
   return (
     <div className="w-full h-full flex justify-center items-center">
       <div className="flex flex-col items-center w-2/3 bg-slate-50 rounded-2xl shadow-xl p-4">
-        <p className="pl-4 font-thin tracking-widest text-4xl select-none">
+        <Text size="xl" font="default">
           Create a room
-        </p>
+        </Text>
         <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
           <Input type="name" register={register} required errors={errors} />
           <RadioType roomType={roomType} setRoomType={setRoomType} />

@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
-import { AuthContainer } from "../widgets/auth-container/auth-container";
-import { NotifyStack } from "../widgets/notification/notification";
+import { AuthContainer } from "../widgets/AuthContainer/AuthContainer";
+import { NotifyStack } from "../widgets/Notification/Notification";
 
 export default function Auth({ type }: { type: "login" | "register" }) {
   return (

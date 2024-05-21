@@ -6,13 +6,14 @@ import {
   IconMessageReply,
   IconTrash,
 } from "@tabler/icons-react";
-import { useMenuContext } from "../../../context-menu/ContextMenu";
+import { useMenuContext } from "../../../ContextMenu/ContextMenu";
 import { useChat, useDelete, useEdit } from "../useChat";
 import { formatDate } from "../../../../shared/lib/date";
 import { MessageType } from "../../../../shared/api/api.schema";
 import { getRandomBoolean, getRandomInt } from "../../../../shared/lib/random";
 import React from "react";
 import { Button } from "../../../../shared/ui/Button/Button";
+import { Text } from "../../../../shared/ui/Text/Text";
 
 export const MessagesSkeleton = React.memo(() => {
   function Skeleton() {
@@ -43,8 +44,10 @@ export const MessagesSkeleton = React.memo(() => {
 export function DateBubble({ date }: { date: number }) {
   const str = formatDate().bubble(date);
   return (
-    <li className="sticky text-center top-0 w-44 mt-4 px-4 py-1 bg-slate-50 self-center rounded-full ring-2 ring-slate-200 text-md font-light select-none">
-      {str}
+    <li className="sticky top-0 w-44 mt-4 px-4 py-1 self-center bg-slate-50 rounded-full ring-2 ring-slate-200">
+      <Text size="sm" font="bold" className="text-center select-none">
+        {str}
+      </Text>
     </li>
   );
 }
@@ -57,20 +60,18 @@ export function Messages({
   chat: ReturnType<typeof useChat>;
 }) {
   return (
-    <>
-      <ul
-        ref={chat.messagesRef}
-        onScroll={chat.debouncedHandleScroll}
-        className="relative overflow-y-scroll will-change-scroll overscroll-none scroll-auto grow w-full p-4 flex flex-col bg-slate-200"
-      >
-        {children}
-      </ul>
+    <ul
+      ref={chat.messagesRef}
+      onScroll={chat.debouncedHandleScroll}
+      className="relative overflow-y-scroll will-change-scroll overscroll-none scroll-auto grow w-full p-4 flex flex-col bg-slate-200"
+    >
+      {children}
       <ScrollButton
         isUnreadMessage={chat?.isUnreadMessage}
         isShowScrollToBottom={chat.isShowScrollToBottom}
         scrollToBottom={chat.scrollToBottom}
       />
-    </>
+    </ul>
   );
 }
 
@@ -89,14 +90,12 @@ function ScrollButton({
       onClick={() => scrollToBottom()}
       style={{
         transform:
-          isShowScrollToBottom || isUnreadMessage
-            ? ""
-            : "translateY(100%) rotate(90deg) scale(0)",
+          isShowScrollToBottom || isUnreadMessage ? "" : "translateY(200%)",
       }}
-      className={`absolute bottom-40 right-4 border-2 rounded-full bg-slate-100 text-slate-600 p-2 hover:bg-slate-200 duration-500 ease-in-out`}
+      className={`sticky bottom-0 self-end border-2 rounded-full bg-slate-100 text-slate-600 p-2 hover:bg-slate-200 duration-500 ease-in-out`}
     >
       {isUnreadMessage && (
-        <div className="absolute top-0 left-0 size-12 rounded-full ring-2 ring-blue-400 animate-pulse" />
+        <div className="absolute top-0 right-0 size-12 rounded-full ring-2 ring-blue-400 animate-pulse" />
       )}
       <IconArrowDown strokeWidth="1" size={32} />
     </button>
@@ -113,8 +112,12 @@ export function Message({ message }: { message: MessageType }) {
   if (message.authorId === "service") {
     return (
       <li className="flex flex-col h-fit p-2 mt-4 self-center bg-slate-50 rounded-xl ring-2 ring-slate-200 select-none">
-        <p className="text-sm text-justify">{text}</p>
-        <p className="text-slate-400 text-sm text-center">{date}</p>
+        <Text size="sm" font="default">
+          {text}
+        </Text>
+        <Text size="sm" font="thin" className="text-center">
+          {date}
+        </Text>
       </li>
     );
   }
@@ -140,12 +143,16 @@ export function Message({ message }: { message: MessageType }) {
       className={`${isYourMessage ? "self-end" : "self-start"} flex flex-col mt-4 p-2 bg-slate-50 ring-slate-400 rounded-xl shadow w-fit max-w-full select-none`}
     >
       <div className="flex flex-row justify-between gap-4 min-w-32 max-w-full text-sm">
-        <p className="text-green-500 max-w-full">
+        <Text size="sm" font="default" className="text-green-600">
           {isYourMessage ? "You" : message.username}
-        </p>
-        <p className="text-gray-400">{date}</p>
+        </Text>
+        <Text size="sm" font="thin">
+          {date}
+        </Text>
       </div>
-      <p className="text-sm text-justify break-all">{text}</p>
+      <Text size="sm" font="default" className="text-justify break-all">
+        {text}
+      </Text>
     </li>
   );
 }
@@ -170,46 +177,6 @@ function MessageContextMenu({
     onEdit: (message: MessageType) => void;
   };
 }) {
-  function MenuButton({
-    type,
-  }: {
-    type: "reply" | "edit" | "copy" | "delete";
-  }) {
-    let Icon;
-    if (type === "reply") {
-      Icon = (
-        <IconMessageReply
-          className="text-slate-600"
-          strokeWidth="2"
-          size={18}
-        />
-      );
-    }
-    if (type === "edit") {
-      Icon = <IconEdit className="text-slate-600" strokeWidth="2" size={18} />;
-    }
-    if (type === "copy") {
-      Icon = <IconCopy className="text-slate-600" strokeWidth="2" size={18} />;
-    }
-    if (type === "delete") {
-      Icon = <IconTrash className="text-red-600" strokeWidth="2" size={18} />;
-    }
-
-    return (
-      <Button title={type} onClick={() => onClickHandler(type)}>
-        <div className="flex flex-row w-32 h-8 items-center">
-          <div className="w-12 flex justify-center">{Icon}</div>
-
-          <p
-            className={`${type === "delete" ? "text-red-600" : "text-slate-600"} capitalize`}
-          >
-            {type}
-          </p>
-        </div>
-      </Button>
-    );
-  }
-
   async function onClickHandler(type: "reply" | "edit" | "copy" | "delete") {
     // if (type === "reply") {
     // }
@@ -228,11 +195,63 @@ function MessageContextMenu({
   }
 
   return (
-    <div className=" bg-slate-100 flex flex-col m-2 rounded-lg shadow-xl">
-      <MenuButton type={"reply"} />
-      {isYourMessage && <MenuButton type={"edit"} />}
-      <MenuButton type={"copy"} />
-      {isYourMessage && <MenuButton type={"delete"} />}
+    <div className="bg-slate-100 flex flex-col m-2 rounded-lg shadow-xl">
+      <Button
+        title="Reply"
+        className="rounded-t-lg"
+        onClick={() => onClickHandler("reply")}
+      >
+        <div className="flex flex-row w-32 h-8 items-center">
+          <IconMessageReply
+            className="text-slate-600 w-12"
+            strokeWidth="2"
+            size={18}
+          />
+          <Text size="md" font="default" className="text-slate-600">
+            Reply
+          </Text>
+        </div>
+      </Button>
+      {isYourMessage && (
+        <Button title="Edit" onClick={() => onClickHandler("edit")}>
+          <div className="flex flex-row w-32 h-8 items-center">
+            <IconEdit
+              className="text-slate-600 w-12"
+              strokeWidth="2"
+              size={18}
+            />
+            <Text size="md" font="default" className="text-slate-600">
+              Edit
+            </Text>
+          </div>
+        </Button>
+      )}
+      <Button title="Copy" onClick={() => onClickHandler("copy")}>
+        <div className="flex flex-row w-32 h-8 items-center">
+          <IconCopy className="text-slate-600 w-12" strokeWidth="2" size={18} />
+          <Text size="md" font="default" className="text-slate-600">
+            Copy
+          </Text>
+        </div>
+      </Button>
+      {isYourMessage && (
+        <Button
+          title="Delete"
+          className="rounded-b-lg"
+          onClick={() => onClickHandler("delete")}
+        >
+          <div className="flex flex-row w-32 h-8 items-center">
+            <IconTrash
+              className="text-red-600 w-12"
+              strokeWidth="2"
+              size={18}
+            />
+            <Text size="md" font="default" className="text-red-600">
+              Delete
+            </Text>
+          </div>
+        </Button>
+      )}
     </div>
   );
 }
