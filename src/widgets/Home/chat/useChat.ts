@@ -2,13 +2,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useQueryCompareMessages,
   useQueryDeleteMessage,
+  useQueryGetMembers,
   useQueryReadMessages,
   useQueryRoomInfo,
   useQuerySendMessage,
   useQueryUpdateMessage,
 } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
-import { MessageDates, MessageType } from "../../../shared/api/api.schema";
+import {
+  MessageDates,
+  MessageType,
+  RoomGetMembersType,
+} from "../../../shared/api/api.schema";
 import { useInterval } from "../../../shared/lib/useInterval";
 import { useStore } from "../../../shared/store/store";
 import { debounce } from "../../../shared/lib/debounce";
@@ -543,4 +548,25 @@ export function useDelete() {
     return { success };
   };
   return { onDelete, isLoading: query.isLoading };
+}
+
+export function useMembers() {
+  const { roomId } = useParams();
+  const query = useQueryGetMembers();
+
+  const [data, setData] = useState<RoomGetMembersType>();
+
+  const getMembers = async () => {
+    const { success, data } = await query.run(roomId as RoomId);
+    if (!success) return { success: false as const };
+    setData(data);
+    return { success: true as const };
+  };
+
+  useEffect(() => {
+    getMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return { getMembers, data, isLoading: query.isLoading };
 }

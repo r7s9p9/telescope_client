@@ -111,8 +111,8 @@ export function TextArea({
     <div className={`relative shrink-0 w-full`}>
       {leftSection && (
         <div
-          style={{ left: sectionOffset }}
-          className={`absolute bottom-0 h-full flex items-center`}
+          style={{ left: sectionOffset, bottom: sectionOffset }}
+          className={`absolute h-full flex items-end`}
         >
           {leftSection}
         </div>
@@ -140,8 +140,8 @@ export function TextArea({
       </p>
       {rightSection && (
         <div
-          style={{ right: sectionOffset }}
-          className={`absolute bottom-0 h-full flex items-center`}
+          style={{ right: sectionOffset, bottom: sectionOffset }}
+          className={`absolute h-full flex items-end`}
         >
           {rightSection}
         </div>

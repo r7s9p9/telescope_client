@@ -1,5 +1,7 @@
+import { isNumeric } from "./number";
+
 export function getRandomInt(min: number, max: number): number {
-  if (!isFinite(min) || !isFinite(max)) {
+  if (!isNumeric(min) || !isNumeric(max)) {
     console.error("Min and max must be finite numbers");
     return NaN;
   }
@@ -17,7 +19,7 @@ export function getRandomArray(
   max: number,
   count: number,
 ): number[] {
-  if (!isFinite(min) || !isFinite(max) || !isFinite(count)) {
+  if (!isNumeric(min) || !isNumeric(max) || !isNumeric(count)) {
     console.error("Min, max and count must be finite numbers");
     return [];
   }
@@ -41,7 +43,7 @@ export function getRandomArray(
 }
 
 export function getRandomBoolean(chance: number = 0.5): boolean {
-  if (!isFinite(chance) || chance < 0 || chance > 1) {
+  if (!isNumeric(chance) || chance < 0 || chance > 1) {
     console.error("Chance must be a finite number between 0 and 1");
     return false;
   }

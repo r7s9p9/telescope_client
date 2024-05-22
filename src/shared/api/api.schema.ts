@@ -320,6 +320,16 @@ export const roomJoinSchema = z.object({
 });
 export type RoomJoinType = z.infer<typeof roomJoinSchema>;
 
+export const roomGetMembersSchema = z.object({
+  success: z.boolean(),
+  access: z.boolean(),
+  isEmpty: z.boolean(),
+  roomId: roomIdSchema,
+  users: accountReadSchema.array().optional(),
+});
+
+export type RoomGetMembersType = z.infer<typeof roomGetMembersSchema>;
+
 export const searchRoomsSchema = z
   .object({
     success: z.boolean(),

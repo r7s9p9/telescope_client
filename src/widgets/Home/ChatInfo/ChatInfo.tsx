@@ -1,7 +1,17 @@
-import { IconCheck, IconEdit, IconPlus, IconX } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconEdit,
+  IconPlus,
+  IconRefresh,
+  IconX,
+} from "@tabler/icons-react";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { RoomInfoUpdate, RoomType } from "../../../shared/api/api.schema";
+import {
+  AccountReadType,
+  RoomInfoUpdate,
+  RoomType,
+} from "../../../shared/api/api.schema";
 import { useStore } from "../../../shared/store/store";
 import { routes } from "../../../constants";
 import { formatDate } from "../../../shared/lib/date";
@@ -11,7 +21,7 @@ import {
 } from "../../../shared/api/api";
 import { RoomId, UserId } from "../../../types";
 import { checkUserId } from "../../../shared/lib/uuid";
-import { useLoadInfo } from "../chat/useChat";
+import { useLoadInfo, useMembers } from "../chat/useChat";
 import { Input } from "../../../shared/ui/Input/Input";
 import { Select } from "../../../shared/ui/Select/Select";
 import { Button } from "../../../shared/ui/Button/Button";
@@ -261,19 +271,6 @@ function Info({
   );
 }
 
-function Members({ isAdmin }: { isAdmin: boolean }) {
-  return (
-    <div className="flex flex-col ">
-      <div className="flex justify-between items-center gap-4">
-        <Text size="xl" font="light" letterSpacing uppercase>
-          Members
-        </Text>
-        {isAdmin && <InviteButton />}
-      </div>
-    </div>
-  );
-}
-
 function EditGroup({
   handleClick,
   isEdit,
@@ -318,6 +315,79 @@ function EditGroup({
       >
         <IconCheck strokeWidth="1" className="text-slate-600" size={24} />
       </Button>
+    </div>
+  );
+}
+
+function Members({ isAdmin }: { isAdmin: boolean }) {
+  const { getMembers, data, isLoading } = useMembers();
+
+  if (data?.isEmpty || !data?.users || isLoading) {
+    return <p>Loading</p>;
+  }
+
+  const users = data.users.map((user) => (
+    <li key={user.targetUserId}>
+      <Member data={user} />
+    </li>
+  ));
+
+  return (
+    <div className="flex flex-col">
+      <div className="flex items-center gap-2">
+        <Text size="xl" font="light" letterSpacing uppercase className="w-full">
+          Members
+        </Text>
+        <Button title="Find user" rounded="full" onClick={() => getMembers()}>
+          <IconRefresh className="text-slate-600" strokeWidth="2" size={24} />
+        </Button>
+        {isAdmin && <InviteButton />}
+      </div>
+      <div className="w-full h-64">
+        <ul>{users}</ul>
+      </div>
+    </div>
+  );
+}
+
+function Member({ data }: { data: AccountReadType }) {
+  let lastSeenStr;
+  let lastSeenColor;
+  if (!data.general?.lastSeen) {
+    lastSeenStr = "invisible";
+    lastSeenColor = "text-slate-400";
+  } else {
+    const { result, range } = formatDate().member(data.general.lastSeen);
+    if (range === "seconds") {
+      lastSeenStr = "online";
+      lastSeenColor = "text-green-600";
+    }
+    if (range !== "seconds") {
+      lastSeenStr = `Last seen: ${result}`;
+      lastSeenColor = "text-slate-600";
+    }
+  }
+
+  return (
+    <div className="mt-2 p-2 bg-slate-50 border-2 border-slate-200 rounded-lg shadow-md flex">
+      <div className="mr-2 size-10 self-center flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
+        {data.general?.username?.at(0)}
+      </div>
+      <div className="grow">
+        <Text size="sm" font="bold">
+          @{data.general?.username}
+        </Text>
+        <div className="flex justify-between w-full">
+          <Text size="sm" font="light">
+            Name: {data.general?.name}
+          </Text>
+          {data.general?.lastSeen && (
+            <Text size="sm" font="light" className={lastSeenColor}>
+              {lastSeenStr}
+            </Text>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

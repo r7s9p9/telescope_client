@@ -53,6 +53,8 @@ import {
   roomLeaveSchema,
   roomJoinSchema,
   RoomJoinType,
+  roomGetMembersSchema,
+  RoomGetMembersType,
 } from "./api.schema";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
@@ -456,6 +458,20 @@ export function useQueryJoinRoom() {
     });
     if (!success) return { success: false as const };
     return { success: true as const, data: response as RoomJoinType };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryGetMembers() {
+  const query = useQuery({ schema: roomGetMembersSchema });
+
+  const run = async (roomId: RoomId) => {
+    const { success, response } = await query.run(serverRoute.room.getMembers, {
+      roomId,
+    });
+    if (!success) return { success: false as const };
+    return { success: true as const, data: response as RoomGetMembersType };
   };
 
   return { run, isLoading: query.isLoading };
