@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import React, { Dispatch, ReactNode, useEffect, useState } from "react";
+import React, { Dispatch, ReactNode, memo, useEffect, useState } from "react";
 import { formatDate } from "../../../shared/lib/date";
 import { getRandomInt } from "../../../shared/lib/random";
 import { routes } from "../../../constants";
@@ -15,7 +15,7 @@ import { Text } from "../../../shared/ui/Text/Text";
 
 const itemHeightStyle = { height: ITEM_HEIGHT + "px" };
 
-const SkeletonList = React.memo(({ count }: { count?: number }) => {
+const SkeletonList = memo(({ count }: { count?: number }) => {
   if (!count) count = getRandomInt(4, 12);
 
   if (count > 0) {
@@ -61,7 +61,11 @@ export function Rooms() {
   if (searchValue !== "") {
     return (
       <Wrapper searchValue={searchValue} setSearchValue={setSearchValue}>
-        <FoundRooms data={foundRooms} openedRoomId={roomId as RoomId} />
+        <FoundRooms
+          isLoading={querySearch.isLoading}
+          data={foundRooms}
+          openedRoomId={roomId as RoomId}
+        />
       </Wrapper>
     );
   }
@@ -146,18 +150,27 @@ function Wrapper({
 function FoundRooms({
   data,
   openedRoomId,
+  isLoading,
 }: {
   data: SearchRoomsType | null;
   openedRoomId: RoomId;
+  isLoading: boolean;
 }) {
+  if (isLoading) return <FoundRoomsSkeleton />;
   if (data && !data.isEmpty) {
     const items = data.rooms.map((item) => (
       <li key={item.roomId}>
         <FoundItem isOpened={openedRoomId === item.roomId} data={item} />
       </li>
     ));
-
     return <>{items}</>;
+  }
+  if (data?.isEmpty) {
+    return (
+      <Text size="md" font="thin" className="text-center">
+        No rooms found
+      </Text>
+    );
   }
 }
 
@@ -188,6 +201,24 @@ function FoundItem({
     </Link>
   );
 }
+
+const FoundRoomsSkeleton = memo(() => {
+  const skeleton = (
+    <div
+      style={itemHeightStyle}
+      className={`bg-slate-100 w-full flex flex-col px-4 py-2 justify-between select-none animate-pulse`}
+    >
+      <div className="w-48 h-4 bg-slate-200 rounded-full" />
+      <div className="w-24 h-4 bg-slate-200 rounded-full" />
+    </div>
+  );
+
+  const count = getRandomInt(2, 6);
+
+  return Array(count)
+    .fill(1)
+    .map((_, i) => <li key={i}>{skeleton}</li>);
+});
 
 function Title() {
   return (

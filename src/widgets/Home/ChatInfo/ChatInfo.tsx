@@ -84,7 +84,7 @@ export function ChatInfo() {
     <Overlay>
       <div
         ref={contentRef}
-        className="bg-slate-100 rounded-xl p-4 flex flex-col shadow-md"
+        className="bg-slate-100 rounded-xl p-4 w-96 flex flex-col shadow-md"
       >
         <div className="flex justify-between items-center mb-2">
           <Text size="xl" font="light" letterSpacing uppercase>
@@ -193,10 +193,7 @@ function Info({
 
   return (
     <div className="flex">
-      <div className="size-10 flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
-        {data.name.at(0)}
-      </div>
-      <div className="flex flex-col ml-4 gap-2 items-start w-64 pr-20">
+      <div className="flex flex-col gap-2 items-start w-full pr-20">
         <div className="flex flex-row pt-1 items-center justify-between gap-2">
           <Text size="sm" font="default" className="min-w-14">
             Name:
@@ -411,9 +408,7 @@ function MemberSkeleton() {
 
 function MembersListWrapper({ children }: { children: ReactNode }) {
   return (
-    <ul className="w-full h-72 px-2 overflow-auto overscroll-none">
-      {children}
-    </ul>
+    <ul className="w-full h-72 overflow-auto overscroll-none">{children}</ul>
   );
 }
 
@@ -443,7 +438,7 @@ function Member({ data }: { data: AccountReadType }) {
   }
 
   return (
-    <div className="my-2 p-2 h-14 bg-slate-50 rounded-lg shadow-md flex">
+    <div className="my-2 p-2 h-14 border-2 border-slate-200 bg-slate-50 rounded-lg shadow-md flex">
       <div className="mr-2 size-10 self-center flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
         {data.general?.username?.at(0)}
       </div>
