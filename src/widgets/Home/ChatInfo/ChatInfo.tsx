@@ -5,10 +5,18 @@ import {
   IconRefresh,
   IconX,
 } from "@tabler/icons-react";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import {
+  ReactNode,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   AccountReadType,
+  RoomGetMembersType,
   RoomInfoUpdate,
   RoomType,
 } from "../../../shared/api/api.schema";
@@ -26,6 +34,7 @@ import { Input } from "../../../shared/ui/Input/Input";
 import { Select } from "../../../shared/ui/Select/Select";
 import { Button } from "../../../shared/ui/Button/Button";
 import { Text } from "../../../shared/ui/Text/Text";
+import { getRandomInt } from "../../../shared/lib/random";
 
 export function ChatInfo() {
   const { roomId } = useParams();
@@ -322,16 +331,6 @@ function EditGroup({
 function Members({ isAdmin }: { isAdmin: boolean }) {
   const { getMembers, data, isLoading } = useMembers();
 
-  if (data?.isEmpty || !data?.users || isLoading) {
-    return <p>Loading</p>;
-  }
-
-  const users = data.users.map((user) => (
-    <li key={user.targetUserId}>
-      <Member data={user} />
-    </li>
-  ));
-
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2">
@@ -343,46 +342,135 @@ function Members({ isAdmin }: { isAdmin: boolean }) {
         </Button>
         {isAdmin && <InviteButton />}
       </div>
-      <div className="w-full h-64">
-        <ul>{users}</ul>
+      <MembersList isLoading={isLoading} data={data} />
+    </div>
+  );
+}
+
+function MembersList({
+  isLoading,
+  data,
+}: {
+  isLoading: boolean;
+  data?: RoomGetMembersType;
+}) {
+  if (isLoading) {
+    return (
+      <MembersListWrapper>
+        <MembersListSkeleton />
+      </MembersListWrapper>
+    );
+  }
+
+  if (data?.isEmpty || !data?.users) {
+    return (
+      <MembersListWrapper>
+        <NoMembers />
+      </MembersListWrapper>
+    );
+  }
+
+  const users = data.users.map((user) => (
+    <li key={user.targetUserId}>
+      <Member data={user} />
+    </li>
+  ));
+
+  return <MembersListWrapper>{users}</MembersListWrapper>;
+}
+
+const MembersListSkeleton = memo(() => {
+  const count = getRandomInt(2, 4);
+
+  return Array(count)
+    .fill(1)
+    .map((_, i) => (
+      <li key={i}>
+        <MemberSkeleton />
+      </li>
+    ));
+});
+
+function MemberSkeleton() {
+  return (
+    <div className="my-2 p-2 h-14 w-full bg-slate-200 rounded-lg flex animate-pulse">
+      <div className="size-10 mr-2 bg-slate-300 rounded-full"></div>
+      <div className="grow flex">
+        <div className="grow flex flex-col justify-between">
+          <div className="w-24 h-4 bg-slate-300 rounded-full"></div>
+          <div className="w-32 h-4 bg-slate-300 rounded-full"></div>
+        </div>
+        <div className="flex flex-col justify-between items-end">
+          <div className="w-12 h-4 bg-slate-300 rounded-full"></div>
+          <div className="w-24 h-4 bg-slate-300 rounded-full"></div>
+        </div>
       </div>
     </div>
   );
 }
 
+function MembersListWrapper({ children }: { children: ReactNode }) {
+  return (
+    <ul className="w-full h-72 px-2 overflow-auto overscroll-none">
+      {children}
+    </ul>
+  );
+}
+
+function NoMembers() {
+  return (
+    <Text size="md" font="light" className="text-center">
+      There are no members in this room yet
+    </Text>
+  );
+}
+
 function Member({ data }: { data: AccountReadType }) {
   let lastSeenStr;
-  let lastSeenColor;
-  if (!data.general?.lastSeen) {
-    lastSeenStr = "invisible";
-    lastSeenColor = "text-slate-400";
+  let memberState: "online" | "offline" | "invisible" | "you";
+  if (data.targetUserId === "self") {
+    memberState = "you";
+  } else if (!data.general?.lastSeen) {
+    memberState = "invisible";
   } else {
     const { result, range } = formatDate().member(data.general.lastSeen);
     if (range === "seconds") {
-      lastSeenStr = "online";
-      lastSeenColor = "text-green-600";
-    }
-    if (range !== "seconds") {
+      memberState = "online";
+    } else {
+      memberState = "offline";
       lastSeenStr = `Last seen: ${result}`;
-      lastSeenColor = "text-slate-600";
     }
   }
 
   return (
-    <div className="mt-2 p-2 bg-slate-50 border-2 border-slate-200 rounded-lg shadow-md flex">
+    <div className="my-2 p-2 h-14 bg-slate-50 rounded-lg shadow-md flex">
       <div className="mr-2 size-10 self-center flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
         {data.general?.username?.at(0)}
       </div>
-      <div className="grow">
-        <Text size="sm" font="bold">
-          @{data.general?.username}
-        </Text>
-        <div className="flex justify-between w-full">
+      <div className="grow flex">
+        <div className="grow flex flex-col">
+          <Text size="sm" font="bold">
+            @{data.general?.username}
+          </Text>
           <Text size="sm" font="light">
             Name: {data.general?.name}
           </Text>
-          {data.general?.lastSeen && (
-            <Text size="sm" font="light" className={lastSeenColor}>
+        </div>
+        <div className="flex flex-col items-end">
+          <Text
+            size="sm"
+            font="light"
+            capitalize
+            className={
+              memberState === "online" || memberState === "you"
+                ? "text-green-600"
+                : "text-slate-600"
+            }
+          >
+            {memberState}
+          </Text>
+          {memberState === "offline" && (
+            <Text size="sm" font="light">
               {lastSeenStr}
             </Text>
           )}

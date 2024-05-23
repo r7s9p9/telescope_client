@@ -19,14 +19,13 @@ const SkeletonList = React.memo(({ count }: { count?: number }) => {
   if (!count) count = getRandomInt(4, 12);
 
   if (count > 0) {
-    const skeletonItems = Array(count)
+    return Array(count)
       .fill(1)
       .map((_, i) => (
         <li key={i}>
           <ItemSkeleton />
         </li>
       ));
-    return skeletonItems;
   }
   return null;
 });

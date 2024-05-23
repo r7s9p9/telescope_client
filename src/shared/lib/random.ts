@@ -6,8 +6,10 @@ export function getRandomInt(min: number, max: number): number {
     return NaN;
   }
 
-  if (min >= max) {
-    console.error("Min must be less than max");
+  if (min === max) return min;
+
+  if (min > max) {
+    console.error("Min must be less or equal than max");
     return NaN;
   }
 

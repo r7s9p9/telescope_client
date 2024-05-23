@@ -251,7 +251,7 @@ function LoginForm({
               <IconComet className="text-slate-600" size={24} />
               Sign-up
             </Button>
-            {!query.isLoading && <Spinner size={48} />}
+            {query.isLoading && <Spinner size={48} />}
             <Button type={"submit"} isDisabled={!isShow || query.isLoading}>
               <IconKey className="text-slate-600" size={24} />
               <p>Login</p>
