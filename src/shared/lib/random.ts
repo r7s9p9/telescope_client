@@ -26,8 +26,13 @@ export function getRandomArray(
     return [];
   }
 
-  if (min >= max) {
-    console.error("Min must be less than max");
+  if (min === max)
+    return Array(count)
+      .fill(1)
+      .map(() => min);
+
+  if (min > max) {
+    console.error("Min must be less or equal than max");
     return [];
   }
 
