@@ -54,7 +54,6 @@ function messageParser(
 
 export function Chat() {
   const chat = useChat();
-
   const info = useInfo();
 
   if (chat?.isInitialLoading) {

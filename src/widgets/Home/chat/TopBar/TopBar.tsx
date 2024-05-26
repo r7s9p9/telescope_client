@@ -104,8 +104,8 @@ function TopBarMenu({
   const queryLeave = useQueryLeaveRoom();
   const navigate = useNavigate();
 
-  const loadInfo = useLoadInfo();
   const loadRooms = useLoadRooms();
+  const loadInfo = useLoadInfo();
 
   async function onClickHandler(type: "info" | "leave") {
     if (roomId) {

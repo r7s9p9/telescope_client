@@ -59,7 +59,7 @@ export const registerFormSchema = z.object({
 
 export const authLoginSchema = z.object({
   success: z.boolean(),
-  code: z.boolean(),
+  code: z.boolean().optional(),
 });
 export type AuthLoginType = z.infer<typeof authLoginSchema>;
 
@@ -169,7 +169,7 @@ const roomTypeSchema = z.union([
   z.literal("service"),
   z.literal("single"),
 ]);
-const roomAboutSchema = z.string().optional();
+const roomAboutSchema = z.string();
 const roomCreatedSchema = z.number();
 
 export const roomUpdateInfoSchema = z.object({
@@ -203,7 +203,7 @@ const roomSchema = z.object({
   roomId: roomIdSchema,
   name: roomNameSchema,
   type: roomTypeSchema,
-  about: roomAboutSchema,
+  about: roomAboutSchema.optional(),
   created: roomCreatedSchema,
   creatorId: z.union([userIdSchema, selfIdSchema, serviceIdSchema]),
   unreadCount: z.number(),

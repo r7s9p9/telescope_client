@@ -302,7 +302,7 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
           {date}
         </Text>
       </div>
-      <div className="w-full flex flex-row gap-2 items-center">
+      <div className="w-full flex flex-row gap-2 justify-start items-center">
         {lastUsername && (
           <Text size="sm" font="default" className="text-blue-600">
             {lastUsername}:
@@ -320,9 +320,16 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
 function UnreadCount({ count }: { count: number }) {
   if (count !== 0) {
     return (
-      <p className="shrink-0 size-6 flex justify-center items-center text-sm text-light text-slate-50 bg-slate-400 text-center rounded-full">
-        {count > 9 ? "9+" : count}
-      </p>
+      <>
+        <div className="grow" />
+        <Text
+          size="sm"
+          font="light"
+          className="shrink-0 size-6 flex justify-center items-center bg-slate-300 rounded-full"
+        >
+          {count > 9 ? "9+" : count}
+        </Text>
+      </>
     );
   }
 }

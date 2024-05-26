@@ -5,31 +5,15 @@ import {
   IconRefresh,
   IconX,
 } from "@tabler/icons-react";
-import {
-  ReactNode,
-  memo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { ReactNode, memo } from "react";
 import {
   AccountReadType,
   RoomGetMembersType,
-  RoomInfoUpdate,
-  RoomType,
+  RoomInfoType,
 } from "../../../shared/api/api.schema";
-import { useStore } from "../../../shared/store/store";
-import { routes } from "../../../constants";
 import { formatDate } from "../../../shared/lib/date";
-import {
-  useQueryDeleteRoom,
-  useQueryUpdateRoom,
-} from "../../../shared/api/api";
-import { RoomId, UserId } from "../../../types";
-import { checkUserId } from "../../../shared/lib/uuid";
-import { useLoadInfo, useMembers } from "../chat/useChat";
+import { RoomId } from "../../../types";
+import { useInfoSection, useMain, useMembersSection } from "./useChatInfo";
 import { Input } from "../../../shared/ui/Input/Input";
 import { Select } from "../../../shared/ui/Select/Select";
 import { Button } from "../../../shared/ui/Button/Button";
@@ -37,48 +21,15 @@ import { Text } from "../../../shared/ui/Text/Text";
 import { getRandomInt } from "../../../shared/lib/random";
 
 export function ChatInfo() {
-  const { roomId } = useParams();
-  const navigate = useNavigate();
-
-  let storedInfo: RoomType | undefined;
-
-  const roomsInfo = useStore().rooms().read()?.items;
-  if (roomsInfo) {
-    for (const info of roomsInfo) {
-      if (info.roomId === roomId) {
-        storedInfo = info;
-        break;
-      }
-    }
-  }
-
-  const isAdmin = storedInfo?.creatorId === "self";
-
-  const close = useCallback(() => {
-    navigate({ pathname: routes.rooms.path + roomId });
-  }, [navigate, roomId]);
-
-  const contentRef = useRef<HTMLDivElement | null>(null);
-
-  const handleClickOutside = useCallback(
-    (event: MouseEvent) => {
-      if (
-        contentRef.current &&
-        !contentRef.current.contains(event.target as Node)
-      ) {
-        close();
-      }
-    },
-    [contentRef, close],
-  );
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const {
+    roomId,
+    info,
+    isInitialLoading,
+    isAdmin,
+    contentRef,
+    handleCloseClick,
+    loadInfo,
+  } = useMain();
 
   return (
     <Overlay>
@@ -90,18 +41,21 @@ export function ChatInfo() {
           <Text size="xl" font="light" letterSpacing uppercase>
             Info
           </Text>
-          <Button title="Exit" rounded="full" onClick={close}>
+          <Button title="Exit" rounded="full" onClick={handleCloseClick}>
             <IconX className="text-slate-600" strokeWidth="2" size={24} />
           </Button>
         </div>
         <div className="flex flex-col gap-2">
-          {storedInfo && (
+          {!isInitialLoading && (
             <Info
-              roomId={roomId as RoomId}
-              data={storedInfo}
+              roomId={roomId}
+              info={info as RoomInfoType["info"]}
+              // info is defined above
               isAdmin={isAdmin}
+              loadInfo={loadInfo}
             />
           )}
+          {isInitialLoading && <InfoSkeleton />}
           <Members isAdmin={isAdmin} />
         </div>
       </div>
@@ -119,90 +73,28 @@ function Overlay({ children }: { children: ReactNode }) {
 
 function Info({
   roomId,
-  data,
+  info,
   isAdmin,
+  loadInfo,
 }: {
   roomId: RoomId;
-  data: RoomType;
+  info: RoomInfoType["info"];
   isAdmin: boolean;
+  loadInfo: ReturnType<typeof useMain>["loadInfo"];
 }) {
-  const defaultInfo = {
-    name: data.name,
-    creatorId: data.creatorId,
-    type: data.type,
-    about: data.about ? data.about : "",
-  };
-
-  const [isEdit, setIsEdit] = useState(false);
-  const [info, setInfo] = useState(defaultInfo);
-
-  const navigate = useNavigate();
-  const loadInfo = useLoadInfo();
-  const queryUpdate = useQueryUpdateRoom();
-  const queryDelete = useQueryDeleteRoom();
-
-  function sendHandler() {
-    const result: RoomInfoUpdate = Object.create(null);
-    let isUpdated = false;
-    if (info.name !== data.name) {
-      result.name = info.name;
-      isUpdated = true;
-    }
-    if (info.type !== data.type) {
-      if (
-        info.type === "public" ||
-        info.type === "private" ||
-        info.type === "single"
-      ) {
-        result.type = info.type;
-        isUpdated = true;
-      }
-    }
-    if (info.about !== data.about) {
-      result.about = info.about;
-      isUpdated = true;
-    }
-    if (info.creatorId !== data.creatorId && checkUserId(data.creatorId)) {
-      result.creatorId = info.creatorId as UserId;
-      isUpdated = true;
-    }
-    if (!isUpdated) return { isUpdated: false as const };
-    return { isUpdated: true as const, info: result };
-  }
-
-  async function handleClick(type: "edit" | "cancel" | "send") {
-    if (type === "edit") setIsEdit(true);
-    if (type === "cancel") {
-      setIsEdit(false);
-      setInfo(defaultInfo);
-    }
-    if (type === "send") {
-      const { isUpdated, info } = sendHandler();
-      if (isUpdated) {
-        const { success } = await queryUpdate.run(roomId, info);
-        if (success) loadInfo.run();
-      }
-      setIsEdit(false);
-    }
-  }
-
-  async function handleDeleteClick() {
-    const { success } = await queryDelete.run(roomId);
-    if (success) navigate({ pathname: routes.rooms.path });
-  }
+  const { handleDeleteClick, handleEditClick, isEdit, editable } =
+    useInfoSection(info, loadInfo, roomId);
 
   return (
-    <div className="flex">
+    <div className="flex h-48">
       <div className="flex flex-col gap-2 items-start w-full pr-20">
         <div className="flex flex-row pt-1 items-center justify-between gap-2">
           <Text size="sm" font="default" className="min-w-14">
             Name:
           </Text>
           <Input
-            value={info.name}
-            setValue={(val) =>
-              setInfo((prevInfo) => ({ ...prevInfo, name: val }))
-            }
+            value={editable.name}
+            setValue={(val) => editable.setName(val)}
             disabled={!isEdit}
             unstyled={!isEdit}
             size="sm"
@@ -213,10 +105,8 @@ function Info({
             About:
           </Text>
           <Input
-            value={info.about}
-            setValue={(val) =>
-              setInfo((prevInfo) => ({ ...prevInfo, about: val }))
-            }
+            value={editable.about}
+            setValue={(val) => editable.setAbout(val)}
             disabled={!isEdit}
             unstyled={!isEdit}
             size="sm"
@@ -227,12 +117,9 @@ function Info({
             Type:
           </Text>
           <Select
-            value={info.type}
+            value={editable.type}
             setValue={(val) =>
-              setInfo((prevInfo) => ({
-                ...prevInfo,
-                type: val as "public" | "private" | "single",
-              }))
+              editable.setType(val as "public" | "private" | "single")
             }
             disabled={!isEdit}
             unstyled={!isEdit}
@@ -248,7 +135,7 @@ function Info({
             Created:
           </Text>
           <Text size="sm" font="light">
-            {formatDate().info(data.created)}
+            {formatDate().info(info.created)}
           </Text>
         </div>
         <div className="flex flex-row items-center gap-2">
@@ -256,7 +143,7 @@ function Info({
             Creator:
           </Text>
           <Text size="sm" font="light">
-            {data.creatorId === "self" ? "You" : data.creatorId}
+            {info.creatorId === "self" ? "You" : info.creatorId}
           </Text>
         </div>
         {isAdmin && (
@@ -272,9 +159,13 @@ function Info({
           </Button>
         )}
       </div>
-      {isAdmin && <EditGroup handleClick={handleClick} isEdit={isEdit} />}
+      {isAdmin && <EditGroup handleClick={handleEditClick} isEdit={isEdit} />}
     </div>
   );
+}
+
+function InfoSkeleton() {
+  return <div className="w-full h-48 rounded-lg bg-slate-200 animate-pulse" />;
 }
 
 function EditGroup({
@@ -326,7 +217,7 @@ function EditGroup({
 }
 
 function Members({ isAdmin }: { isAdmin: boolean }) {
-  const { getMembers, data, isLoading } = useMembers();
+  const { getMembers, data, isLoading } = useMembersSection();
 
   return (
     <div className="flex flex-col">

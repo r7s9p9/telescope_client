@@ -2,18 +2,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useQueryCompareMessages,
   useQueryDeleteMessage,
-  useQueryGetMembers,
   useQueryReadMessages,
   useQueryRoomInfo,
   useQuerySendMessage,
   useQueryUpdateMessage,
 } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
-import {
-  MessageDates,
-  MessageType,
-  RoomGetMembersType,
-} from "../../../shared/api/api.schema";
+import { MessageDates, MessageType } from "../../../shared/api/api.schema";
 import { useInterval } from "../../../shared/lib/useInterval";
 import { useStore } from "../../../shared/store/store";
 import { debounce } from "../../../shared/lib/debounce";
@@ -244,24 +239,6 @@ function useCompareMessages() {
   return { run: compareMessages };
 }
 
-export function useLoadInfo() {
-  const queryInfo = useQueryRoomInfo();
-  const { roomId } = useParams();
-  const storeAction = useStore().chat(roomId as RoomId);
-
-  const loadInfo = useCallback(async () => {
-    const { success, data } = await queryInfo.run(roomId as RoomId);
-
-    if (success) {
-      storeAction.update().data({ info: data.info });
-    }
-
-    if (!success) storeAction.flagAsBad();
-  }, [queryInfo, roomId, storeAction]);
-
-  return { run: loadInfo };
-}
-
 export function useChat() {
   const navigate = useNavigate();
   const { roomId } = useParams();
@@ -414,24 +391,43 @@ export function useChat() {
   };
 }
 
-export function useInfo() {
+export function useLoadInfo() {
+  const queryInfo = useQueryRoomInfo();
   const { roomId } = useParams();
-  const storedInfo = useStore()
-    .chat(roomId as RoomId)
-    .read()?.info;
-  const loadInfo = useLoadInfo();
+  const storeAction = useStore().chat(roomId as RoomId);
+
+  const run = useCallback(async () => {
+    const { success, data } = await queryInfo.run(roomId as RoomId);
+
+    if (success) {
+      storeAction.update().data({ info: data.info });
+    }
+
+    if (!success) storeAction.flagAsBad();
+  }, [queryInfo, roomId, storeAction]);
+
+  return {
+    run,
+    roomId: roomId as RoomId,
+    storedInfo: storeAction.read()?.info,
+  };
+}
+
+export function useInfo() {
+  const { run, roomId, storedInfo } = useLoadInfo();
 
   useEffect(() => {
     // Initial load data if no chat in store
-    if (!storedInfo) loadInfo.run();
+    if (!storedInfo) run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storedInfo]);
 
   // Update info
-  useInterval(() => loadInfo.run(), INFO_UPDATE_INTERVAL);
+  useInterval(() => run(), INFO_UPDATE_INTERVAL);
 
   return {
-    roomId: roomId as RoomId,
+    run,
+    roomId,
     info: {
       ...storedInfo,
       isInitialLoading: !storedInfo,
@@ -548,25 +544,4 @@ export function useDelete() {
     return { success };
   };
   return { onDelete, isLoading: query.isLoading };
-}
-
-export function useMembers() {
-  const { roomId } = useParams();
-  const query = useQueryGetMembers();
-
-  const [data, setData] = useState<RoomGetMembersType>();
-
-  const getMembers = async () => {
-    const { success, data } = await query.run(roomId as RoomId);
-    if (!success) return { success: false as const };
-    setData(data);
-    return { success: true as const };
-  };
-
-  useEffect(() => {
-    getMembers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return { getMembers, data, isLoading: query.isLoading };
 }

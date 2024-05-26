@@ -1,5 +1,5 @@
 import { IconEdit, IconSend2, IconX } from "@tabler/icons-react";
-import { useLoadInfo, useSend, useEdit, useInfo } from "../useChat";
+import { useSend, useEdit, useLoadInfo, useInfo } from "../useChat";
 import { useLoadRooms } from "../../Rooms/useRooms";
 import { useQueryJoinRoom } from "../../../../shared/api/api";
 import { Button } from "../../../../shared/ui/Button/Button";
