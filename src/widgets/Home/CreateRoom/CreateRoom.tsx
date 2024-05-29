@@ -14,6 +14,8 @@ import { useNavigate } from "react-router-dom";
 import { routes } from "../../../constants";
 import { useLoadRooms } from "../Rooms/useRooms";
 import { Text } from "../../../shared/ui/Text/Text";
+import { Paper } from "../../../shared/ui/Paper/Paper";
+import { Button } from "../../../shared/ui/Button/Button";
 
 export interface IFormValues {
   name: string;
@@ -58,33 +60,38 @@ export function CreateRoom() {
   };
 
   return (
-    <div className="w-full h-full flex justify-center items-center">
-      <div className="flex flex-col items-center w-2/3 bg-slate-50 rounded-2xl shadow-xl p-4">
-        <Text size="xl" font="default">
+    <div className="w-full h-full flex items-center justify-center">
+      <Paper
+        padding={4}
+        rounded="xl"
+        shadow="xl"
+        className="flex flex-col items-center w-1/2 bg-slate-50"
+      >
+        <Text size="xl" font="light" letterSpacing>
           Create a room
         </Text>
-        <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className="w-full flex flex-col items-end"
+          onSubmit={handleSubmit(onSubmit)}
+        >
           <Input type="name" register={register} required errors={errors} />
           <RadioType roomType={roomType} setRoomType={setRoomType} />
           <Input type="about" register={register} required errors={errors} />
-          <Button isDisabled={false} />
+          <Button
+            title="Create room"
+            type="submit"
+            rounded="default"
+            className="mt-4 p-2 gap-2 border-2 border-slate-400"
+            formNoValidate={true}
+          >
+            <IconComet className="text-slate-500" size={24} />
+            <Text size="md" font="default">
+              Create
+            </Text>
+          </Button>
         </form>
-      </div>
+      </Paper>
     </div>
-  );
-}
-
-function Button({ isDisabled }: { isDisabled: boolean }) {
-  return (
-    <button
-      type="submit"
-      className="mt-4 font-light text-lg flex justify-center items-center gap-2 px-2 py-2 w-32 bg-slate-100 outline-none shadow ring-slate-300 focus:ring-2 focus:shadow-slate-800 focus:bg-slate-50 focus:border-slate-50 active:ring-0 border-2 shadow-slate-400 border-slate-400 rounded-xl hover:ring-4 active:shadow-inner active:shadow-slate-700 active:bg-slate-200 active:border-slate-400 duration-300"
-      formNoValidate={true} // disable stock html validation
-      disabled={isDisabled}
-    >
-      <IconComet className="text-slate-500" size={24} />
-      Create
-    </button>
   );
 }
 
@@ -111,7 +118,7 @@ function RadioType({
                     ? "translateX(100%)"
                     : "translateX(200%)",
             }}
-            className="z-10 absolute border-4 border-slate-400 rounded-xl shadow-inner shadow-slate-300 h-full w-1/3 duration-500 ease-in-out "
+            className="z-10 absolute border-4 border-slate-400 rounded-lg shadow-inner shadow-slate-300 h-full w-1/3 duration-500 ease-in-out "
           ></div>
           <div
             onClick={() => {
@@ -119,7 +126,7 @@ function RadioType({
                 setRoomType("public");
               }
             }}
-            className={`cursor-pointer grow h-10 border-y-2 border-l-2 border-slate-400 rounded-l-xl flex justify-center items-center select-none text-xl uppercase`}
+            className={`cursor-pointer grow h-10 border-y-2 border-l-2 border-slate-400 rounded-l-lg flex justify-center items-center select-none text-xl uppercase`}
           >
             Public
           </div>
@@ -139,7 +146,7 @@ function RadioType({
                 setRoomType("single");
               }
             }}
-            className={`cursor-pointer grow h-10 border-y-2 border-r-2 border-slate-400 rounded-r-xl  flex justify-center items-center select-none text-xl uppercase`}
+            className={`cursor-pointer grow h-10 border-y-2 border-r-2 border-slate-400 rounded-r-lg  flex justify-center items-center select-none text-xl uppercase`}
           >
             Single
           </div>
@@ -168,7 +175,7 @@ function Input({ type, register, required, errors }: InputProps) {
       </div>
       <div className="flex w-full items-center justify-end">
         <input
-          className={`text-lg font-medium w-full h-10 duration-300 appearance-none shadow-md shadow-slate-200 ring-slate-300 focus:shadow-slate-400 hover:ring-4 focus:ring-2 outline-none bg-slate-100 border-2 border-slate-400 p-1 rounded-xl focus:bg-slate-50 focus:border-slate-50`}
+          className={`text-lg font-medium w-full h-10 duration-300 appearance-none shadow-md shadow-slate-200 ring-slate-300 focus:shadow-slate-400 hover:ring-4 focus:ring-2 outline-none bg-slate-100 border-2 border-slate-400 p-1 rounded-lg focus:bg-slate-50 focus:border-slate-50`}
           type={type}
           spellCheck={false}
           multiple={false}

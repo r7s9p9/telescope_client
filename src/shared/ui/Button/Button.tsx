@@ -12,6 +12,7 @@ export function Button({
   className,
   buttonRef,
   style,
+  formNoValidate,
   onClick,
 }: {
   children: ReactNode;
@@ -26,6 +27,7 @@ export function Button({
   className?: string;
   buttonRef?: React.MutableRefObject<HTMLButtonElement | null>;
   style?: React.CSSProperties;
+  formNoValidate?: boolean;
   onClick?: () => void;
 }) {
   const Loader = (
@@ -52,6 +54,7 @@ export function Button({
         type={type}
         ref={buttonRef}
         onClick={onClick}
+        formNoValidate={formNoValidate}
         className={`${loading || disabled ? "" : "cursor-pointer"} ${rounded === "default" ? "rounded-lg" : ""} ${rounded === "full" ? "rounded-full" : ""} ${!noHover ? "hover:bg-slate-200 p-1" : ""} h-full flex items-center opacity-75 hover:opacity-100 duration-300 ease-in-out ${className || ""}`}
       >
         {Content}

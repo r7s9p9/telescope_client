@@ -1,8 +1,4 @@
-import { useInfo, useLoadInfo } from "../useChat";
-import { routes } from "../../../../constants";
-import { useNavigate } from "react-router-dom";
-import { useQueryLeaveRoom } from "../../../../shared/api/api";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useInfo } from "../useChat";
 import { Text } from "../../../../shared/ui/Text/Text";
 import {
   IconDoorExit,
@@ -10,43 +6,32 @@ import {
   IconInfoCircle,
 } from "@tabler/icons-react";
 import { Button } from "../../../../shared/ui/Button/Button";
-import { RoomId } from "../../../../types";
-import { useLoadRooms } from "../../Rooms/useRooms";
+import { useTopBar } from "./useTopBar";
 
 export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
-  const userCountStr = () => {
-    if (data.info.userCount === 0) {
-      return "no members";
-    }
-    if (data.info.userCount === 1) {
-      return "1 member";
-    }
-    if (data.info.userCount && data.info.userCount > 1) {
-      return `${data.info.userCount} members`;
-    }
-  };
+  const { content, menu } = useTopBar(data);
 
   return (
     <div className="w-full h-16 px-4 font-light flex justify-between items-center border-x-2 border-slate-100 bg-slate-50 select-none">
-      {!data.info.isInitialLoading && (
+      {!content.isInitialLoading && (
         <div className="flex items-center shrink-0">
           <div className="size-10 flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
-            {data.info?.name?.at(0)}
+            {content.name?.at(0)}
           </div>
           <div className="flex flex-col ml-4 py-2 grow">
             <Text size="md" font="light">
-              {data.info.name}
+              {content.name}
             </Text>
             <div className="flex flex-row gap-1">
               <Text size="sm" font="light">
-                {data.info?.type} room, {userCountStr()}
+                {content.description}
               </Text>
             </div>
           </div>
         </div>
       )}
-      {data.info.isInitialLoading && <TopBarSkeleton />}
-      <TopBarMenu roomId={data.roomId} isMember={data.info.isMember} />
+      {content.isInitialLoading && <TopBarSkeleton />}
+      <TopBarMenu menu={menu} isMember={content.isMember} />
     </div>
   );
 }
@@ -64,72 +49,19 @@ function TopBarSkeleton() {
 }
 
 function TopBarMenu({
-  roomId,
+  menu,
   isMember,
 }: {
-  roomId: RoomId;
+  menu: ReturnType<typeof useTopBar>["menu"];
   isMember?: boolean;
 }) {
-  const [isMenuOpened, setIsMenuOpened] = useState(false);
-
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
-
-  const closeMenu = () => {
-    setIsMenuOpened((isMenuOpened) => (isMenuOpened ? false : isMenuOpened));
-  };
-
-  const handleClickOutside = useCallback(
-    (event: MouseEvent) => {
-      if (
-        contentRef.current &&
-        buttonRef.current &&
-        !contentRef.current.contains(event.target as Node) &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        closeMenu();
-      }
-    },
-    [contentRef, buttonRef],
-  );
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const queryLeave = useQueryLeaveRoom();
-  const navigate = useNavigate();
-
-  const loadRooms = useLoadRooms();
-  const loadInfo = useLoadInfo();
-
-  async function onClickHandler(type: "info" | "leave") {
-    if (roomId) {
-      if (type === "info") {
-        navigate({ pathname: routes.rooms.path + roomId + "/info" });
-      }
-      if (type === "leave") {
-        const { success } = await queryLeave.run(roomId);
-        if (success) {
-          loadRooms.run();
-          loadInfo.run();
-          navigate({ pathname: routes.rooms.path });
-        }
-      }
-    }
-  }
-
   return (
     <>
       <Button
         title={"Show more"}
         rounded={"full"}
-        buttonRef={buttonRef}
-        onClick={() => setIsMenuOpened(!isMenuOpened)}
+        buttonRef={menu.buttonRef}
+        onClick={menu.open}
       >
         <IconDotsVertical
           className="text-slate-600"
@@ -139,15 +71,15 @@ function TopBarMenu({
       </Button>
       <div
         style={{
-          opacity: isMenuOpened ? 1 : 0,
-          transform: isMenuOpened
+          opacity: menu.isOpened ? 1 : 0,
+          transform: menu.isOpened
             ? "translateY(0%) scaleY(1)"
             : "translateY(-50%) scaleY(0)",
         }}
-        ref={contentRef}
+        ref={menu.contentRef}
         className="absolute z-10 flex flex-col right-0 top-16 duration-300 ease-in-out border-t-2 border-slate-100 bg-slate-50 shadow-md rounded-b-lg"
       >
-        <Button title={"Info"} onClick={() => onClickHandler("info")}>
+        <Button title={"Info"} onClick={() => menu.onClickHandler("info")}>
           <div className="w-28 h-8 flex items-center">
             <IconInfoCircle
               className="w-12 text-slate-600"
@@ -160,7 +92,7 @@ function TopBarMenu({
           </div>
         </Button>
         {isMember && (
-          <Button title={"Leave"} onClick={() => onClickHandler("leave")}>
+          <Button title={"Leave"} onClick={() => menu.onClickHandler("leave")}>
             <div className="w-28 h-8 flex items-center">
               <IconDoorExit
                 className="w-12 text-red-600"
