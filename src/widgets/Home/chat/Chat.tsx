@@ -67,7 +67,13 @@ export function Chat() {
   }
 
   const messageElement = (content: MessageType) => {
-    return <Message key={`message-${content.created}`} message={content} />;
+    return (
+      <Message
+        key={`message-${content.created}`}
+        message={content}
+        roomId={chat.roomId}
+      />
+    );
   };
   const dateBubbleElement = (created: number) => {
     return <DateBubble key={`date-${created}`} date={created} />;

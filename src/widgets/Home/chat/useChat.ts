@@ -1,11 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useQueryCompareMessages,
-  useQueryDeleteMessage,
   useQueryReadMessages,
   useQueryRoomInfo,
-  useQuerySendMessage,
-  useQueryUpdateMessage,
 } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
 import { MessageDates, MessageType } from "../../../shared/api/api.schema";
@@ -381,6 +378,7 @@ export function useChat() {
   }, [messagesRef, storeAction]);
 
   return {
+    roomId: roomId as RoomId,
     messagesRef: messagesRef,
     messages: storedMessages,
     isInitialLoading: !storedMessages,
@@ -435,81 +433,6 @@ export function useInfo() {
   };
 }
 
-export function useSend() {
-  const { roomId } = useParams();
-  const loadNewerMessages = useLoadNewerMessages();
-
-  const storeAction = useStore().chat(roomId as RoomId);
-  const storedChat = storeAction.read();
-  const storedMessages = storedChat?.messages;
-  const editable = storedChat?.editable;
-
-  const querySend = useQuerySendMessage();
-  const queryUpdate = useQueryUpdateMessage();
-
-  const [formData, setFormData] = useState({ text: "" });
-  const resetFormData = () => setFormData({ text: "" });
-
-  useEffect(() => {
-    if (editable?.isExist && editable.message.content.text) {
-      setFormData({ text: editable.message.content.text });
-    }
-  }, [editable]);
-
-  const onSubmit = async () => {
-    if (
-      formData.text &&
-      !querySend.isLoading &&
-      !queryUpdate.isLoading &&
-      storedMessages
-    ) {
-      // If message edited
-      if (editable?.isExist) {
-        const { success, data } = await queryUpdate.run(
-          roomId as RoomId,
-          editable.message.created,
-          formData,
-        );
-        // TODO 500 error
-        if (!success) return;
-        //
-        console.log(data);
-        if (data.success && data.access) {
-          const updatedMessages = storedMessages.map((message) => {
-            if (message.created === editable.message.created) {
-              return {
-                ...message,
-                content: formData,
-                modified: data.dates.modified,
-              };
-            }
-            return message;
-          }) as MessageType[];
-
-          storeAction.update().data({
-            ...storedChat,
-            messages: updatedMessages,
-          });
-          storeAction.update().editable(false);
-        }
-      } else {
-        // If new message writed
-        const { success } = await querySend.run(roomId as RoomId, formData);
-        // TODO 500 error
-        if (success) loadNewerMessages.run();
-      }
-      resetFormData();
-    }
-  };
-
-  return {
-    formData,
-    setFormData,
-    onSubmit,
-    isLoading: querySend.isLoading || queryUpdate.isLoading,
-  };
-}
-
 export function useEdit() {
   const { roomId } = useParams();
   const storeAction = useStore().chat(roomId as RoomId);
@@ -523,25 +446,4 @@ export function useEdit() {
     storeAction.update().editable(false);
   };
   return { onEdit, closeEdit, editable };
-}
-
-export function useDelete() {
-  const { roomId } = useParams();
-  const storeAction = useStore().chat(roomId as RoomId);
-  const storedMessages = storeAction.read()?.messages;
-  const query = useQueryDeleteMessage();
-
-  const onDelete = async (created: MessageType["created"]) => {
-    const { success } = await query.run(roomId as RoomId, created);
-    if (success && storedMessages) {
-      const messages = storedMessages?.filter(
-        (message) => message.created !== created,
-      );
-      storeAction.update().data({
-        messages,
-      });
-    }
-    return { success };
-  };
-  return { onDelete, isLoading: query.isLoading };
 }

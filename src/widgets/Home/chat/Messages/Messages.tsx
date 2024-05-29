@@ -6,8 +6,8 @@ import {
   IconMessageReply,
   IconTrash,
 } from "@tabler/icons-react";
-import { useMenuContext } from "../../../ContextMenu/ContextMenu";
-import { useChat, useDelete, useEdit } from "../useChat";
+import { useChat } from "../useChat";
+import { useMessage } from "./useMessages";
 import { formatDate } from "../../../../shared/lib/date";
 import { MessageType } from "../../../../shared/api/api.schema";
 import { getRandomBoolean, getRandomInt } from "../../../../shared/lib/random";
@@ -15,6 +15,7 @@ import React from "react";
 import { Button } from "../../../../shared/ui/Button/Button";
 import { Text } from "../../../../shared/ui/Text/Text";
 import { Paper } from "../../../../shared/ui/Paper/Paper";
+import { RoomId } from "../../../../types";
 
 export const MessagesSkeleton = React.memo(() => {
   function Skeleton() {
@@ -105,14 +106,19 @@ function ScrollButton({
   );
 }
 
-export function Message({ message }: { message: MessageType }) {
-  const editAction = useEdit();
-  const deleteAction = useDelete();
-  const { openMenu, closeMenu } = useMenuContext();
+export function Message({
+  roomId,
+  message,
+}: {
+  roomId: RoomId;
+  message: MessageType;
+}) {
+  const { content, onClickMenuHandler, openMenu } = useMessage({
+    roomId,
+    message,
+  });
 
-  const text = message.content.text;
-  const date = formatDate().message(message.created, message.modified);
-  if (message.authorId === "service") {
+  if (content.type === "service") {
     return (
       <Paper
         inList
@@ -121,26 +127,21 @@ export function Message({ message }: { message: MessageType }) {
         className="flex flex-col mt-4 self-center bg-slate-50 ring-2 ring-slate-200 select-none"
       >
         <Text size="sm" font="default">
-          {text}
+          {content.text}
         </Text>
         <Text size="sm" font="thin" className="text-center">
-          {date}
+          {content.date}
         </Text>
       </Paper>
     );
   }
 
-  const isYourMessage = message.authorId === "self";
-
   function onContextHandler(e: React.MouseEvent<HTMLElement, MouseEvent>) {
     openMenu(
       e,
       <MessageContextMenu
-        closeMenu={closeMenu}
-        message={message}
-        isYourMessage={isYourMessage}
-        deleteAction={deleteAction}
-        editAction={editAction}
+        isYourMessage={content.type === "self"}
+        onClickMenuHandler={onClickMenuHandler}
       />,
     );
   }
@@ -151,66 +152,36 @@ export function Message({ message }: { message: MessageType }) {
       inList
       rounded="xl"
       padding={2}
-      className={`${isYourMessage ? "self-end" : "self-start"} flex flex-col mt-4 bg-slate-50 rounded-xl shadow select-none`}
+      className={`${content.type === "self" ? "self-end" : "self-start"} flex flex-col mt-4 bg-slate-50 rounded-xl shadow select-none`}
     >
       <div className="flex flex-row justify-between gap-4 min-w-32 max-w-full text-sm">
         <Text size="sm" font="default" className="text-green-600">
-          {isYourMessage ? "You" : message.username}
+          {content.type === "self" ? "You" : content.username}
         </Text>
         <Text size="sm" font="thin">
-          {date}
+          {content.date}
         </Text>
       </div>
       <Text size="sm" font="default" className="text-justify break-all">
-        {text}
+        {content.text}
       </Text>
     </Paper>
   );
 }
 
 function MessageContextMenu({
-  closeMenu,
-  message,
   isYourMessage,
-  deleteAction,
-  editAction,
+  onClickMenuHandler,
 }: {
-  closeMenu: ReturnType<typeof Function>;
-  message: MessageType;
   isYourMessage: boolean;
-  deleteAction: {
-    onDelete: (created: number) => Promise<{
-      success: boolean;
-    }>;
-    isLoading: boolean;
-  };
-  editAction: {
-    onEdit: (message: MessageType) => void;
-  };
+  onClickMenuHandler: ReturnType<typeof useMessage>["onClickMenuHandler"];
 }) {
-  async function onClickHandler(type: "reply" | "edit" | "copy" | "delete") {
-    // if (type === "reply") {
-    // }
-    if (type === "edit") {
-      editAction.onEdit(message);
-      closeMenu();
-    }
-    if (type === "copy") {
-      navigator.clipboard.writeText(message.content.text);
-      closeMenu();
-    }
-    if (type === "delete") {
-      const success = await deleteAction.onDelete(message.created);
-      if (success) closeMenu();
-    }
-  }
-
   return (
     <Paper rounded="lg" shadow="xl" className="flex flex-col m-2">
       <Button
         title="Reply"
         className="rounded-t-lg"
-        onClick={() => onClickHandler("reply")}
+        onClick={() => onClickMenuHandler("reply")}
       >
         <div className="flex flex-row w-32 h-8 items-center">
           <IconMessageReply
@@ -224,7 +195,7 @@ function MessageContextMenu({
         </div>
       </Button>
       {isYourMessage && (
-        <Button title="Edit" onClick={() => onClickHandler("edit")}>
+        <Button title="Edit" onClick={() => onClickMenuHandler("edit")}>
           <div className="flex flex-row w-32 h-8 items-center">
             <IconEdit
               className="text-slate-600 w-12"
@@ -237,7 +208,7 @@ function MessageContextMenu({
           </div>
         </Button>
       )}
-      <Button title="Copy" onClick={() => onClickHandler("copy")}>
+      <Button title="Copy" onClick={() => onClickMenuHandler("copy")}>
         <div className="flex flex-row w-32 h-8 items-center">
           <IconCopy className="text-slate-600 w-12" strokeWidth="2" size={18} />
           <Text size="md" font="default" className="text-slate-600">
@@ -249,7 +220,7 @@ function MessageContextMenu({
         <Button
           title="Delete"
           className="rounded-b-lg"
-          onClick={() => onClickHandler("delete")}
+          onClick={() => onClickMenuHandler("delete")}
         >
           <div className="flex flex-row w-32 h-8 items-center">
             <IconTrash

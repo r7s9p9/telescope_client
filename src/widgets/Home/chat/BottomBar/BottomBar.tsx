@@ -1,12 +1,11 @@
 import { IconEdit, IconSend2, IconX } from "@tabler/icons-react";
-import { useSend, useEdit, useLoadInfo, useInfo } from "../useChat";
-import { useLoadRooms } from "../../Rooms/useRooms";
-import { useQueryJoinRoom } from "../../../../shared/api/api";
 import { Button } from "../../../../shared/ui/Button/Button";
 import { RoomId } from "../../../../types";
 import { Spinner } from "../../../../shared/ui/Spinner/Spinner";
 import { Text } from "../../../../shared/ui/Text/Text";
 import { TextArea } from "../../../../shared/ui/TextArea/TextArea";
+import { useEdit, useInfo } from "../useChat";
+import { useJoin, useSend } from "./useBottomBar";
 
 export function BottomBarWrapper({
   data,
@@ -14,7 +13,7 @@ export function BottomBarWrapper({
   data: ReturnType<typeof useInfo>;
 }) {
   if (data.info?.isInitialLoading) return <BottomBarSpinner />;
-  if (data.info?.isMember) return <BottomBar />;
+  if (data.info?.isMember) return <BottomBar roomId={data.roomId} />;
   return <BottomBarNoMember roomId={data.roomId} />;
 }
 
@@ -27,36 +26,31 @@ function BottomBarSpinner() {
 }
 
 function BottomBarNoMember({ roomId }: { roomId: RoomId }) {
-  const joinQuery = useQueryJoinRoom();
-  const loadInfo = useLoadInfo();
-  const loadRooms = useLoadRooms();
-  const joinAction = async () => {
-    const { success } = await joinQuery.run(roomId);
-    if (success) {
-      loadRooms.run();
-      loadInfo.run();
-    }
-  };
+  const join = useJoin(roomId);
 
   return (
     <>
-      {!joinQuery.isLoading && (
+      {!join.isLoading && (
         <div className="shrink-0 relative h-24 w-full flex items-center justify-center border-x-2 border-slate-100 bg-slate-50">
-          <Button title="Join room" rounded="default" onClick={joinAction}>
+          <Button
+            title="Join room"
+            rounded="default"
+            onClick={() => join.run()}
+          >
             <Text size="xl" font="default" uppercase className="py-2 px-6">
               Join
             </Text>
           </Button>
         </div>
       )}
-      {joinQuery.isLoading && <BottomBarSpinner />}
+      {join.isLoading && <BottomBarSpinner />}
     </>
   );
 }
 
-function BottomBar() {
+function BottomBar({ roomId }: { roomId: RoomId }) {
   const editAction = useEdit();
-  const { formData, setFormData, isLoading, onSubmit } = useSend();
+  const { formData, setFormData, isLoading, onSubmit } = useSend(roomId);
 
   return (
     <>
