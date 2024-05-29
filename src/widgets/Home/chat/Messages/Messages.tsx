@@ -14,6 +14,7 @@ import { getRandomBoolean, getRandomInt } from "../../../../shared/lib/random";
 import React from "react";
 import { Button } from "../../../../shared/ui/Button/Button";
 import { Text } from "../../../../shared/ui/Text/Text";
+import { Paper } from "../../../../shared/ui/Paper/Paper";
 
 export const MessagesSkeleton = React.memo(() => {
   function Skeleton() {
@@ -113,14 +114,19 @@ export function Message({ message }: { message: MessageType }) {
   const date = formatDate().message(message.created, message.modified);
   if (message.authorId === "service") {
     return (
-      <li className="flex flex-col h-fit p-2 mt-4 self-center bg-slate-50 rounded-xl ring-2 ring-slate-200 select-none">
+      <Paper
+        inList
+        rounded="xl"
+        padding={2}
+        className="flex flex-col mt-4 self-center bg-slate-50 ring-2 ring-slate-200 select-none"
+      >
         <Text size="sm" font="default">
           {text}
         </Text>
         <Text size="sm" font="thin" className="text-center">
           {date}
         </Text>
-      </li>
+      </Paper>
     );
   }
 
@@ -140,9 +146,12 @@ export function Message({ message }: { message: MessageType }) {
   }
 
   return (
-    <li
+    <Paper
       onContextMenu={(e) => onContextHandler(e)}
-      className={`${isYourMessage ? "self-end" : "self-start"} flex flex-col mt-4 p-2 bg-slate-50 ring-slate-400 rounded-xl shadow w-fit max-w-full select-none`}
+      inList
+      rounded="xl"
+      padding={2}
+      className={`${isYourMessage ? "self-end" : "self-start"} flex flex-col mt-4 bg-slate-50 rounded-xl shadow select-none`}
     >
       <div className="flex flex-row justify-between gap-4 min-w-32 max-w-full text-sm">
         <Text size="sm" font="default" className="text-green-600">
@@ -155,7 +164,7 @@ export function Message({ message }: { message: MessageType }) {
       <Text size="sm" font="default" className="text-justify break-all">
         {text}
       </Text>
-    </li>
+    </Paper>
   );
 }
 
@@ -197,7 +206,7 @@ function MessageContextMenu({
   }
 
   return (
-    <div className="bg-slate-100 flex flex-col m-2 rounded-lg shadow-xl">
+    <Paper rounded="lg" shadow="xl" className="flex flex-col m-2">
       <Button
         title="Reply"
         className="rounded-t-lg"
@@ -254,6 +263,6 @@ function MessageContextMenu({
           </div>
         </Button>
       )}
-    </div>
+    </Paper>
   );
 }

@@ -18,6 +18,7 @@ import { Input } from "../../../shared/ui/Input/Input";
 import { Select } from "../../../shared/ui/Select/Select";
 import { Button } from "../../../shared/ui/Button/Button";
 import { Text } from "../../../shared/ui/Text/Text";
+import { Paper } from "../../../shared/ui/Paper/Paper";
 import { getRandomInt } from "../../../shared/lib/random";
 
 export function ChatInfo() {
@@ -33,10 +34,7 @@ export function ChatInfo() {
 
   return (
     <Overlay>
-      <div
-        ref={contentRef}
-        className="bg-slate-100 rounded-xl p-4 w-96 flex flex-col shadow-md"
-      >
+      <Paper ref={contentRef} rounded="xl" padding={4} shadow="md">
         <div className="flex justify-between items-center mb-2">
           <Text size="xl" font="light" letterSpacing uppercase>
             Info
@@ -58,7 +56,7 @@ export function ChatInfo() {
           {isInitialLoading && <InfoSkeleton />}
           <Members isAdmin={isAdmin} />
         </div>
-      </div>
+      </Paper>
     </Overlay>
   );
 }

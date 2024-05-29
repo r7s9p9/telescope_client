@@ -27,13 +27,13 @@ export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
   };
 
   return (
-    <div className="shrink-0 w-full h-16 px-4 font-light flex justify-between items-center border-x-2 border-slate-100 bg-slate-50 select-none">
+    <div className="w-full h-16 px-4 font-light flex justify-between items-center border-x-2 border-slate-100 bg-slate-50 select-none">
       {!data.info.isInitialLoading && (
-        <>
+        <div className="flex items-center shrink-0">
           <div className="size-10 flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
             {data.info?.name?.at(0)}
           </div>
-          <div className="flex flex-col ml-4 grow">
+          <div className="flex flex-col ml-4 py-2 grow">
             <Text size="md" font="light">
               {data.info.name}
             </Text>
@@ -43,7 +43,7 @@ export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
               </Text>
             </div>
           </div>
-        </>
+        </div>
       )}
       {data.info.isInitialLoading && <TopBarSkeleton />}
       <TopBarMenu roomId={data.roomId} isMember={data.info.isMember} />
