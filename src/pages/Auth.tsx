@@ -34,6 +34,7 @@ import { NotifyType } from "../widgets/Notification/types";
 import { Spinner } from "../shared/ui/Spinner/Spinner";
 import { Text } from "../shared/ui/Text/Text";
 import { Button } from "../shared/ui/Button/Button";
+import { Paper } from "../shared/ui/Paper/Paper";
 
 const message = {
   loggedOut:
@@ -238,12 +239,13 @@ function LoginForm({
   };
 
   return (
-    <div
+    <Paper
+      rounded="lg"
       style={{
         transform: isShow ? "" : "translateX(-250%)",
         opacity: isShow ? "1" : "0",
       }}
-      className="bg-slate-50 rounded-lg ring-slate-50 ring-8 shadow-xl absolute w-2/3 min-w-72 max-w-md flex flex-col justify-center gap-2 duration-500 transform-gpu"
+      className="bg-slate-50 ring-slate-50 ring-8 shadow-xl absolute w-2/3 min-w-72 max-w-md flex flex-col justify-center gap-2 duration-500 transform-gpu"
     >
       <Text size="xl" font="light" letterSpacing className="p-2 text-center">
         Welcome back!
@@ -297,7 +299,7 @@ function LoginForm({
           </Button>
         </div>
       </form>
-    </div>
+    </Paper>
   );
 }
 
@@ -337,8 +339,9 @@ function CodeForm({
   };
 
   return (
-    <div
-      className="bg-slate-50 rounded-lg ring-slate-50 ring-8 shadow-xl absolute w-2/3 min-w-72 max-w-md flex flex-col justify-around gap-4 duration-700 transform-gpu"
+    <Paper
+      rounded="lg"
+      className="bg-slate-50 ring-slate-50 ring-8 shadow-xl absolute w-2/3 min-w-72 max-w-md flex flex-col justify-around gap-4 duration-700 transform-gpu"
       style={{
         transform: isShow ? "" : "translateX(250%)",
         opacity: isShow ? "1" : "0",
@@ -393,7 +396,7 @@ function CodeForm({
           </Button>
         </div>
       </form>
-    </div>
+    </Paper>
   );
 }
 
@@ -447,8 +450,9 @@ function RegisterForm({
     }
   };
   return (
-    <div
-      className="bg-slate-50 rounded-lg ring-slate-50 ring-8 shadow-xl absolute w-2/3 min-w-72 max-w-md flex flex-col justify-center gap-2 duration-500 ease-in-out transform-gpu"
+    <Paper
+      rounded="lg"
+      className="bg-slate-50 ring-slate-50 ring-8 shadow-xl absolute w-2/3 min-w-72 max-w-md flex flex-col justify-center gap-2 duration-500 ease-in-out transform-gpu"
       style={{
         transform: isShow ? "" : "translateX(250%)",
         opacity: isShow ? "1" : "0",
@@ -513,6 +517,6 @@ function RegisterForm({
           </Button>
         </div>
       </form>
-    </div>
+    </Paper>
   );
 }

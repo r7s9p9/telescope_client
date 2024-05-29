@@ -7,6 +7,7 @@ export const Paper = forwardRef(function Paper(
     rounded,
     shadow,
     inList,
+    style,
     className,
     onContextMenu,
   }: {
@@ -15,6 +16,7 @@ export const Paper = forwardRef(function Paper(
     rounded?: "sm" | "md" | "lg" | "xl";
     shadow?: "sm" | "md" | "lg" | "xl";
     inList?: boolean;
+    style?: React.CSSProperties;
     className?: string;
     onContextMenu?: React.MouseEventHandler<HTMLDivElement | HTMLLIElement>;
   },
@@ -24,6 +26,7 @@ export const Paper = forwardRef(function Paper(
     <>
       {inList && (
         <li
+          style={style}
           onContextMenu={
             onContextMenu as React.MouseEventHandler<HTMLLIElement>
           }
@@ -35,6 +38,7 @@ export const Paper = forwardRef(function Paper(
       )}
       {!inList && (
         <div
+          style={style}
           onContextMenu={
             onContextMenu as React.MouseEventHandler<HTMLDivElement>
           }
