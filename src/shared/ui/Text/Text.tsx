@@ -8,6 +8,7 @@ export function Text({
   uppercase,
   className,
   letterSpacing,
+  onClick,
 }: {
   children: string | ReactNode;
   size: "sm" | "md" | "xl";
@@ -16,6 +17,7 @@ export function Text({
   uppercase?: boolean;
   className?: string;
   letterSpacing?: boolean;
+  onClick?: () => void;
 }) {
   let textSize;
   let fontStyle;
@@ -47,6 +49,7 @@ export function Text({
 
   return (
     <p
+      onClick={onClick}
       className={`${textSize} ${fontStyle} ${letterSpacing ? "tracking-widest" : ""} ${capitalize ? "capitalize" : ""} ${uppercase ? "uppercase" : ""} ${className || ""}`}
     >
       {children}

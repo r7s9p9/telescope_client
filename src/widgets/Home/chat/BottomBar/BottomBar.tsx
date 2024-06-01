@@ -19,7 +19,7 @@ export function BottomBarWrapper({
 
 function BottomBarSpinner() {
   return (
-    <div className="shrink-0 h-24 w-full flex border-x-2 border-slate-100 bg-slate-50">
+    <div className="shrink-0 h-24 w-full flex items-center justify-center border-x-2 border-slate-100 bg-slate-50">
       <Spinner size={64} />
     </div>
   );
@@ -93,6 +93,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
               rounded={"full"}
               loading={isLoading}
               loaderType={"outside"}
+              loaderSize={32}
               onClick={onSubmit}
             >
               <IconSend2 className="text-slate-400" size={24} />

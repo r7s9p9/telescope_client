@@ -265,9 +265,9 @@ function LoginForm({
           isDisabled={!isShow || query.isLoading}
           errors={errors}
         />
-        <div className="pt-2 w-full flex flex-row justify-between">
+        <div className="pt-2 w-full flex flex-row justify-between items-center">
           <div className="flex flex-col items-start">
-            <Text size="md" font="light" className="text-slate-800">
+            <Text size="sm" font="light" className="text-slate-800">
               Need an account?
             </Text>
             <Button
@@ -275,15 +275,14 @@ function LoginForm({
               disabled={!isShow || query.isLoading}
               onClick={() => switchForm.toRegister()}
               noHover
-              className="hover:ring-2 gap-2 ring-slate-400 rounded-md"
             >
-              <Text size="md" font="default" className="text-slate-800">
+              <Text size="sm" font="default" className="text-slate-800">
                 Sign-up
               </Text>
             </Button>
           </div>
 
-          {query.isLoading && <Spinner size={48} />}
+          {query.isLoading && <Spinner size={32} />}
 
           <Button
             title="Login"
@@ -334,7 +333,7 @@ function CodeForm({
 
     if (!query.isLoading) {
       if (!success || !data.success) notify.show.error(message.badCode);
-      if (success) navigate({ pathname: routes.home.path });
+      if (success && data.success) navigate({ pathname: routes.home.path });
     }
   };
 
@@ -362,9 +361,9 @@ function CodeForm({
           isDisabled={!isShow}
           errors={errors}
         />
-        <div className="pt-2 w-full flex flex-row justify-between">
+        <div className="pt-2 w-full flex flex-row justify-between items-center">
           <div className="flex flex-col items-start">
-            <Text size="md" font="light" className="text-slate-800">
+            <Text size="sm" font="light" className="text-slate-800">
               Not your account?
             </Text>
             <Button
@@ -374,13 +373,13 @@ function CodeForm({
               noHover
               className="hover:ring-2 gap-2 ring-slate-400 rounded-md"
             >
-              <Text size="md" font="default" className="text-slate-800">
+              <Text size="sm" font="default" className="text-slate-800">
                 Sign-in
               </Text>
             </Button>
           </div>
 
-          {query.isLoading && <Spinner size={48} />}
+          {query.isLoading && <Spinner size={32} />}
 
           <Button
             title="Register"
@@ -483,9 +482,9 @@ function RegisterForm({
           isDisabled={!isShow || query.isLoading}
           errors={errors}
         />
-        <div className="pt-2 w-full flex flex-row justify-between">
+        <div className="pt-2 w-full flex flex-row justify-between items-center">
           <div className="flex flex-col items-start">
-            <Text size="md" font="light" className="text-slate-800">
+            <Text size="sm" font="light" className="text-slate-800">
               Need to log in?
             </Text>
             <Button
@@ -493,15 +492,14 @@ function RegisterForm({
               disabled={!isShow || query.isLoading}
               onClick={() => switchForm.toLogin()}
               noHover
-              className="hover:ring-2 gap-2 ring-slate-400 rounded-md"
             >
-              <Text size="md" font="default" className="text-slate-800">
+              <Text size="sm" font="default" className="text-slate-800">
                 Sign-in
               </Text>
             </Button>
           </div>
 
-          {query.isLoading && <Spinner size={48} />}
+          {query.isLoading && <Spinner size={32} />}
 
           <Button
             title="Register"

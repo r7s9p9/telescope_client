@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { Spinner } from "../Spinner/Spinner";
 
 export function Button({
   children,
@@ -9,6 +10,7 @@ export function Button({
   disabled,
   loading,
   loaderType,
+  loaderSize,
   className,
   buttonRef,
   style,
@@ -23,6 +25,7 @@ export function Button({
   disabled?: boolean;
   loading?: boolean;
   loaderType?: "pulse" | "outside" | "replace";
+  loaderSize?: number;
   // outside loaderType only for icons
   className?: string;
   buttonRef?: React.MutableRefObject<HTMLButtonElement | null>;
@@ -31,8 +34,9 @@ export function Button({
   onClick?: () => void;
 }) {
   const Loader = (
-    <div
-      className={`${loaderType === "outside" ? "absolute z-10" : ""} ${loaderType === "replace" ? "aspect-square size-8" : "w-full h-full"} rounded-full border-x-2 border-slate-300 animate-spin`}
+    <Spinner
+      size={loaderSize || 24}
+      className={`${loaderType === "outside" ? "absolute z-10" : ""}`}
     />
   );
 
