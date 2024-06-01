@@ -84,7 +84,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           setValue={(val) =>
             setFormData((prevInfo) => ({ ...prevInfo, text: val }))
           }
-          minRows={2}
+          minRows={1}
           maxRows={6}
           size="xl"
           rightSection={
@@ -93,10 +93,10 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
               rounded={"full"}
               loading={isLoading}
               loaderType={"outside"}
-              loaderSize={32}
+              loaderSize={42}
               onClick={onSubmit}
             >
-              <IconSend2 className="text-slate-400" size={24} />
+              <IconSend2 className="text-slate-400" size={28} />
             </Button>
           }
         />

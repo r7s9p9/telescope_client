@@ -20,6 +20,7 @@ import { Button } from "../../../shared/ui/Button/Button";
 import { Text } from "../../../shared/ui/Text/Text";
 import { Paper } from "../../../shared/ui/Paper/Paper";
 import { getRandomInt } from "../../../shared/lib/random";
+import { TextArea } from "../../../shared/ui/TextArea/TextArea";
 
 export function ChatInfo() {
   const {
@@ -102,13 +103,22 @@ function Info({
           <Text size="sm" font="default" className="min-w-14">
             About:
           </Text>
-          <Input
+          <TextArea
+            size="sm"
+            minRows={1}
+            maxRows={4}
+            value={editable.about}
+            setValue={(val) => editable.setAbout(val)}
+            disabled={!isEdit}
+            unstyled={!isEdit}
+          />
+          {/* <Input
             value={editable.about}
             setValue={(val) => editable.setAbout(val)}
             disabled={!isEdit}
             unstyled={!isEdit}
             size="sm"
-          />
+          /> */}
         </div>
         <div className="flex flex-row items-center gap-2">
           <Text size="sm" font="default" className="min-w-14">

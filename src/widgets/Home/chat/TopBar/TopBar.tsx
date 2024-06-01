@@ -38,7 +38,7 @@ export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
 
 function TopBarSkeleton() {
   return (
-    <div className="h-14 flex items-center animate-pulse">
+    <div className="h-16 flex items-center animate-pulse">
       <div className="size-10 bg-slate-200 rounded-full"></div>
       <div className="ml-4 h-full flex flex-col justify-center gap-2">
         <div className="w-64 h-6 rounded-md bg-slate-200" />

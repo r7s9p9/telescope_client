@@ -7,7 +7,7 @@ function getStyle(size: "sm" | "md" | "xl") {
 
   switch (size) {
     case "sm":
-      height = 24;
+      height = 32;
       padding = 6;
       textSize = "text-sm";
       break;
@@ -83,7 +83,7 @@ export function TextArea({
   }, [textAreaRef, heightDetectorRef, maxRows, value, height]);
 
   return (
-    <div className={`relative shrink-0 w-full`}>
+    <div className="relative shrink-0 w-full">
       {leftSection && (
         <div
           // The content is in a square with a side equal to the height of the component
@@ -110,7 +110,6 @@ export function TextArea({
           // we set the same indentation because the section has the position: absolute property
           paddingLeft: leftSection ? height : padding,
           paddingRight: rightSection ? height : padding,
-          height, // set the starting height
           paddingBottom: padding,
           paddingTop: padding,
         }}

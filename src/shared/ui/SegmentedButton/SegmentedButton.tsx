@@ -13,7 +13,7 @@ function getStyle(size: "sm" | "md" | "xl") {
   let height;
   switch (size) {
     case "sm":
-      height = 24;
+      height = 32;
       break;
     case "md":
       height = 48;
@@ -143,7 +143,7 @@ export function SegmentedButton({
       )}
       <div
         ref={selectorRef}
-        className={`z-10 absolute opacity-0 ring-2 ring-slate-400 rounded-lg duration-300 ease-in-out`}
+        className={`z-10 absolute opacity-0 ring-2 ring-slate-400 rounded-lg duration-200 ease-in-out`}
       />
       <ul
         className={`${className || ""} flex ${type === "vertical" ? "flex-col" : "flex-row"} w-full justify-between bg-slate-100 rounded-lg ring-2 ring-slate-200 hover:ring-slate-400 hover:rounded-xl duration-500 ease-in-out`}
