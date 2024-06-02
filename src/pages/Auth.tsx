@@ -2,28 +2,12 @@ import { Dispatch, ReactNode } from "react";
 import { NotifyStack } from "../widgets/Notification/Notification";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { IconKey, IconMail, IconSend2, IconUser } from "@tabler/icons-react";
 import {
-  IconKey,
-  IconMail,
-  IconPassword,
-  IconSend2,
-  IconUser,
-} from "@tabler/icons-react";
-import {
-  Path,
-  FieldErrors,
-  SubmitHandler,
-  UseFormRegister,
-  UseFormReset,
-  useForm,
-} from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  codeFormSchema,
+  codeSchema,
   emailSchema,
-  loginFormSchema,
   passwordSchema,
-  registerFormSchema,
+  usernameSchema,
 } from "../shared/api/api.schema";
 import {
   useQueryCode,
@@ -32,7 +16,6 @@ import {
 } from "../shared/api/api";
 import { routes } from "../constants";
 import { useNotify } from "../widgets/Notification/Notification";
-import { NotifyType } from "../widgets/Notification/types";
 import { Spinner } from "../shared/ui/Spinner/Spinner";
 import { Text } from "../shared/ui/Text/Text";
 import { Button } from "../shared/ui/Button/Button";
@@ -56,26 +39,6 @@ interface ShowItemState {
   setShowItem: Dispatch<ShowItemState["showItem"]>;
 }
 
-interface EmailState {
-  email: string;
-  setEmail: Dispatch<EmailState["email"]>;
-}
-
-interface IFormValues {
-  email: string;
-  password: string;
-  username: string;
-  code: string;
-}
-
-type InputProps = {
-  type: Path<IFormValues>;
-  register: UseFormRegister<IFormValues>;
-  required: boolean;
-  isDisabled: boolean;
-  errors: FieldErrors<IFormValues>;
-};
-
 export default function Auth({ type }: { type: "login" | "register" }) {
   return (
     <Background>
@@ -93,14 +56,9 @@ function Background({ children }: { children: ReactNode }) {
   );
 }
 
-const useResetForm = (isShow: boolean, reset: UseFormReset<IFormValues>) =>
-  useEffect(() => {
-    if (isShow) reset();
-  }, [isShow, reset]);
-
 function AuthContainer({ type }: { type: "login" | "register" }) {
   const [showItem, setShowItem] = useState<ShowItemState["showItem"]>(type);
-  const [email, setEmail] = useState<EmailState["email"]>("");
+  const [email, setEmail] = useState("");
 
   const notify = useNotify();
   const location = useLocation();
@@ -147,60 +105,13 @@ function AuthContainer({ type }: { type: "login" | "register" }) {
         handleCodeRequired={handleCodeRequired}
         switchForm={switchForm}
       />
+      <RegisterForm isShow={showItem === "register"} switchForm={switchForm} />
       <CodeForm
         isShow={showItem === "code"}
         email={email}
         switchForm={switchForm}
-        notify={notify}
-      />
-      <RegisterForm
-        isShow={showItem === "register"}
-        switchForm={switchForm}
-        notify={notify}
       />
     </div>
-  );
-}
-
-function Input({ type, register, required, isDisabled, errors }: InputProps) {
-  let inputType: "email" | "text" | "password" | undefined;
-  let Icon: JSX.Element | undefined;
-  if (type === "email") {
-    Icon = <IconMail size={24} className="absolute mx-2 text-slate-400" />;
-    inputType = "email";
-  }
-  if (type === "username") {
-    Icon = <IconUser size={24} className="absolute mx-2 text-slate-400" />;
-    inputType = "text";
-  }
-  if (type === "password" || type === "code") {
-    Icon = <IconPassword size={24} className="absolute mx-2 text-slate-400" />;
-    inputType = "password";
-  }
-
-  return (
-    <>
-      <div className="flex w-full justify-between items-center">
-        <Text size="md" font="light" letterSpacing uppercase>
-          {type}
-        </Text>
-        <Text size="sm" font="bold" className="text-red-600">
-          {errors[type]?.message}
-        </Text>
-      </div>
-      <div className="flex w-full items-center justify-end">
-        <input
-          className={`${type === "code" ? "text-center" : ""} text-lg font-medium w-full duration-300 appearance-none shadow-md shadow-slate-200 ring-slate-300 focus:shadow-slate-400 hover:ring-4 focus:ring-2 outline-none bg-slate-100 border-2 border-slate-400 p-1.5 rounded-lg focus:bg-slate-50 focus:border-slate-50`}
-          type={inputType}
-          spellCheck={false}
-          multiple={false}
-          aria-invalid={errors[type] ? "true" : "false"}
-          disabled={isDisabled}
-          {...register(type, { required })}
-        />
-        {Icon}
-      </div>
-    </>
   );
 }
 
@@ -264,14 +175,16 @@ function useLogin({
       password: form.password.value,
     });
     // TODO make warning 500
-    if (!success) {
+    if (!success || !data.success) {
       notify.show.error(message.badAuth);
     }
     if (!query.isLoading && success) {
-      if (data.success && data.code)
-        if (data.success && !data.code) handleCodeRequired(form.email.value);
-      navigate({ pathname: routes.home.path });
-      if (!data.success) notify.show.error(message.badAuth);
+      if (data.success && data.code) {
+        handleCodeRequired(form.email.value);
+      }
+      if (data.success && !data.code) {
+        navigate({ pathname: routes.home.path });
+      }
     }
   };
 
@@ -307,10 +220,11 @@ function LoginForm({
       shadow="xl"
       padding={4}
       style={{
-        transform: isShow ? "" : "translateX(-250%)",
+        transform: isShow ? "" : "translateY(-125%)",
         opacity: isShow ? "1" : "0",
+        zIndex: isShow ? 50 : 0,
       }}
-      className="absolute w-3/4 min-w-[480px] max-w-[600px] flex flex-col justify-center gap-2 duration-500 transform-gpu"
+      className="absolute w-3/4 min-w-[480px] max-w-[600px] flex flex-col justify-center gap-2 duration-500 ease-in-out transform-gpu"
     >
       <div className="flex justify-between items-center">
         <Text size="xl" font="light" letterSpacing>
@@ -373,34 +287,38 @@ function LoginForm({
   );
 }
 
-function CodeForm({
-  isShow,
-  email,
-  switchForm,
-  notify,
-}: {
-  isShow: boolean;
-  email: string;
-  switchForm: {
-    toLogin: () => void;
-    toRegister: () => void;
-  };
-  notify: NotifyType;
-}) {
-  const {
-    register,
-    reset,
-    formState: { errors },
-    handleSubmit,
-  } = useForm<IFormValues>({ resolver: zodResolver(codeFormSchema) });
-
-  useResetForm(isShow, reset);
-
-  const navigate = useNavigate();
+function useCode({ email }: { email: string }) {
   const query = useQueryCode();
+  const navigate = useNavigate();
+  const notify = useNotify();
 
-  const onSubmit: SubmitHandler<IFormValues> = async (formData) => {
-    const { success, data } = await query.run({ ...formData, email });
+  const defaultForm = {
+    value: "",
+    error: "",
+  };
+
+  const [code, setCode] = useState(defaultForm);
+
+  const reset = () => {
+    setCode(defaultForm);
+  };
+
+  const schemaValidator = () => {
+    if (!codeSchema.safeParse(code.value).success) {
+      setCode((prevCode) => ({
+        ...prevCode,
+        error: `The verification code must be ${env.codeLength} characters long`,
+      }));
+      return false;
+    }
+    return true;
+  };
+
+  const run = async () => {
+    const validation = schemaValidator();
+    if (!validation) return;
+
+    const { success, data } = await query.run({ code: code.value, email });
 
     if (!query.isLoading) {
       if (!success || !data.success) notify.show.error(message.badCode);
@@ -408,96 +326,174 @@ function CodeForm({
     }
   };
 
-  return (
-    <Paper
-      rounded="lg"
-      className="bg-slate-50 ring-slate-50 ring-8 shadow-xl absolute w-2/3 min-w-72 max-w-md flex flex-col justify-around gap-4 duration-700 transform-gpu"
-      style={{
-        transform: isShow ? "" : "translateX(250%)",
-        opacity: isShow ? "1" : "0",
-      }}
-    >
-      <Text size="xl" font="light" letterSpacing className="p-2 text-center">
-        Almost done
-      </Text>
-      <Text size="md" font="light" className="text-justify">
-        Please enter the verification code sent to your telescope account{" "}
-        <b className="text-green-600">{email}</b> on another device:
-      </Text>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Input
-          type="code"
-          register={register}
-          required
-          isDisabled={!isShow}
-          errors={errors}
-        />
-        <div className="pt-2 w-full flex flex-row justify-between items-center">
-          <div className="flex flex-col items-start">
-            <Text size="sm" font="light" className="text-slate-800">
-              Not your account?
-            </Text>
-            <Button
-              title="Sign-in"
-              disabled={!isShow || query.isLoading}
-              onClick={() => switchForm.toLogin()}
-              noHover
-              className="hover:ring-2 gap-2 ring-slate-400 rounded-md"
-            >
-              <Text size="sm" font="default" className="text-slate-800">
-                Sign-in
-              </Text>
-            </Button>
-          </div>
-
-          {query.isLoading && <Spinner size={32} />}
-
-          <Button
-            title="Register"
-            disabled={!isShow || query.isLoading}
-            type="submit"
-            rounded="default"
-            className="px-4 gap-2 border-2 border-slate-400"
-          >
-            <IconSend2 className="text-slate-800" strokeWidth="1.5" size={24} />
-            <Text size="md" font="default" className="text-slate-800">
-              Send
-            </Text>
-          </Button>
-        </div>
-      </form>
-    </Paper>
-  );
+  return {
+    code,
+    setCode: (value: string) => {
+      setCode((prevCode) => ({ ...prevCode, value }));
+    },
+    run,
+    reset,
+    isLoading: query.isLoading,
+  };
 }
 
-function RegisterForm({
+function CodeForm({
   isShow,
+  email,
   switchForm,
-  notify,
 }: {
   isShow: boolean;
+  email: string;
   switchForm: {
     toLogin: () => void;
     toRegister: () => void;
   };
-  notify: NotifyType;
 }) {
-  const {
-    register,
-    reset,
-    formState: { errors },
-    handleSubmit,
-  } = useForm<IFormValues>({
-    resolver: zodResolver(registerFormSchema),
-  });
+  const { code, setCode, run, reset, isLoading } = useCode({ email });
 
-  useResetForm(isShow, reset);
+  return (
+    <Paper
+      rounded="lg"
+      shadow="xl"
+      padding={4}
+      style={{
+        transform: isShow ? "" : "translateY(125%)",
+        opacity: isShow ? "1" : "0",
+        zIndex: isShow ? 50 : 0,
+      }}
+      className="absolute w-3/4 min-w-[480px] max-w-[600px] flex flex-col justify-center gap-2 duration-500 transform-gpu"
+    >
+      <div className="flex justify-between items-center">
+        <Text size="xl" font="light" letterSpacing>
+          Almost done
+        </Text>
+        {isLoading && <Spinner size={32} />}
+      </div>
+      <Text size="sm" font="light" className="text-justify">
+        Please enter the verification code sent to your telescope account{" "}
+        <b className="text-green-600">{email}</b> on another device:
+      </Text>
+      <InputField
+        label="Code"
+        sensitive
+        size="md"
+        disabled={!isShow || isLoading}
+        value={code.value}
+        setValue={setCode}
+        error={code.error}
+      />
+      <div className="pt-2 w-full flex flex-row justify-between items-center">
+        <div className="flex flex-col items-start">
+          <Text size="sm" font="light" className="text-slate-800">
+            Not your account?
+          </Text>
+          <Button
+            title="Sign-in"
+            disabled={!isShow || isLoading}
+            onClick={() => {
+              reset(), switchForm.toLogin();
+            }}
+            noHover
+          >
+            <Text size="sm" font="default" underline className="text-slate-800">
+              Sign-in
+            </Text>
+          </Button>
+        </div>
+        <Button
+          title="Login"
+          onClick={run}
+          disabled={!isShow || isLoading}
+          rounded="default"
+          className="px-4 gap-2 ring-2 ring-slate-300"
+        >
+          <IconSend2 className="text-slate-800" strokeWidth="1.5" size={24} />
+          <Text size="md" font="default" className="text-slate-800">
+            Send
+          </Text>
+        </Button>
+      </div>
+    </Paper>
+  );
+}
 
-  const navigate = useNavigate();
+function useRegister({
+  switchForm,
+}: {
+  switchForm: {
+    toLogin: () => void;
+    toRegister: () => void;
+  };
+}) {
   const query = useQueryRegister();
+  const navigate = useNavigate();
+  const notify = useNotify();
 
-  const onSubmit: SubmitHandler<IFormValues> = async (formData) => {
-    const { success, data } = await query.run(formData);
+  const defaultForm = {
+    email: { value: "", error: "" },
+    username: { value: "", error: "" },
+    password: { value: "", error: "" },
+  };
+
+  const [form, setForm] = useState(defaultForm);
+  const setEmail = (value: string) => {
+    setForm((prevForm) => ({ ...prevForm, email: { value, error: "" } }));
+  };
+  const setUsername = (value: string) => {
+    setForm((prevForm) => ({ ...prevForm, username: { value, error: "" } }));
+  };
+  const setPassword = (value: string) => {
+    setForm((prevForm) => ({ ...prevForm, password: { value, error: "" } }));
+  };
+
+  const reset = () => {
+    setForm(defaultForm);
+  };
+
+  const schemaValidator = () => {
+    const email = emailSchema.safeParse(form.email.value);
+    if (!email.success) {
+      setForm((prevForm) => ({
+        ...prevForm,
+        email: {
+          ...prevForm.email,
+          error: "Please enter a correct email address",
+        },
+      }));
+    }
+    const username = usernameSchema.safeParse(form.password.value);
+    if (!username.success) {
+      setForm((prevForm) => ({
+        ...prevForm,
+        username: {
+          ...prevForm.username,
+          error: `Must be at least ${env.usernameRange.min} and no more than ${env.usernameRange.max} characters`,
+        },
+      }));
+    }
+    const password = passwordSchema.safeParse(form.password.value);
+    if (!password.success) {
+      setForm((prevForm) => ({
+        ...prevForm,
+        password: {
+          ...prevForm.password,
+          error: `Must be at least ${env.passwordRange.min} and no more than ${env.passwordRange.max} characters`,
+        },
+      }));
+    }
+    if (!email.success || !password.success || !username.success) return false;
+    return true;
+  };
+
+  const run = async () => {
+    const validation = schemaValidator();
+    if (!validation) return;
+
+    const { success, data } = await query.run({
+      email: form.email.value,
+      password: form.password.value,
+      username: form.username.value,
+    });
     // TODO make warning 500
     if (!success) return;
     if (!data.success) {
@@ -519,73 +515,111 @@ function RegisterForm({
       switchForm.toLogin();
     }
   };
+
+  return {
+    form,
+    setEmail,
+    setUsername,
+    setPassword,
+    run,
+    reset,
+    isLoading: query.isLoading,
+  };
+}
+
+function RegisterForm({
+  isShow,
+  switchForm,
+}: {
+  isShow: boolean;
+  switchForm: {
+    toLogin: () => void;
+    toRegister: () => void;
+  };
+}) {
+  const { form, setEmail, setUsername, setPassword, run, reset, isLoading } =
+    useRegister({ switchForm });
+
   return (
     <Paper
       rounded="lg"
-      className="bg-slate-50 ring-slate-50 ring-8 shadow-xl absolute w-2/3 min-w-72 max-w-md flex flex-col justify-center gap-2 duration-500 ease-in-out transform-gpu"
+      shadow="xl"
+      padding={4}
       style={{
-        transform: isShow ? "" : "translateX(250%)",
+        transform: isShow ? "" : "translateY(125%)",
         opacity: isShow ? "1" : "0",
+        zIndex: isShow ? 50 : 0,
       }}
+      className="absolute w-3/4 min-w-[480px] max-w-[600px] flex flex-col justify-center gap-2 duration-500 transform-gpu"
     >
-      <Text size="xl" font="light" letterSpacing className="p-2 text-center">
-        Create an account
-      </Text>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Input
-          type="email"
-          register={register}
-          required
-          isDisabled={!isShow || query.isLoading}
-          errors={errors}
-        />
-        <Input
-          type="username"
-          register={register}
-          required
-          isDisabled={!isShow || query.isLoading}
-          errors={errors}
-        />
-        <Input
-          type="password"
-          register={register}
-          required
-          isDisabled={!isShow || query.isLoading}
-          errors={errors}
-        />
-        <div className="pt-2 w-full flex flex-row justify-between items-center">
-          <div className="flex flex-col items-start">
-            <Text size="sm" font="light" className="text-slate-800">
-              Need to log in?
-            </Text>
-            <Button
-              title="Sign-in"
-              disabled={!isShow || query.isLoading}
-              onClick={() => switchForm.toLogin()}
-              noHover
-            >
-              <Text size="sm" font="default" className="text-slate-800">
-                Sign-in
-              </Text>
-            </Button>
-          </div>
-
-          {query.isLoading && <Spinner size={32} />}
-
+      <div className="flex justify-between items-center">
+        <Text size="xl" font="light" letterSpacing>
+          Create an account
+        </Text>
+        {isLoading && <Spinner size={32} />}
+      </div>
+      <InputField
+        label="Email"
+        size="md"
+        disabled={!isShow || isLoading}
+        value={form.email.value}
+        setValue={setEmail}
+        error={form.email.error}
+        rightSection={
+          <IconMail size={28} className="text-slate-500" strokeWidth="1" />
+        }
+      />
+      <InputField
+        label="Username"
+        size="md"
+        disabled={!isShow || isLoading}
+        value={form.username.value}
+        setValue={setUsername}
+        error={form.username.error}
+        rightSection={
+          <IconUser size={28} className="text-slate-500" strokeWidth="1" />
+        }
+      />
+      <InputField
+        label="Password"
+        sensitive
+        size="md"
+        disabled={!isShow || isLoading}
+        value={form.password.value}
+        setValue={setPassword}
+        error={form.password.error}
+      />
+      <div className="pt-2 w-full flex flex-row justify-between items-center">
+        <div className="flex flex-col items-start">
+          <Text size="sm" font="light" className="text-slate-800">
+            Need to log in?
+          </Text>
           <Button
-            title="Register"
-            disabled={!isShow || query.isLoading}
-            type="submit"
-            rounded="default"
-            className="px-4 gap-2 border-2 border-slate-400"
+            title="Sign-in"
+            disabled={!isShow || isLoading}
+            onClick={() => {
+              reset(), switchForm.toLogin();
+            }}
+            noHover
           >
-            <IconKey className="text-slate-800" strokeWidth="1.5" size={24} />
-            <Text size="md" font="default" className="text-slate-800">
-              Register
+            <Text size="sm" font="default" underline className="text-slate-800">
+              Sign-in
             </Text>
           </Button>
         </div>
-      </form>
+        <Button
+          title="Register"
+          onClick={run}
+          disabled={!isShow || isLoading}
+          rounded="default"
+          className="px-4 gap-2 ring-2 ring-slate-300"
+        >
+          <IconKey className="text-slate-800" strokeWidth="1.5" size={24} />
+          <Text size="md" font="default" className="text-slate-800">
+            Register
+          </Text>
+        </Button>
+      </div>
     </Paper>
   );
 }
