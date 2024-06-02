@@ -32,6 +32,7 @@ function getStyle(size: "sm" | "md" | "xl") {
 export function Input({
   value,
   setValue,
+  type = "text",
   size,
   placeholder,
   leftSection,
@@ -41,6 +42,7 @@ export function Input({
 }: {
   value: string;
   setValue: Dispatch<string>;
+  type?: "text" | "password";
   size: "sm" | "md" | "xl";
   placeholder?: string;
   leftSection?: ReactNode;
@@ -63,6 +65,7 @@ export function Input({
       )}
       <input
         value={value}
+        type={type}
         onChange={(e) => setValue(e.currentTarget.value)}
         disabled={disabled}
         placeholder={placeholder}

@@ -6,6 +6,7 @@ export function Text({
   font,
   capitalize,
   uppercase,
+  underline,
   className,
   letterSpacing,
   onClick,
@@ -15,6 +16,7 @@ export function Text({
   font: "thin" | "light" | "default" | "bold";
   capitalize?: boolean;
   uppercase?: boolean;
+  underline?: boolean;
   className?: string;
   letterSpacing?: boolean;
   onClick?: () => void;
@@ -50,7 +52,7 @@ export function Text({
   return (
     <p
       onClick={onClick}
-      className={`${textSize} ${fontStyle} ${letterSpacing ? "tracking-widest" : ""} ${capitalize ? "capitalize" : ""} ${uppercase ? "uppercase" : ""} ${className || ""}`}
+      className={`${underline ? "underline" : ""} ${textSize} ${fontStyle} ${letterSpacing ? "tracking-widest" : ""} ${capitalize ? "capitalize" : ""} ${uppercase ? "uppercase" : ""} ${className || ""}`}
     >
       {children}
     </p>

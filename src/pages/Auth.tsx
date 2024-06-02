@@ -20,7 +20,9 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   codeFormSchema,
+  emailSchema,
   loginFormSchema,
+  passwordSchema,
   registerFormSchema,
 } from "../shared/api/api.schema";
 import {
@@ -35,6 +37,8 @@ import { Spinner } from "../shared/ui/Spinner/Spinner";
 import { Text } from "../shared/ui/Text/Text";
 import { Button } from "../shared/ui/Button/Button";
 import { Paper } from "../shared/ui/Paper/Paper";
+import { InputField } from "../shared/ui/InputField/InputField";
+import { env } from "../shared/lib/env";
 
 const message = {
   loggedOut:
@@ -142,7 +146,6 @@ function AuthContainer({ type }: { type: "login" | "register" }) {
         isShow={showItem === "login"}
         handleCodeRequired={handleCodeRequired}
         switchForm={switchForm}
-        notify={notify}
       />
       <CodeForm
         isShow={showItem === "code"}
@@ -201,11 +204,91 @@ function Input({ type, register, required, isDisabled, errors }: InputProps) {
   );
 }
 
+function useLogin({
+  handleCodeRequired,
+}: {
+  handleCodeRequired: ReturnType<typeof Function>;
+}) {
+  const query = useQueryLogin();
+  const navigate = useNavigate();
+  const notify = useNotify();
+
+  const defaultForm = {
+    email: { value: "", error: "" },
+    password: { value: "", error: "" },
+  };
+
+  const [form, setForm] = useState(defaultForm);
+  const setEmail = (value: string) => {
+    setForm((prevForm) => ({ ...prevForm, email: { value, error: "" } }));
+  };
+  const setPassword = (value: string) => {
+    setForm((prevForm) => ({ ...prevForm, password: { value, error: "" } }));
+  };
+
+  const reset = () => {
+    setForm(defaultForm);
+  };
+
+  const schemaValidator = () => {
+    const email = emailSchema.safeParse(form.email.value);
+    if (!email.success) {
+      setForm((prevForm) => ({
+        ...prevForm,
+        email: {
+          ...prevForm.email,
+          error: "Please enter a correct email address",
+        },
+      }));
+    }
+    const password = passwordSchema.safeParse(form.password.value);
+    if (!password.success) {
+      setForm((prevForm) => ({
+        ...prevForm,
+        password: {
+          ...prevForm.password,
+          error: `Must be at least ${env.passwordRange.min} and no more than ${env.passwordRange.max} characters`,
+        },
+      }));
+    }
+    if (!email.success || !password.success) return false;
+    return true;
+  };
+
+  const run = async () => {
+    const validation = schemaValidator();
+    if (!validation) return;
+
+    const { success, data } = await query.run({
+      email: form.email.value,
+      password: form.password.value,
+    });
+    // TODO make warning 500
+    if (!success) {
+      notify.show.error(message.badAuth);
+    }
+    if (!query.isLoading && success) {
+      if (data.success && data.code)
+        if (data.success && !data.code) handleCodeRequired(form.email.value);
+      navigate({ pathname: routes.home.path });
+      if (!data.success) notify.show.error(message.badAuth);
+    }
+  };
+
+  return {
+    form,
+    setEmail,
+    setPassword,
+    run,
+    reset,
+    isLoading: query.isLoading,
+  };
+}
+
 function LoginForm({
   isShow,
   handleCodeRequired,
   switchForm,
-  notify,
 }: {
   isShow: boolean;
   handleCodeRequired: ReturnType<typeof Function>;
@@ -213,91 +296,79 @@ function LoginForm({
     toLogin: () => void;
     toRegister: () => void;
   };
-  notify: NotifyType;
 }) {
-  const {
-    register,
-    reset,
-    formState: { errors },
-    handleSubmit,
-  } = useForm<IFormValues>({
-    resolver: zodResolver(loginFormSchema),
+  const { form, setEmail, setPassword, run, reset, isLoading } = useLogin({
+    handleCodeRequired,
   });
-
-  useResetForm(isShow, reset);
-  const query = useQueryLogin();
-  const navigate = useNavigate();
-  const onSubmit: SubmitHandler<IFormValues> = async (formData) => {
-    const { success, data } = await query.run(formData);
-    // TODO make warning 500
-    if (!success) return;
-    if (!query.isLoading) {
-      if (data.success && data.code) handleCodeRequired(formData.email);
-      if (data.success && !data.code) navigate({ pathname: routes.home.path });
-      if (!data.success) notify.show.error(message.badAuth);
-    }
-  };
 
   return (
     <Paper
       rounded="lg"
+      shadow="xl"
+      padding={4}
       style={{
         transform: isShow ? "" : "translateX(-250%)",
         opacity: isShow ? "1" : "0",
       }}
-      className="bg-slate-50 ring-slate-50 ring-8 shadow-xl absolute w-2/3 min-w-72 max-w-md flex flex-col justify-center gap-2 duration-500 transform-gpu"
+      className="absolute w-3/4 min-w-[480px] max-w-[600px] flex flex-col justify-center gap-2 duration-500 transform-gpu"
     >
-      <Text size="xl" font="light" letterSpacing className="p-2 text-center">
-        Welcome back!
-      </Text>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Input
-          type="email"
-          register={register}
-          required
-          isDisabled={!isShow || query.isLoading}
-          errors={errors}
-        />
-        <Input
-          type="password"
-          register={register}
-          required
-          isDisabled={!isShow || query.isLoading}
-          errors={errors}
-        />
-        <div className="pt-2 w-full flex flex-row justify-between items-center">
-          <div className="flex flex-col items-start">
-            <Text size="sm" font="light" className="text-slate-800">
-              Need an account?
-            </Text>
-            <Button
-              title="Sign-up"
-              disabled={!isShow || query.isLoading}
-              onClick={() => switchForm.toRegister()}
-              noHover
-            >
-              <Text size="sm" font="default" className="text-slate-800">
-                Sign-up
-              </Text>
-            </Button>
-          </div>
-
-          {query.isLoading && <Spinner size={32} />}
-
+      <div className="flex justify-between items-center">
+        <Text size="xl" font="light" letterSpacing>
+          Login to account
+        </Text>
+        {isLoading && <Spinner size={32} />}
+      </div>
+      <InputField
+        label="Email"
+        size="md"
+        disabled={!isShow || isLoading}
+        value={form.email.value}
+        setValue={setEmail}
+        error={form.email.error}
+        rightSection={
+          <IconMail size={28} className="text-slate-500" strokeWidth="1" />
+        }
+      />
+      <InputField
+        label="Password"
+        sensitive
+        size="md"
+        disabled={!isShow || isLoading}
+        value={form.password.value}
+        setValue={setPassword}
+        error={form.password.error}
+      />
+      <div className="pt-2 w-full flex flex-row justify-between items-center">
+        <div className="flex flex-col items-start">
+          <Text size="sm" font="light" className="text-slate-800">
+            Need an account?
+          </Text>
           <Button
-            title="Login"
-            disabled={!isShow || query.isLoading}
-            type="submit"
-            rounded="default"
-            className="px-4 gap-2 border-2 border-slate-400"
+            title="Sign-up"
+            disabled={!isShow || isLoading}
+            onClick={() => {
+              reset(), switchForm.toRegister();
+            }}
+            noHover
           >
-            <IconKey className="text-slate-800" strokeWidth="1.5" size={24} />
-            <Text size="md" font="default" className="text-slate-800">
-              Login
+            <Text size="sm" font="default" underline className="text-slate-800">
+              Sign-up
             </Text>
           </Button>
         </div>
-      </form>
+        <Button
+          title="Login"
+          onClick={run}
+          disabled={!isShow || isLoading}
+          rounded="default"
+          className="px-4 gap-2 ring-2 ring-slate-300"
+        >
+          <IconKey className="text-slate-800" strokeWidth="1.5" size={24} />
+          <Text size="md" font="default" className="text-slate-800">
+            Login
+          </Text>
+        </Button>
+      </div>
     </Paper>
   );
 }

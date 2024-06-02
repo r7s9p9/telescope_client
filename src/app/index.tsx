@@ -18,6 +18,7 @@ import { ContextMenuProvider } from "../widgets/ContextMenu/ContextMenu.tsx";
 import { CreateRoom } from "../widgets/Home/CreateRoom/CreateRoom.tsx";
 import { ChatInfo } from "../widgets/Home/ChatInfo/ChatInfo.tsx";
 import { Profile } from "../widgets/Home/Profile/Profile.tsx";
+import { WIP } from "../widgets/WIP/WIP.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -58,17 +59,16 @@ const router = createBrowserRouter(
             />
           </Route>
         </Route>
-
-        {/* <Route
+        <Route
           path={routes.friends.path}
           id={routes.friends.id}
-          element={<RoomList />}
+          element={<WIP />}
         />
         <Route
           path={routes.settings.path}
           id={routes.settings.id}
-          element={<RoomList />}
-        />  */}
+          element={<WIP />}
+        />
       </Route>
     </>,
   ),
