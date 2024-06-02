@@ -53,7 +53,7 @@ export function Select({
         value={value}
         onChange={(e) => setValue(e.currentTarget.value)}
         style={{ height, paddingLeft: padding, paddingRight: padding }}
-        className={`${textSize} ${unstyled ? "" : "ring-2 ring-slate-200"} appearance-none h-full w-fit outline-none ${!disabled ? "cursor-pointer" : ""} font-light text-gray-800 bg-slate-100 rounded-md enabled:hover:ring-slate-400 enabled:hover:bg-slate-50 enabled:hover:rounded-xl focus:ring-slate-400 focus:bg-slate-50 focus:rounded-xl duration-300 ease-in-out`}
+        className={`${textSize} text-center ${unstyled ? "" : "ring-2 ring-slate-200"} appearance-none h-full w-fit outline-none ${!disabled ? "cursor-pointer" : ""} font-light text-gray-800 bg-slate-100 rounded-md enabled:hover:ring-slate-400 enabled:hover:bg-slate-50 enabled:hover:rounded-xl focus:ring-slate-400 focus:bg-slate-50 focus:rounded-xl duration-300 ease-in-out`}
       >
         {children}
       </select>

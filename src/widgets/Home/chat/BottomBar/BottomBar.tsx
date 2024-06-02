@@ -96,7 +96,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
               loaderSize={42}
               onClick={onSubmit}
             >
-              <IconSend2 className="text-slate-400" size={28} />
+              <IconSend2 className="text-slate-600" strokeWidth="1" size={32} />
             </Button>
           }
         />

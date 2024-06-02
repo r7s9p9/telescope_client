@@ -85,7 +85,7 @@ function Info({
     useInfoSection(info, loadInfo, roomId);
 
   return (
-    <div className="flex h-48">
+    <div className="flex">
       <div className="flex flex-col gap-2 items-start w-full pr-20">
         <div className="flex flex-row pt-1 items-center justify-between gap-2">
           <Text size="sm" font="default" className="min-w-14">
@@ -112,13 +112,6 @@ function Info({
             disabled={!isEdit}
             unstyled={!isEdit}
           />
-          {/* <Input
-            value={editable.about}
-            setValue={(val) => editable.setAbout(val)}
-            disabled={!isEdit}
-            unstyled={!isEdit}
-            size="sm"
-          /> */}
         </div>
         <div className="flex flex-row items-center gap-2">
           <Text size="sm" font="default" className="min-w-14">
@@ -140,18 +133,18 @@ function Info({
         </div>
         <div className="flex flex-row items-center gap-2">
           <Text size="sm" font="default" className="min-w-16">
-            Created:
-          </Text>
-          <Text size="sm" font="light">
-            {formatDate().info(info.created)}
-          </Text>
-        </div>
-        <div className="flex flex-row items-center gap-2">
-          <Text size="sm" font="default" className="min-w-16">
             Creator:
           </Text>
           <Text size="sm" font="light">
             {info.creatorId === "self" ? "You" : info.creatorId}
+          </Text>
+        </div>
+        <div className="flex flex-row items-center gap-2">
+          <Text size="sm" font="default" className="min-w-16">
+            Created:
+          </Text>
+          <Text size="sm" font="light">
+            {formatDate().info(info.created)}
           </Text>
         </div>
         {isAdmin && (
@@ -206,6 +199,7 @@ function EditGroup({
           opacity: !isEdit ? "0" : "1",
         }}
         disabled={!isEdit}
+        className="z-0"
       >
         <IconX strokeWidth="1" className="text-slate-600" size={24} />
       </Button>

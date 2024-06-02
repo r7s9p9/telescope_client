@@ -73,14 +73,14 @@ export function TextArea({
           target.style.height = `${height}px`;
         } else {
           // for height with 1+ row
-          target.style.height = `${target.scrollHeight}px`;
+          target.style.height = `${detector.clientHeight * allRowsCount + 2 * padding}px`;
         }
       } else {
         // to hold the maximum specified number of rows
-        target.style.height = `${(Number(target.scrollHeight) / allRowsCount) * maxRows}px`;
+        target.style.height = `${detector.clientHeight * maxRows + 2 * padding}px`;
       }
     }
-  }, [textAreaRef, heightDetectorRef, maxRows, value, height]);
+  }, [textAreaRef, heightDetectorRef, maxRows, padding, value, height]);
 
   return (
     <div className="relative shrink-0 w-full">
