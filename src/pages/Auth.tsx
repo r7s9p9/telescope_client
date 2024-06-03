@@ -18,10 +18,10 @@ import { routes } from "../constants";
 import { useNotify } from "../widgets/Notification/Notification";
 import { Spinner } from "../shared/ui/Spinner/Spinner";
 import { Text } from "../shared/ui/Text/Text";
-import { Button } from "../shared/ui/Button/Button";
 import { Paper } from "../shared/ui/Paper/Paper";
 import { InputField } from "../shared/ui/InputField/InputField";
 import { env } from "../shared/lib/env";
+import { Button } from "../shared/ui/Button/Button";
 
 const message = {
   loggedOut:
@@ -252,34 +252,32 @@ function LoginForm({
         setValue={setPassword}
         error={form.password.error}
       />
-      <div className="pt-2 w-full flex flex-row justify-between items-center">
-        <div className="flex flex-col items-start">
-          <Text size="sm" font="light" className="text-slate-800">
+      <div className="pt-2 flex justify-between items-center">
+        <div className="flex flex-col">
+          <Text size="sm" font="light">
             Need an account?
           </Text>
-          <Button
-            title="Sign-up"
-            disabled={!isShow || isLoading}
+          <Text
+            size="sm"
+            font="default"
             onClick={() => {
               reset(), switchForm.toRegister();
             }}
-            noHover
+            underline
+            className="cursor-pointer"
           >
-            <Text size="sm" font="default" underline className="text-slate-800">
-              Sign-up
-            </Text>
-          </Button>
+            Sign-up
+          </Text>
         </div>
         <Button
-          title="Login"
+          title="Sign-in"
+          size="md"
           onClick={run}
           disabled={!isShow || isLoading}
-          rounded="default"
-          className="px-4 gap-2 ring-2 ring-slate-300"
         >
-          <IconKey className="text-slate-800" strokeWidth="1.5" size={24} />
-          <Text size="md" font="default" className="text-slate-800">
-            Login
+          <IconKey className="text-slate-500" strokeWidth="1.5" size={24} />
+          <Text size="md" font="light">
+            Sign-in
           </Text>
         </Button>
       </div>
@@ -382,34 +380,32 @@ function CodeForm({
         setValue={setCode}
         error={code.error}
       />
-      <div className="pt-2 w-full flex flex-row justify-between items-center">
+      <div className="pt-2 flex justify-between items-center">
         <div className="flex flex-col items-start">
-          <Text size="sm" font="light" className="text-slate-800">
+          <Text size="sm" font="light">
             Not your account?
           </Text>
-          <Button
-            title="Sign-in"
-            disabled={!isShow || isLoading}
+          <Text
+            size="sm"
+            font="default"
             onClick={() => {
               reset(), switchForm.toLogin();
             }}
-            noHover
+            underline
+            className="cursor-pointer"
           >
-            <Text size="sm" font="default" underline className="text-slate-800">
-              Sign-in
-            </Text>
-          </Button>
+            Return to login
+          </Text>
         </div>
         <Button
-          title="Login"
+          title="Send code"
+          size="md"
           onClick={run}
           disabled={!isShow || isLoading}
-          rounded="default"
-          className="px-4 gap-2 ring-2 ring-slate-300"
         >
-          <IconSend2 className="text-slate-800" strokeWidth="1.5" size={24} />
-          <Text size="md" font="default" className="text-slate-800">
-            Send
+          <IconSend2 className="text-slate-500" strokeWidth="1.5" size={24} />
+          <Text size="md" font="light">
+            Proceed
           </Text>
         </Button>
       </div>
@@ -589,34 +585,32 @@ function RegisterForm({
         setValue={setPassword}
         error={form.password.error}
       />
-      <div className="pt-2 w-full flex flex-row justify-between items-center">
+      <div className="pt-2 flex justify-between items-center">
         <div className="flex flex-col items-start">
-          <Text size="sm" font="light" className="text-slate-800">
+          <Text size="sm" font="light">
             Need to log in?
           </Text>
-          <Button
-            title="Sign-in"
-            disabled={!isShow || isLoading}
+          <Text
+            size="sm"
+            font="default"
             onClick={() => {
               reset(), switchForm.toLogin();
             }}
-            noHover
+            underline
+            className="cursor-pointer"
           >
-            <Text size="sm" font="default" underline className="text-slate-800">
-              Sign-in
-            </Text>
-          </Button>
+            Sign-in
+          </Text>
         </div>
         <Button
-          title="Register"
+          title="Sign-up"
+          size="md"
           onClick={run}
           disabled={!isShow || isLoading}
-          rounded="default"
-          className="px-4 gap-2 ring-2 ring-slate-300"
         >
-          <IconKey className="text-slate-800" strokeWidth="1.5" size={24} />
-          <Text size="md" font="default" className="text-slate-800">
-            Register
+          <IconKey className="text-slate-500" strokeWidth="1.5" size={24} />
+          <Text size="md" font="light">
+            Sign-up
           </Text>
         </Button>
       </div>

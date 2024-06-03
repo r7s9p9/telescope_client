@@ -5,8 +5,10 @@ import {
   IconDotsVertical,
   IconInfoCircle,
 } from "@tabler/icons-react";
-import { Button } from "../../../../shared/ui/Button/Button";
+import { IconButton } from "../../../../shared/ui/IconButton/IconButton";
 import { useTopBar } from "./useTopBar";
+import { Button } from "../../../../shared/ui/Button/Button";
+import { Paper } from "../../../../shared/ui/Paper/Paper";
 
 export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
   const { content, menu } = useTopBar(data);
@@ -57,9 +59,8 @@ function TopBarMenu({
 }) {
   return (
     <>
-      <Button
+      <IconButton
         title={"Show more"}
-        rounded={"full"}
         buttonRef={menu.buttonRef}
         onClick={menu.open}
       >
@@ -68,8 +69,9 @@ function TopBarMenu({
           strokeWidth="1"
           size={32}
         />
-      </Button>
-      <div
+      </IconButton>
+      <Paper
+        shadow="md"
         style={{
           opacity: menu.isOpened ? 1 : 0,
           transform: menu.isOpened
@@ -77,35 +79,49 @@ function TopBarMenu({
             : "translateY(-50%) scaleY(0)",
         }}
         ref={menu.contentRef}
-        className="absolute z-10 flex flex-col right-0 top-16 duration-300 ease-in-out border-t-2 border-slate-100 bg-slate-50 shadow-md rounded-b-lg"
+        className="absolute z-10 flex flex-col items-center right-0 top-16 duration-300 ease-in-out border-t-2 rounded-b-lg"
       >
-        <Button title={"Info"} onClick={() => menu.onClickHandler("info")}>
-          <div className="w-28 h-8 flex items-center">
+        <Button
+          title={"Info"}
+          size="md"
+          unstyled
+          padding={24}
+          className="w-32 hover:bg-slate-200"
+          onClick={() => menu.onClickHandler("info")}
+        >
+          <>
             <IconInfoCircle
-              className="w-12 text-slate-600"
-              strokeWidth="2"
-              size={18}
+              className=" text-slate-600"
+              strokeWidth="1.5"
+              size={24}
             />
             <Text size="md" font="default" className="text-slate-600">
               Info
             </Text>
-          </div>
+          </>
         </Button>
         {isMember && (
-          <Button title={"Leave"} onClick={() => menu.onClickHandler("leave")}>
-            <div className="w-28 h-8 flex items-center">
+          <Button
+            title={"Leave"}
+            size="md"
+            unstyled
+            padding={24}
+            className="w-32 rounded-b-lg hover:bg-slate-200"
+            onClick={() => menu.onClickHandler("leave")}
+          >
+            <>
               <IconDoorExit
-                className="w-12 text-red-600"
-                strokeWidth="2"
-                size={18}
+                className="text-red-600"
+                strokeWidth="1.5"
+                size={24}
               />
               <Text size="md" font="default" className="text-red-600">
                 Leave
               </Text>
-            </div>
+            </>
           </Button>
         )}
-      </div>
+      </Paper>
     </>
   );
 }

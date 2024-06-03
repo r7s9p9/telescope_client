@@ -7,7 +7,7 @@ import {
 } from "@tabler/icons-react";
 import { Text } from "../../../shared/ui/Text/Text";
 import { Paper } from "../../../shared/ui/Paper/Paper";
-import { Button } from "../../../shared/ui/Button/Button";
+import { IconButton } from "../../../shared/ui/IconButton/IconButton";
 import { SegmentedButton } from "../../../shared/ui/SegmentedButton/SegmentedButton";
 import { InputField } from "../../../shared/ui/InputField/InputField";
 import { useCreateRoom } from "./useCreateRoom";
@@ -26,9 +26,15 @@ export function CreateRoom() {
         shadow="xl"
         className="w-2/3 flex flex-col bg-slate-50"
       >
-        <Text size="xl" font="light" className="self-center">
-          Create a room
-        </Text>
+        <div className="flex justify-between items-center">
+          <Text size="xl" font="light" className="self-center">
+            Create a room
+          </Text>
+          <Spinner
+            size={32}
+            className={`${isLoading ? "opacity-100" : "opacity-0"}`}
+          />
+        </div>
         <InputField
           size="md"
           label={"Name"}
@@ -112,22 +118,17 @@ export function CreateRoom() {
             />
           }
         />
-        <div className="mt-4 w-full flex justify-between items-center">
-          <Spinner
-            size={42}
-            className={`${isLoading ? "opacity-100" : "opacity-0"}`}
-          />
-          <Button
+        <div className="mt-4 w-full flex justify-end items-center">
+          <IconButton
             title="Create room"
             type="submit"
-            rounded="default"
-            className="py-2 px-4 ring-2 ring-slate-400 self-end"
+            className="py-2 px-4 ring-2 ring-slate-400"
             onClick={run}
           >
             <Text size="md" font="light">
               Create
             </Text>
-          </Button>
+          </IconButton>
         </div>
       </Paper>
     </div>

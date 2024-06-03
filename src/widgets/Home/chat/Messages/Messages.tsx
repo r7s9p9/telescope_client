@@ -12,10 +12,10 @@ import { formatDate } from "../../../../shared/lib/date";
 import { MessageType } from "../../../../shared/api/api.schema";
 import { getRandomBoolean, getRandomInt } from "../../../../shared/lib/random";
 import React from "react";
-import { Button } from "../../../../shared/ui/Button/Button";
 import { Text } from "../../../../shared/ui/Text/Text";
 import { Paper } from "../../../../shared/ui/Paper/Paper";
 import { RoomId } from "../../../../types";
+import { Button } from "../../../../shared/ui/Button/Button";
 
 export const MessagesSkeleton = React.memo(() => {
   function Skeleton() {
@@ -177,61 +177,73 @@ function MessageContextMenu({
   onClickMenuHandler: ReturnType<typeof useMessage>["onClickMenuHandler"];
 }) {
   return (
-    <Paper rounded="lg" shadow="xl" className="flex flex-col m-2">
+    <Paper rounded="lg" shadow="md" className="flex flex-col m-2">
       <Button
         title="Reply"
-        className="rounded-t-lg"
+        size="md"
+        unstyled
+        padding={24}
+        className="w-32 hover:bg-slate-200 rounded-t-lg"
         onClick={() => onClickMenuHandler("reply")}
       >
-        <div className="flex flex-row w-32 h-8 items-center">
+        <>
           <IconMessageReply
-            className="text-slate-600 w-12"
-            strokeWidth="2"
+            className="text-slate-600"
+            strokeWidth="1.5"
             size={18}
           />
           <Text size="md" font="default" className="text-slate-600">
             Reply
           </Text>
-        </div>
+        </>
       </Button>
       {isYourMessage && (
-        <Button title="Edit" onClick={() => onClickMenuHandler("edit")}>
-          <div className="flex flex-row w-32 h-8 items-center">
-            <IconEdit
-              className="text-slate-600 w-12"
-              strokeWidth="2"
-              size={18}
-            />
+        <Button
+          title="Edit"
+          size="md"
+          unstyled
+          padding={24}
+          className="w-32 hover:bg-slate-200"
+          onClick={() => onClickMenuHandler("edit")}
+        >
+          <>
+            <IconEdit className="text-slate-600" strokeWidth="1.5" size={18} />
             <Text size="md" font="default" className="text-slate-600">
               Edit
             </Text>
-          </div>
+          </>
         </Button>
       )}
-      <Button title="Copy" onClick={() => onClickMenuHandler("copy")}>
-        <div className="flex flex-row w-32 h-8 items-center">
-          <IconCopy className="text-slate-600 w-12" strokeWidth="2" size={18} />
+      <Button
+        title="Copy"
+        size="md"
+        unstyled
+        padding={24}
+        className={`w-32 hover:bg-slate-200 ${isYourMessage ? "" : "rounded-b-lg"}`}
+        onClick={() => onClickMenuHandler("copy")}
+      >
+        <>
+          <IconCopy className="text-slate-600" strokeWidth="1.5" size={18} />
           <Text size="md" font="default" className="text-slate-600">
             Copy
           </Text>
-        </div>
+        </>
       </Button>
       {isYourMessage && (
         <Button
           title="Delete"
-          className="rounded-b-lg"
+          size="md"
+          unstyled
+          padding={24}
+          className="w-32 hover:bg-slate-200 rounded-b-lg"
           onClick={() => onClickMenuHandler("delete")}
         >
-          <div className="flex flex-row w-32 h-8 items-center">
-            <IconTrash
-              className="text-red-600 w-12"
-              strokeWidth="2"
-              size={18}
-            />
+          <>
+            <IconTrash className="text-red-600" strokeWidth="1.5" size={18} />
             <Text size="md" font="default" className="text-red-600">
               Delete
             </Text>
-          </div>
+          </>
         </Button>
       )}
     </Paper>

@@ -9,7 +9,7 @@ import { ITEM_HEIGHT } from "./constants";
 import { RoomType, SearchRoomsType } from "../../../shared/api/api.schema";
 import { useQuerySearchRooms } from "../../../shared/api/api";
 import { RoomId } from "../../../types";
-import { Button } from "../../../shared/ui/Button/Button";
+import { IconButton } from "../../../shared/ui/IconButton/IconButton";
 import { Input } from "../../../shared/ui/Input/Input";
 import { Text } from "../../../shared/ui/Text/Text";
 
@@ -227,13 +227,13 @@ function Title() {
         Rooms
       </Text>
       <Link to={routes.createRoom.path}>
-        <Button title={"Create new room"} rounded={"full"} noHover>
+        <IconButton title={"Create new room"} noHover>
           <IconCirclePlus
             strokeWidth="1"
             className="text-slate-600"
             size={32}
           />
-        </Button>
+        </IconButton>
       </Link>
     </div>
   );

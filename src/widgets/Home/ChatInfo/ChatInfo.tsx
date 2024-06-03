@@ -16,11 +16,20 @@ import { RoomId } from "../../../types";
 import { useInfoSection, useMain, useMembersSection } from "./useChatInfo";
 import { Input } from "../../../shared/ui/Input/Input";
 import { Select } from "../../../shared/ui/Select/Select";
-import { Button } from "../../../shared/ui/Button/Button";
+import { IconButton } from "../../../shared/ui/IconButton/IconButton";
 import { Text } from "../../../shared/ui/Text/Text";
 import { Paper } from "../../../shared/ui/Paper/Paper";
 import { getRandomInt } from "../../../shared/lib/random";
 import { TextArea } from "../../../shared/ui/TextArea/TextArea";
+import { Button } from "../../../shared/ui/Button/Button";
+
+function Overlay({ children }: { children: ReactNode }) {
+  return (
+    <div className="absolute w-full h-full flex justify-center items-center backdrop-blur-sm bg-opacity-50 bg-gray-600">
+      {children}
+    </div>
+  );
+}
 
 export function ChatInfo() {
   const {
@@ -37,19 +46,18 @@ export function ChatInfo() {
     <Overlay>
       <Paper ref={contentRef} rounded="xl" padding={4} shadow="md">
         <div className="flex justify-between items-center mb-2">
-          <Text size="xl" font="light" letterSpacing uppercase>
-            Info
+          <Text size="xl" font="light" letterSpacing>
+            Room info
           </Text>
-          <Button title="Exit" rounded="full" onClick={handleCloseClick}>
-            <IconX className="text-slate-600" strokeWidth="2" size={24} />
-          </Button>
+          <IconButton title="Close info" onClick={handleCloseClick}>
+            <IconX className="text-slate-600" strokeWidth="1.5" size={24} />
+          </IconButton>
         </div>
         <div className="flex flex-col gap-2">
           {!isInitialLoading && (
             <Info
               roomId={roomId}
               info={info as RoomInfoType["info"]}
-              // info is defined above
               isAdmin={isAdmin}
               loadInfo={loadInfo}
             />
@@ -62,9 +70,12 @@ export function ChatInfo() {
   );
 }
 
-function Overlay({ children }: { children: ReactNode }) {
+function InfoLine({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="absolute w-full h-full flex justify-center items-center backdrop-blur-sm bg-opacity-50 bg-gray-600">
+    <div className="flex items-center">
+      <Text size="sm" font="default" className="min-w-14">
+        {label}:
+      </Text>
       {children}
     </div>
   );
@@ -87,10 +98,7 @@ function Info({
   return (
     <div className="flex">
       <div className="flex flex-col gap-2 items-start w-full pr-20">
-        <div className="flex flex-row pt-1 items-center justify-between gap-2">
-          <Text size="sm" font="default" className="min-w-14">
-            Name:
-          </Text>
+        <InfoLine label="Name">
           <Input
             value={editable.name}
             setValue={(val) => editable.setName(val)}
@@ -98,11 +106,8 @@ function Info({
             unstyled={!isEdit}
             size="sm"
           />
-        </div>
-        <div className="flex flex-row items-center gap-2">
-          <Text size="sm" font="default" className="min-w-14">
-            About:
-          </Text>
+        </InfoLine>
+        <InfoLine label="About">
           <TextArea
             size="sm"
             minRows={1}
@@ -112,11 +117,8 @@ function Info({
             disabled={!isEdit}
             unstyled={!isEdit}
           />
-        </div>
-        <div className="flex flex-row items-center gap-2">
-          <Text size="sm" font="default" className="min-w-14">
-            Type:
-          </Text>
+        </InfoLine>
+        <InfoLine label="Type">
           <Select
             value={editable.type}
             setValue={(val) =>
@@ -130,29 +132,25 @@ function Info({
             <option value="private">Private</option>
             <option value="single">Single</option>
           </Select>
-        </div>
-        <div className="flex flex-row items-center gap-2">
-          <Text size="sm" font="default" className="min-w-16">
-            Creator:
-          </Text>
-          <Text size="sm" font="light">
+        </InfoLine>
+        <InfoLine label="Creator">
+          <Text size="sm" font="light" className="ml-2">
             {info.creatorId === "self" ? "You" : info.creatorId}
           </Text>
-        </div>
-        <div className="flex flex-row items-center gap-2">
-          <Text size="sm" font="default" className="min-w-16">
-            Created:
-          </Text>
-          <Text size="sm" font="light">
+        </InfoLine>
+        <InfoLine label="Created">
+          <Text size="sm" font="light" className="ml-2">
             {formatDate().info(info.created)}
           </Text>
-        </div>
+        </InfoLine>
         {isAdmin && (
           <Button
+            size="sm"
+            unstyled
+            padding={0}
             title="Delete room"
-            rounded="default"
             onClick={handleDeleteClick}
-            noHover
+            disabled={!isAdmin}
           >
             <Text size="sm" font="bold" className="text-red-600">
               Delete room
@@ -178,9 +176,8 @@ function EditGroup({
 }) {
   return (
     <div className="relative">
-      <Button
+      <IconButton
         title="Edit"
-        rounded="full"
         onClick={() => handleClick("edit")}
         style={{
           position: "absolute",
@@ -190,10 +187,9 @@ function EditGroup({
         disabled={isEdit}
       >
         <IconEdit strokeWidth="1" className="text-slate-600" size={24} />
-      </Button>
-      <Button
+      </IconButton>
+      <IconButton
         title="Cancel edit"
-        rounded="full"
         onClick={() => handleClick("cancel")}
         style={{
           opacity: !isEdit ? "0" : "1",
@@ -202,10 +198,9 @@ function EditGroup({
         className="z-0"
       >
         <IconX strokeWidth="1" className="text-slate-600" size={24} />
-      </Button>
-      <Button
+      </IconButton>
+      <IconButton
         title="Update info"
-        rounded="full"
         onClick={() => handleClick("send")}
         style={{
           opacity: !isEdit ? "0" : "1",
@@ -213,7 +208,7 @@ function EditGroup({
         disabled={!isEdit}
       >
         <IconCheck strokeWidth="1" className="text-slate-600" size={24} />
-      </Button>
+      </IconButton>
     </div>
   );
 }
@@ -224,12 +219,12 @@ function Members({ isAdmin }: { isAdmin: boolean }) {
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2">
-        <Text size="xl" font="light" letterSpacing uppercase className="w-full">
+        <Text size="xl" font="light" letterSpacing className="w-full">
           Members
         </Text>
-        <Button title="Find user" rounded="full" onClick={() => getMembers()}>
+        <IconButton title="Find user" onClick={() => getMembers()}>
           <IconRefresh className="text-slate-600" strokeWidth="2" size={24} />
-        </Button>
+        </IconButton>
         {isAdmin && <InviteButton />}
       </div>
       <MembersList isLoading={isLoading} data={data} />
@@ -370,8 +365,8 @@ function Member({ data }: { data: AccountReadType }) {
 
 function InviteButton() {
   return (
-    <Button title="Invite users" rounded="full">
+    <IconButton title="Invite users">
       <IconPlus className="text-slate-600" strokeWidth="2" size={24} />
-    </Button>
+    </IconButton>
   );
 }

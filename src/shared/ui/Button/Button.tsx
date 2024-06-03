@@ -1,69 +1,66 @@
 import { ReactNode } from "react";
-import { Spinner } from "../Spinner/Spinner";
+
+function getStyle(size: "sm" | "md" | "xl") {
+  let height;
+
+  switch (size) {
+    case "sm":
+      height = 32;
+      break;
+    case "md":
+      height = 48;
+      break;
+    case "xl":
+      height = 64;
+      break;
+  }
+  return {
+    height,
+  };
+}
 
 export function Button({
   children,
   title,
-  type,
-  rounded,
-  noHover,
+  size,
+  type = "button",
+  padding = 2,
+  gap = 2,
+  unstyled,
   disabled,
-  loading,
-  loaderType,
-  loaderSize,
   className,
   buttonRef,
-  style,
   formNoValidate,
   onClick,
 }: {
   children: ReactNode;
   title: string;
+  size: "sm" | "md" | "xl";
   type?: "submit" | "button" | "reset";
-  rounded?: "default" | "full";
-  noHover?: boolean;
+  padding?: number;
+  gap?: number;
+  unstyled?: boolean;
   disabled?: boolean;
-  loading?: boolean;
-  loaderType?: "pulse" | "outside" | "replace";
-  loaderSize?: number;
-  // outside loaderType only for icons
   className?: string;
   buttonRef?: React.MutableRefObject<HTMLButtonElement | null>;
   style?: React.CSSProperties;
   formNoValidate?: boolean;
   onClick?: () => void;
 }) {
-  const Loader = (
-    <Spinner
-      size={loaderSize || 24}
-      className={`${loaderType === "outside" ? "absolute z-10" : ""}`}
-    />
-  );
-
-  let Content: ReactNode;
-  if (loading && loaderType === "replace") {
-    Content = Loader;
-  } else {
-    Content = children;
-  }
+  const { height } = getStyle(size);
 
   return (
-    <div
-      style={style}
-      className={`${loaderType === "pulse" && loading ? "animate-pulse" : ""} flex justify-center items-center duration-300 ease-in-out`}
+    <button
+      title={title}
+      disabled={disabled}
+      type={type}
+      ref={buttonRef}
+      onClick={onClick}
+      formNoValidate={formNoValidate}
+      style={{ height, padding }}
+      className={`${gap ? `gap-${gap}` : ""} ${unstyled ? "" : "bg-slate-100 ring-2 ring-slate-200 enabled:hover:ring-slate-400 enabled:hover:bg-slate-50 enabled:hover:rounded-xl rounded-md"} flex items-center duration-300 ease-in-out ${className || ""}`}
     >
-      <button
-        title={title}
-        disabled={loading || disabled}
-        type={type}
-        ref={buttonRef}
-        onClick={onClick}
-        formNoValidate={formNoValidate}
-        className={`${loading || disabled ? "" : "cursor-pointer"} ${rounded === "default" ? "rounded-lg" : ""} ${rounded === "full" ? "rounded-full" : ""} ${!noHover ? "hover:bg-slate-200 p-1" : ""} h-full flex items-center opacity-75 hover:opacity-100 duration-300 ease-in-out ${className || ""}`}
-      >
-        {Content}
-      </button>
-      {loaderType === "outside" && loading && Loader}
-    </div>
+      {children}
+    </button>
   );
 }
