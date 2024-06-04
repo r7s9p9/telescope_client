@@ -1,13 +1,14 @@
 import {
   IconAbc,
   IconBlockquote,
+  IconStar,
   IconUser,
   IconUsers,
   IconUsersGroup,
 } from "@tabler/icons-react";
 import { Text } from "../../../shared/ui/Text/Text";
 import { Paper } from "../../../shared/ui/Paper/Paper";
-import { IconButton } from "../../../shared/ui/IconButton/IconButton";
+import { Button } from "../../../shared/ui/Button/Button";
 import { SegmentedButton } from "../../../shared/ui/SegmentedButton/SegmentedButton";
 import { InputField } from "../../../shared/ui/InputField/InputField";
 import { useCreateRoom } from "./useCreateRoom";
@@ -27,7 +28,7 @@ export function CreateRoom() {
         className="w-2/3 flex flex-col bg-slate-50"
       >
         <div className="flex justify-between items-center">
-          <Text size="xl" font="light" className="self-center">
+          <Text size="xl" font="light" letterSpacing className="self-center">
             Create a room
           </Text>
           <Spinner
@@ -42,7 +43,7 @@ export function CreateRoom() {
           setValue={setName}
           error={form.name.error}
           rightSection={
-            <IconAbc className="text-slate-600" strokeWidth="1" size={24} />
+            <IconAbc className="text-slate-500" strokeWidth="1" size={28} />
           }
           className="w-full"
         />
@@ -60,8 +61,8 @@ export function CreateRoom() {
                 <>
                   <IconUsersGroup
                     className="text-slate-600"
-                    strokeWidth="2"
-                    size={20}
+                    strokeWidth="1"
+                    size={24}
                   />
                   <Text size="md" font="light">
                     Public
@@ -75,8 +76,8 @@ export function CreateRoom() {
                 <>
                   <IconUsers
                     className="text-slate-600"
-                    strokeWidth="2"
-                    size={20}
+                    strokeWidth="1"
+                    size={24}
                   />
                   <Text size="md" font="light">
                     Private
@@ -90,8 +91,8 @@ export function CreateRoom() {
                 <>
                   <IconUser
                     className="text-slate-600"
-                    strokeWidth="2"
-                    size={20}
+                    strokeWidth="1"
+                    size={24}
                   />
                   <Text size="md" font="light">
                     Single
@@ -112,23 +113,25 @@ export function CreateRoom() {
           error={form.about.error}
           rightSection={
             <IconBlockquote
-              className="text-slate-600"
+              className="text-slate-500"
               strokeWidth="1"
-              size={24}
+              size={28}
             />
           }
         />
         <div className="mt-4 w-full flex justify-end items-center">
-          <IconButton
-            title="Create room"
-            type="submit"
-            className="py-2 px-4 ring-2 ring-slate-400"
-            onClick={run}
-          >
-            <Text size="md" font="light">
-              Create
-            </Text>
-          </IconButton>
+          <Button title="Create room" size="md" onClick={run}>
+            <>
+              <IconStar
+                className="text-slate-500"
+                strokeWidth="1.5"
+                size={24}
+              />
+              <Text size="md" font="light">
+                Create
+              </Text>
+            </>
+          </Button>
         </div>
       </Paper>
     </div>

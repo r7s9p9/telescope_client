@@ -1,8 +1,12 @@
 import {
+  IconBan,
   IconCheck,
+  IconCopy,
   IconEdit,
+  IconKarate,
   IconPlus,
   IconRefresh,
+  IconUserScan,
   IconX,
 } from "@tabler/icons-react";
 import { ReactNode, memo } from "react";
@@ -13,7 +17,12 @@ import {
 } from "../../../shared/api/api.schema";
 import { formatDate } from "../../../shared/lib/date";
 import { RoomId } from "../../../types";
-import { useInfoSection, useMain, useMembersSection } from "./useChatInfo";
+import {
+  useInfoSection,
+  useMain,
+  useMember,
+  useMembersSection,
+} from "./useChatInfo";
 import { Input } from "../../../shared/ui/Input/Input";
 import { Select } from "../../../shared/ui/Select/Select";
 import { IconButton } from "../../../shared/ui/IconButton/IconButton";
@@ -227,16 +236,18 @@ function Members({ isAdmin }: { isAdmin: boolean }) {
         </IconButton>
         {isAdmin && <InviteButton />}
       </div>
-      <MembersList isLoading={isLoading} data={data} />
+      <MembersList isLoading={isLoading} isAdmin={isAdmin} data={data} />
     </div>
   );
 }
 
 function MembersList({
   isLoading,
+  isAdmin,
   data,
 }: {
   isLoading: boolean;
+  isAdmin: boolean;
   data?: RoomGetMembersType;
 }) {
   if (isLoading) {
@@ -256,9 +267,7 @@ function MembersList({
   }
 
   const users = data.users.map((user) => (
-    <li key={user.targetUserId}>
-      <Member data={user} />
-    </li>
+    <Member key={user.targetUserId} data={user} isAdmin={isAdmin} />
   ));
 
   return <MembersListWrapper>{users}</MembersListWrapper>;
@@ -278,7 +287,7 @@ const MembersListSkeleton = memo(() => {
 
 function MemberSkeleton() {
   return (
-    <div className="my-2 p-2 h-14 w-full bg-slate-200 rounded-lg flex animate-pulse">
+    <div className="mb-2 mr-4 p-2 h-14 w-full bg-slate-200 rounded-lg flex animate-pulse">
       <div className="size-10 mr-2 bg-slate-300 rounded-full"></div>
       <div className="grow flex">
         <div className="grow flex flex-col justify-between">
@@ -296,7 +305,9 @@ function MemberSkeleton() {
 
 function MembersListWrapper({ children }: { children: ReactNode }) {
   return (
-    <ul className="w-full h-72 overflow-auto overscroll-none">{children}</ul>
+    <ul className="w-full h-72 pt-2 overflow-auto overscroll-none">
+      {children}
+    </ul>
   );
 }
 
@@ -308,7 +319,13 @@ function NoMembers() {
   );
 }
 
-function Member({ data }: { data: AccountReadType }) {
+function Member({
+  data,
+  isAdmin,
+}: {
+  data: AccountReadType;
+  isAdmin: boolean;
+}) {
   let lastSeenStr;
   let memberState: "online" | "offline" | "invisible" | "you";
   if (data.targetUserId === "self") {
@@ -325,9 +342,30 @@ function Member({ data }: { data: AccountReadType }) {
     }
   }
 
+  const { openMenu, onClickMenuHandler } = useMember({
+    data,
+  });
+
+  function onContextHandler(e: React.MouseEvent<HTMLElement, MouseEvent>) {
+    openMenu(
+      e,
+      <MemberContextMenu
+        isYou={data.targetUserId === "self"}
+        isAdmin={isAdmin}
+        onClick={onClickMenuHandler}
+      />,
+    );
+  }
+
   return (
-    <div className="my-2 p-2 h-14 border-2 border-slate-200 bg-slate-50 rounded-lg shadow-md flex">
-      <div className="mr-2 size-10 self-center flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
+    <Paper
+      onContextMenu={(e) => onContextHandler(e)}
+      padding={2}
+      rounded="lg"
+      inList
+      className="h-14 mb-2 mr-4 border-2 border-slate-300 hover:bg-slate-200 duration-300 ease-in-out flex"
+    >
+      <div className="mr-2 size-10 self-center flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400 select-none">
         {data.general?.username?.at(0)}
       </div>
       <div className="grow flex">
@@ -346,20 +384,108 @@ function Member({ data }: { data: AccountReadType }) {
             capitalize
             className={
               memberState === "online" || memberState === "you"
-                ? "text-green-600"
-                : "text-slate-600"
+                ? "text-green-600 select-none"
+                : "text-slate-600 select-none"
             }
           >
             {memberState}
           </Text>
           {memberState === "offline" && (
-            <Text size="sm" font="light">
+            <Text size="sm" font="light" className="select-none">
               {lastSeenStr}
             </Text>
           )}
         </div>
       </div>
-    </div>
+    </Paper>
+  );
+}
+
+function MemberContextMenu({
+  isYou,
+  isAdmin,
+  onClick,
+}: {
+  isYou: boolean;
+  isAdmin: boolean;
+  onClick: ReturnType<typeof useMember>["onClickMenuHandler"];
+}) {
+  return (
+    <Paper rounded="lg" shadow="md" className="flex flex-col m-2">
+      <Button
+        title="Go to profile"
+        size="md"
+        unstyled
+        padding={24}
+        className="w-54 hover:bg-slate-200 rounded-t-lg"
+        onClick={() => onClick("profile")}
+      >
+        <>
+          <IconUserScan
+            className="text-slate-600"
+            strokeWidth="1.5"
+            size={24}
+          />
+          <Text size="md" font="default" className="text-slate-600">
+            Go to profile
+          </Text>
+        </>
+      </Button>
+      <Button
+        title="Copy username"
+        size="md"
+        unstyled
+        padding={24}
+        className={`w-54 hover:bg-slate-200 ${!isAdmin || isYou ? "rounded-b-lg" : ""}`}
+        onClick={() => onClick("copy")}
+      >
+        <>
+          <IconCopy className="text-slate-600" strokeWidth="1.5" size={24} />
+          <Text size="md" font="default" className="text-slate-600">
+            Copy username
+          </Text>
+        </>
+      </Button>
+      {isAdmin && !isYou && (
+        <>
+          <Button
+            title="Kick"
+            size="md"
+            unstyled
+            padding={24}
+            className="w-54 hover:bg-slate-200"
+            onClick={() => onClick("kick")}
+          >
+            <>
+              <IconKarate
+                className="text-red-600"
+                strokeWidth="1.5"
+                size={24}
+              />
+              <Text size="md" font="default" className="text-red-600">
+                Kick
+              </Text>
+            </>
+          </Button>
+
+          <Button
+            title="Ban"
+            size="md"
+            unstyled
+            padding={24}
+            className="w-54 hover:bg-slate-200 rounded-b-lg"
+            onClick={() => onClick("ban")}
+          >
+            <>
+              <IconBan className="text-red-600" strokeWidth="1.5" size={24} />
+              <Text size="md" font="default" className="text-red-600">
+                Ban
+              </Text>
+            </>
+          </Button>
+        </>
+      )}
+    </Paper>
   );
 }
 

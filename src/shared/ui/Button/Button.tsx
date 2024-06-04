@@ -24,7 +24,7 @@ export function Button({
   title,
   size,
   type = "button",
-  padding = 2,
+  padding = 12,
   gap = 2,
   unstyled,
   disabled,

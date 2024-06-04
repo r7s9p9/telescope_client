@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RoomId } from "../../types";
+import { RoomId, UserId } from "../../types";
 import {
   compareMessages,
   deleteMessage,
@@ -55,6 +55,10 @@ import {
   RoomJoinType,
   roomGetMembersSchema,
   RoomGetMembersType,
+  RoomKickMemberType,
+  RoomBanMemberType,
+  roomKickMemberSchema,
+  roomBanMemberSchema,
 } from "./api.schema";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
@@ -472,6 +476,36 @@ export function useQueryGetMembers() {
     });
     if (!success) return { success: false as const };
     return { success: true as const, data: response as RoomGetMembersType };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryKickMember() {
+  const query = useQuery({ schema: roomKickMemberSchema });
+
+  const run = async (roomId: RoomId, userId: UserId) => {
+    const { success, response } = await query.run(serverRoute.room.kick, {
+      roomId,
+      userIds: [userId],
+    });
+    if (!success) return { success: false as const };
+    return { success: true as const, data: response as RoomKickMemberType };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryBanMember() {
+  const query = useQuery({ schema: roomBanMemberSchema });
+
+  const run = async (roomId: RoomId, userId: UserId) => {
+    const { success, response } = await query.run(serverRoute.room.ban, {
+      roomId,
+      userIds: [userId],
+    });
+    if (!success) return { success: false as const };
+    return { success: true as const, data: response as RoomBanMemberType };
   };
 
   return { run, isLoading: query.isLoading };

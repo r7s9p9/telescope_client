@@ -100,7 +100,7 @@ export const accountReadSchema = z.object({
   targetUserId: z.union([selfIdSchema, userIdSchema]),
   general: z
     .object({
-      username: usernameSchema.optional(),
+      username: usernameSchema,
       name: nameSchema.optional(),
       bio: bioSchema.optional(),
       lastSeen: lastSeenSchema.optional(),
@@ -350,3 +350,17 @@ export const searchRoomsSchema = z
   );
 
 export type SearchRoomsType = z.infer<typeof searchRoomsSchema>;
+
+export const roomKickMemberSchema = z.object({
+  success: z.boolean(),
+  access: z.boolean(),
+});
+
+export type RoomKickMemberType = z.infer<typeof roomKickMemberSchema>;
+
+export const roomBanMemberSchema = z.object({
+  success: z.boolean(),
+  access: z.boolean(),
+});
+
+export type RoomBanMemberType = z.infer<typeof roomBanMemberSchema>;

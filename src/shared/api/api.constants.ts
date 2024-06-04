@@ -62,6 +62,8 @@ export const serverRoute = {
     leave: endpoint + "/api/room/leave",
     join: endpoint + "/api/room/join",
     getMembers: endpoint + "/api/room/members",
+    kick: endpoint + "/api/room/kick",
+    ban: endpoint + "/api/room/block",
   },
   message: {
     read: endpoint + "/api/message/read",
