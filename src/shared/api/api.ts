@@ -222,13 +222,13 @@ export function useQueryLogout() {
   return { run, isLoading: query.isLoading };
 }
 
-export function useQuerySelfAccount() {
+export function useQueryAccount() {
   const query = useQuery({ schema: accountReadSchema });
 
-  const run = async () => {
+  const run = async (userId: UserId | "self") => {
     const { success, response } = await query.run(
       serverRoute.account.read,
-      readAccountBody("self"),
+      readAccountBody(userId),
     );
     if (!success) return { success: false as const };
     return { success: true as const, data: response as AccountReadType };

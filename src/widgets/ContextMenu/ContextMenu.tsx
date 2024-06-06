@@ -60,7 +60,7 @@ export const ContextMenuProvider = ({
   };
 
   const closeMenu = () => {
-    setData(dataDefault);
+    setData((prevData) => ({ ...prevData, isOpen: false }));
   };
 
   useEffect(() => {
@@ -112,10 +112,13 @@ export const ContextMenuProvider = ({
       }}
     >
       {children}
-      {data.isOpen && data.content && data.position && (
+      {data.isOpen && (
         <div
           ref={targetRef}
-          style={{ left: data.position.x, top: data.position.y }}
+          style={{
+            left: data.position.x,
+            top: data.position.y,
+          }}
           className="absolute"
         >
           {data.content}

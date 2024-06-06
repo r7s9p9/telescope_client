@@ -279,13 +279,26 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
     ? data.lastMessage.content.text
     : "There is no messages";
 
-  let lastUsername: string | false = false;
-  if (data.lastMessage) {
-    if (data.lastMessage.authorId === "self") {
-      lastUsername = "You" as const;
-    } else if (data.lastMessage.username) {
-      lastUsername = data.lastMessage.username;
-    }
+  let username: JSX.Element = <></>;
+
+  if (data?.lastMessage?.authorId === "self") {
+    username = (
+      <Text size="sm" font="light" className="text-green-600">
+        You:
+      </Text>
+    );
+  } else if (data?.lastMessage?.username) {
+    username = (
+      <Text size="sm" font="light" className="text-gray-600">
+        {data.lastMessage.username}:
+      </Text>
+    );
+  } else if (data?.lastMessage?.authorId === "service") {
+    username = (
+      <Text size="sm" font="light" className="text-blue-600">
+        Service:
+      </Text>
+    );
   }
 
   return (
@@ -295,20 +308,16 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
       className={`${isOpened ? "bg-slate-200 cursor-default" : "bg-slate-50"} w-full flex flex-col px-4 py-2 justify-between items-center hover:bg-slate-200 duration-300 ease-out`}
     >
       <div className="w-full flex flex-row justify-between items-center gap-2">
-        <Text size="sm" font="light" className="text-green-600">
+        <Text size="sm" font="light" className="text-gray-600">
           {data.name}
         </Text>
-        <Text size="sm" font="light" className="text-slate-600">
+        <Text size="sm" font="light" className="text-gray-600">
           {date}
         </Text>
       </div>
       <div className="w-full flex flex-row gap-2 justify-start items-center">
-        {lastUsername && (
-          <Text size="sm" font="default" className="text-blue-600">
-            {lastUsername}:
-          </Text>
-        )}
-        <Text size="sm" font="light" className="text-slate-600 truncate">
+        {username}
+        <Text size="sm" font="light" className="truncate text-gray-600">
           {lastMessage}
         </Text>
         <UnreadCount count={data.unreadCount} />

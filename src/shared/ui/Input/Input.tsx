@@ -39,6 +39,7 @@ export function Input({
   rightSection,
   unstyled,
   disabled,
+  className,
 }: {
   value: string;
   setValue: Dispatch<string>;
@@ -49,6 +50,7 @@ export function Input({
   rightSection?: ReactNode;
   unstyled?: boolean;
   disabled?: boolean;
+  className?: string;
 }) {
   const { height, textSize, padding } = getStyle(size);
 
@@ -78,7 +80,7 @@ export function Input({
           paddingTop: padding,
           paddingBottom: padding,
         }}
-        className={`${textSize} ${unstyled ? "" : "ring-2 ring-slate-200"} h-full w-full bg-slate-100 outline-none font-light rounded-md enabled:hover:ring-slate-400 enabled:hover:bg-slate-50 enabled:hover:rounded-xl focus:ring-slate-400 focus:bg-slate-50 focus:rounded-xl duration-300 ease-in-out`}
+        className={`${textSize} ${unstyled ? "" : "ring-2 ring-slate-200"} h-full w-full bg-slate-100 outline-none font-light rounded-md enabled:hover:ring-slate-400 enabled:hover:bg-slate-50 enabled:hover:rounded-xl focus:ring-slate-400 focus:bg-slate-50 focus:rounded-xl duration-300 ease-in-out ${className || ""}`}
       ></input>
       {rightSection && (
         <div

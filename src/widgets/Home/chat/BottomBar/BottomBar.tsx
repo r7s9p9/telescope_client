@@ -20,7 +20,7 @@ export function BottomBarWrapper({
 
 function BottomBarSpinner() {
   return (
-    <div className="shrink-0 h-24 w-full flex items-center justify-center border-x-2 border-slate-100 bg-slate-50">
+    <div className="shrink-0 h-24 w-full flex items-center justify-center border-l-2 border-slate-100 bg-slate-50">
       <Spinner size={64} />
     </div>
   );
@@ -32,7 +32,7 @@ function BottomBarNoMember({ roomId }: { roomId: RoomId }) {
   return (
     <>
       {!join.isLoading && (
-        <div className="shrink-0 relative h-24 w-full flex items-center justify-center border-x-2 border-slate-100 bg-slate-50">
+        <div className="shrink-0 relative h-24 w-full flex items-center justify-center border-l-2 border-slate-100 bg-slate-50">
           <Button
             title="Join room"
             size="md"
@@ -57,7 +57,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
   return (
     <>
       {editAction.editable?.isExist && (
-        <div className="w-full px-4 border-x-2 border-b-2 border-slate-100 bg-slate-50 flex flex-row items-center">
+        <div className="w-full px-4 border-l-2 border-b-2 border-slate-100 bg-slate-50 flex flex-row items-center">
           <IconEdit
             className="shrink-0 text-slate-400"
             strokeWidth="1"
@@ -79,7 +79,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           </IconButton>
         </div>
       )}
-      <div className="shrink-0 relative min-h-24 p-4 w-full flex items-center border-x-2 border-slate-100 bg-slate-50">
+      <div className="shrink-0 relative min-h-24 p-4 w-full flex items-center border-l-2 border-slate-100 bg-slate-50">
         <TextArea
           value={formData.text}
           setValue={(val) =>

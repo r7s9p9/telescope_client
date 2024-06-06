@@ -1,20 +1,15 @@
 import { useInfo } from "../useChat";
 import { Text } from "../../../../shared/ui/Text/Text";
-import {
-  IconDoorExit,
-  IconDotsVertical,
-  IconInfoCircle,
-} from "@tabler/icons-react";
+import { IconLayoutSidebarRightExpand } from "@tabler/icons-react";
 import { IconButton } from "../../../../shared/ui/IconButton/IconButton";
 import { useTopBar } from "./useTopBar";
-import { Button } from "../../../../shared/ui/Button/Button";
-import { Paper } from "../../../../shared/ui/Paper/Paper";
 
 export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
-  const { content, menu } = useTopBar(data);
+  const { content, openSideBar, closeSideBar, isSideBarExpanded } =
+    useTopBar(data);
 
   return (
-    <div className="w-full h-16 px-4 font-light flex justify-between items-center border-x-2 border-slate-100 bg-slate-50 select-none">
+    <div className="w-full h-16 px-4 font-light flex justify-between items-center border-l-2 border-slate-100 bg-slate-50 select-none">
       {!content.isInitialLoading && (
         <div className="flex items-center shrink-0">
           <div className="size-10 flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
@@ -33,7 +28,17 @@ export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
         </div>
       )}
       {content.isInitialLoading && <TopBarSkeleton />}
-      <TopBarMenu menu={menu} isMember={content.isMember} />
+      <IconButton
+        title={"Show more"}
+        onClick={isSideBarExpanded ? closeSideBar : openSideBar}
+        style={{ transform: isSideBarExpanded ? "rotate(180deg)" : "" }}
+      >
+        <IconLayoutSidebarRightExpand
+          className="text-slate-600"
+          strokeWidth="1"
+          size={32}
+        />
+      </IconButton>
     </div>
   );
 }
@@ -47,81 +52,5 @@ function TopBarSkeleton() {
         <div className="w-36 h-4 rounded-md bg-slate-200" />
       </div>
     </div>
-  );
-}
-
-function TopBarMenu({
-  menu,
-  isMember,
-}: {
-  menu: ReturnType<typeof useTopBar>["menu"];
-  isMember?: boolean;
-}) {
-  return (
-    <>
-      <IconButton
-        title={"Show more"}
-        buttonRef={menu.buttonRef}
-        onClick={menu.open}
-      >
-        <IconDotsVertical
-          className="text-slate-600"
-          strokeWidth="1"
-          size={32}
-        />
-      </IconButton>
-      <Paper
-        shadow="md"
-        style={{
-          opacity: menu.isOpened ? 1 : 0,
-          transform: menu.isOpened
-            ? "translateY(0%) scaleY(1)"
-            : "translateY(-50%) scaleY(0)",
-        }}
-        ref={menu.contentRef}
-        className="absolute z-10 flex flex-col items-center right-0 top-16 duration-300 ease-in-out border-t-2 rounded-b-lg"
-      >
-        <Button
-          title={"Info"}
-          size="md"
-          unstyled
-          padding={24}
-          className="w-32 hover:bg-slate-200"
-          onClick={() => menu.onClickHandler("info")}
-        >
-          <>
-            <IconInfoCircle
-              className=" text-slate-600"
-              strokeWidth="1.5"
-              size={24}
-            />
-            <Text size="md" font="default" className="text-slate-600">
-              Info
-            </Text>
-          </>
-        </Button>
-        {isMember && (
-          <Button
-            title={"Leave"}
-            size="md"
-            unstyled
-            padding={24}
-            className="w-32 rounded-b-lg hover:bg-slate-200"
-            onClick={() => menu.onClickHandler("leave")}
-          >
-            <>
-              <IconDoorExit
-                className="text-red-600"
-                strokeWidth="1.5"
-                size={24}
-              />
-              <Text size="md" font="default" className="text-red-600">
-                Leave
-              </Text>
-            </>
-          </Button>
-        )}
-      </Paper>
-    </>
   );
 }

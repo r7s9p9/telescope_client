@@ -1,8 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useInfo, useLoadInfo } from "../useChat";
-import { useQueryLeaveRoom } from "../../../../shared/api/api";
-import { useNavigate } from "react-router-dom";
-import { useLoadRooms } from "../../Rooms/useRooms";
+import { useInfo } from "../useChat";
+import { useLocation, useNavigate } from "react-router-dom";
 import { routes } from "../../../../constants";
 
 export function useTopBar(data: ReturnType<typeof useInfo>) {
@@ -24,69 +21,22 @@ export function useTopBar(data: ReturnType<typeof useInfo>) {
     description: `${data.info?.type} room, ${userCountStr}`,
   };
 
-  const [isMenuOpened, setIsMenuOpened] = useState(false);
-
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
-
-  const openMenu = () => {
-    setIsMenuOpened(true);
-  };
-
-  const closeMenu = () => {
-    setIsMenuOpened((isMenuOpened) => (isMenuOpened ? false : isMenuOpened));
-  };
-
-  const handleClickOutside = useCallback(
-    (event: MouseEvent) => {
-      if (
-        contentRef.current &&
-        buttonRef.current &&
-        !contentRef.current.contains(event.target as Node) &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        closeMenu();
-      }
-    },
-    [contentRef, buttonRef],
-  );
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const queryLeave = useQueryLeaveRoom();
   const navigate = useNavigate();
 
-  const loadRooms = useLoadRooms();
-  const loadInfo = useLoadInfo();
+  const { pathname } = useLocation();
 
-  async function onClickMenuHandler(type: "info" | "leave") {
-    if (type === "info") {
-      navigate({ pathname: routes.rooms.path + data.roomId + "/info" });
-    }
-    if (type === "leave") {
-      const { success } = await queryLeave.run(data.roomId);
-      if (success) {
-        loadRooms.run();
-        loadInfo.run();
-        navigate({ pathname: routes.rooms.path });
-      }
-    }
-  }
+  const openSideBar = () => {
+    navigate({ pathname: routes.rooms.path + data.roomId + "/info" });
+  };
+
+  const closeSideBar = () => {
+    navigate({ pathname: routes.rooms.path + data.roomId });
+  };
 
   return {
     content,
-    menu: {
-      buttonRef,
-      contentRef,
-      isOpened: isMenuOpened,
-      open: openMenu,
-      onClickHandler: onClickMenuHandler,
-    },
+    openSideBar,
+    closeSideBar,
+    isSideBarExpanded: pathname.includes("/info"),
   };
 }

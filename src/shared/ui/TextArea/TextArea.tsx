@@ -40,6 +40,7 @@ export function TextArea({
   rightSection,
   unstyled,
   disabled,
+  className,
 }: {
   minRows?: number;
   maxRows: number;
@@ -51,6 +52,7 @@ export function TextArea({
   rightSection?: ReactNode;
   unstyled?: boolean;
   disabled?: boolean;
+  className?: string;
 }) {
   const { height, padding, textSize } = getStyle(size);
 
@@ -113,7 +115,7 @@ export function TextArea({
           paddingBottom: padding,
           paddingTop: padding,
         }}
-        className={`${textSize} font-light ${unstyled ? "" : "ring-2 ring-slate-200"} resize-none h-full w-full outline-none bg-slate-100 rounded-md enabled:hover:ring-slate-400 enabled:hover:bg-slate-50 enabled:hover:rounded-xl focus:ring-slate-400 focus:bg-slate-50 focus:rounded-xl duration-300 ease-in-out`}
+        className={`${textSize} font-light ${unstyled ? "" : "ring-2 ring-slate-200"} resize-none h-full w-full outline-none bg-slate-100 rounded-md enabled:hover:ring-slate-400 enabled:hover:bg-slate-50 enabled:hover:rounded-xl focus:ring-slate-400 focus:bg-slate-50 focus:rounded-xl duration-300 ease-in-out ${className || ""}`}
       />
       <p
         // Defines the height of one line of the same font as <textarea />
