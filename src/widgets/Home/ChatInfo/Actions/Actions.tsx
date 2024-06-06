@@ -13,7 +13,7 @@ export function Actions() {
   } = useActions();
 
   return (
-    <div className="flex flex-col shrink-0 grow justify-end">
+    <div className="flex flex-col shrink-0 grow justify-end border-t-2 border-slate-100">
       <Button
         title="Copy link"
         size="md"
