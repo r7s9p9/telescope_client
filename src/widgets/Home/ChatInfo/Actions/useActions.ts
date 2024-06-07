@@ -8,7 +8,7 @@ import { useNotify } from "../../../Notification/Notification";
 import { useLoadRooms } from "../../Rooms/useRooms";
 import { useLocation } from "react-router-dom";
 import { useNavigate, useParams } from "react-router-dom";
-import { useLoadInfo } from "../../chat/useChat";
+import { useLoadInfo } from "../../Chat/useChat";
 import { routes } from "../../../../constants";
 
 export function useActions() {
@@ -21,7 +21,7 @@ export function useActions() {
   const loadRooms = useLoadRooms();
   const notify = useNotify();
 
-  async function handleLeaveClick() {
+  async function handleLeave() {
     const { success } = await queryLeave.run(roomId as RoomId);
     if (success) {
       loadRooms.run();
@@ -36,7 +36,7 @@ export function useActions() {
     }
   }
 
-  async function handleDeleteClick() {
+  async function handleDelete() {
     const { success } = await queryDelete.run(roomId as RoomId);
     if (success) {
       loadRooms.run();
@@ -51,7 +51,7 @@ export function useActions() {
     }
   }
 
-  function handleCopyClick() {
+  function handleCopy() {
     // TODO Fix
     navigator.clipboard.writeText(location.pathname as string);
     notify.show.info("Room link copied to clipboard");
@@ -65,9 +65,9 @@ export function useActions() {
   }, []);
 
   return {
-    handleLeaveClick,
-    handleDeleteClick,
-    handleCopyClick,
+    handleLeave,
+    handleDelete,
+    handleCopy,
     isMember: loadInfo.storedInfo?.isMember,
     isAdmin: loadInfo.storedInfo?.creatorId === "self",
   };

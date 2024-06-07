@@ -1,4 +1,5 @@
 import { NotifyStack } from "../widgets/Notification/Notification";
+import { PopupStack } from "../widgets/Popup/Popup";
 import { Link, Outlet } from "react-router-dom";
 import {
   IconMessageCircle,
@@ -13,6 +14,7 @@ export default function Home() {
   return (
     <div className="w-full h-full flex bg-slate-200">
       <NotifyStack />
+      <PopupStack />
       <LeftPanel />
       <Outlet />
     </div>

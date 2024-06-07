@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLoadInfo } from "../../chat/useChat";
+import { useLoadInfo } from "../../Chat/useChat";
 import {
   useQueryAccount,
   useQueryUpdateRoom,

@@ -11,7 +11,7 @@ import "./index.css";
 import Auth from "../pages/Auth.tsx";
 import { routes } from "../constants.ts";
 import { NotifyProvider } from "../widgets/Notification/Notification.tsx";
-import { Chat } from "../widgets/Home/chat/Chat.tsx";
+import { Chat } from "../widgets/Home/Chat/Chat.tsx";
 import { Rooms } from "../widgets/Home/Rooms/Rooms.tsx";
 import { StoreProvider } from "../shared/store/StoreProvider.tsx";
 import { ContextMenuProvider } from "../widgets/ContextMenu/ContextMenu.tsx";
@@ -19,6 +19,7 @@ import { CreateRoom } from "../widgets/Home/CreateRoom/CreateRoom.tsx";
 import { ChatInfo } from "../widgets/Home/ChatInfo/ChatInfo.tsx";
 import { Profile } from "../widgets/Home/Profile/Profile.tsx";
 import { WIP } from "../widgets/WIP/WIP.tsx";
+import { PopupProvider } from "../widgets/Popup/Popup.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -78,9 +79,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <StoreProvider>
       <NotifyProvider>
-        <ContextMenuProvider>
-          <RouterProvider router={router} />
-        </ContextMenuProvider>
+        <PopupProvider>
+          <ContextMenuProvider>
+            <RouterProvider router={router} />
+          </ContextMenuProvider>
+        </PopupProvider>
       </NotifyProvider>
     </StoreProvider>
   </React.StrictMode>,

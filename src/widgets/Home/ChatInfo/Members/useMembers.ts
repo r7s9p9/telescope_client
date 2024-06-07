@@ -4,7 +4,7 @@ import {
   useQueryGetMembers,
   useQueryKickMember,
 } from "../../../../shared/api/api";
-import { useLoadInfo } from "../../chat/useChat";
+import { useLoadInfo } from "../../Chat/useChat";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AccountReadType,
