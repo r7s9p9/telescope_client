@@ -6,17 +6,18 @@ import {
 } from "../../../../shared/api/api";
 import { useLoadInfo } from "../../Chat/useChat";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  AccountReadType,
-  RoomGetMembersType,
-} from "../../../../shared/api/api.schema";
+import { RoomGetMembersType } from "../../../../shared/api/api.schema";
 import { debounce } from "../../../../shared/lib/debounce";
 import { routes } from "../../../../constants";
-import { RoomId } from "../../../../types";
+import { RoomId, UserId } from "../../../../types";
 import { useMenuContext } from "../../../ContextMenu/ContextMenu";
 import { useNotify } from "../../../Notification/Notification";
 
 const DEBOUNCE_SCROLL_INTERVAL = 200;
+
+// TODO
+// !!! Move members to store !!!
+// TODO
 
 export function useMembers() {
   const { roomId } = useParams();
@@ -51,7 +52,7 @@ export function useMembers() {
   );
 
   useEffect(() => {
-    getMembers();
+    if (!data?.users) getMembers();
     if (!info.storedInfo) info.run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -66,6 +67,7 @@ export function useMembers() {
   );
 
   return {
+    roomId,
     getMembers,
     listRef,
     debouncedHandleScroll,
@@ -76,10 +78,8 @@ export function useMembers() {
 }
 
 export function useMember({
-  data,
   getMembers,
 }: {
-  data: AccountReadType;
   getMembers: ReturnType<typeof useMembers>["getMembers"];
 }) {
   const { openMenu, closeMenu } = useMenuContext();
@@ -90,68 +90,79 @@ export function useMember({
   const kickQuery = useQueryKickMember();
   const banQuery = useQueryBanMember();
 
-  async function onClickMenuHandler(type: "profile" | "copy" | "kick" | "ban") {
-    if (type === "profile") {
+  function onClickMenuHandler() {
+    const profile = (userId: string) => {
       // TODO Pages for another users
-      if (data.targetUserId === "self") navigate(routes.profile.path);
-    }
-    if (type === "copy") {
-      navigator.clipboard.writeText(data?.general?.username as string);
+      if (userId === "self") navigate(routes.profile.path);
+      closeMenu();
+    };
+    const copy = (username: string) => {
+      navigator.clipboard.writeText(username as string);
       notify.show.info("Username copied to clipboard");
-    }
-    if (type === "kick" && data.targetUserId !== "self") {
-      const result = await kickQuery.run(roomId as RoomId, data.targetUserId);
-      if (!result.success) {
-        notify.show.error(
-          "Invalid response from the server. Please try again later",
-        );
-        return;
+      closeMenu();
+    };
+    const kick = async (userId: string, username: string) => {
+      if (userId !== "self") {
+        const result = await kickQuery.run(roomId as RoomId, userId as UserId);
+        if (!result.success) {
+          notify.show.error(
+            "Invalid response from the server. Please try again later",
+          );
+          closeMenu();
+          return;
+        }
+        if (!result.data.access) {
+          notify.show.error("You don't have enough rights");
+          closeMenu();
+          return;
+        }
+        if (!result.data.success) {
+          notify.show.error(
+            `User ${username} cannot be kicked. Perhaps he is no longer a member of the room`,
+          );
+          closeMenu();
+          return;
+        }
+        if (result.data.success) {
+          notify.show.info(
+            `User ${username} successfully kicked out of the room`,
+          );
+          getMembers();
+          closeMenu();
+          return;
+        }
       }
-      if (!result.data.access) {
-        notify.show.error("You don't have enough rights");
-        return;
+    };
+    const ban = async (userId: string, username: string) => {
+      if (userId !== "self") {
+        const result = await banQuery.run(roomId as RoomId, userId as UserId);
+        if (!result.success) {
+          notify.show.error(
+            "Invalid response from the server. Please try again later",
+          );
+          return;
+        }
+        if (!result.data.access) {
+          notify.show.error("You don't have enough rights");
+          return;
+        }
+        if (!result.data.success) {
+          notify.show.error(
+            `User ${username} cannot be banned. Perhaps he is no longer a member of the room`,
+          );
+          return;
+        }
+        if (result.data.success) {
+          notify.show.info(
+            `User ${username} successfully banned from this room`,
+          );
+          getMembers();
+          return;
+        }
       }
-      if (!result.data.success) {
-        notify.show.error(
-          `User ${data.general?.username} cannot be kicked. Perhaps he is no longer a member of the room`,
-        );
-        return;
-      }
-      if (result.data.success) {
-        notify.show.info(
-          `User ${data.general?.username} successfully kicked out of the room`,
-        );
-        getMembers();
-        return;
-      }
-    }
-    if (type === "ban" && data.targetUserId !== "self") {
-      const result = await banQuery.run(roomId as RoomId, data.targetUserId);
-      if (!result.success) {
-        notify.show.error(
-          "Invalid response from the server. Please try again later",
-        );
-        return;
-      }
-      if (!result.data.access) {
-        notify.show.error("You don't have enough rights");
-        return;
-      }
-      if (!result.data.success) {
-        notify.show.error(
-          `User ${data.general?.username} cannot be banned. Perhaps he is no longer a member of the room`,
-        );
-        return;
-      }
-      if (result.data.success) {
-        notify.show.info(
-          `User ${data.general?.username} successfully banned from this room`,
-        );
-        getMembers();
-        return;
-      }
-    }
-    closeMenu();
+      closeMenu();
+    };
+    return { profile, copy, kick, ban };
   }
 
   return { openMenu, onClickMenuHandler };

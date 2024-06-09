@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Overlay } from "../../shared/ui/Overlay/Overlay";
 
 const PopupContext = createContext({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -44,7 +45,7 @@ export const PopupStack = () => {
   const { hide } = useContext(PopupContext);
 
   const overlayRef = useRef<HTMLDivElement>(null);
-  const targetRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -52,8 +53,8 @@ export const PopupStack = () => {
         data.isShow &&
         overlayRef.current &&
         overlayRef.current.contains(event.target as Node) &&
-        targetRef.current &&
-        !targetRef.current.contains(event.target as Node)
+        contentRef.current &&
+        !contentRef.current.contains(event.target as Node)
       ) {
         hide();
       }
@@ -64,14 +65,13 @@ export const PopupStack = () => {
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, [data, hide, targetRef]);
+  }, [data, hide, contentRef]);
 
   return (
-    <div
-      ref={overlayRef}
-      className={`${data.isShow ? "opacity-100 z-10" : "hidden"} absolute w-screen h-screen flex justify-center items-center backdrop-blur-sm bg-opacity-50 bg-gray-600`}
-    >
-      {data.isShow && <div ref={targetRef}>{data.content}</div>}
-    </div>
+    data.isShow && (
+      <Overlay overlayRef={overlayRef} contentRef={contentRef}>
+        {data.content}
+      </Overlay>
+    )
   );
 };

@@ -22,11 +22,11 @@ export function ConfirmPopup({
       <Text
         size="md"
         font="light"
-        className="mt-2 mb-4 max-w-72 text-justify select-none"
+        className="mt-2 mb-4 max-w-72 text-center select-none"
       >
         {text}
       </Text>
-      <div className="flex justify-between items-between gap-8">
+      <div className="w-full flex justify-between items-between gap-8">
         <Button
           size="md"
           title="yes"

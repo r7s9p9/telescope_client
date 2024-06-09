@@ -16,9 +16,12 @@ import {
 } from "@tabler/icons-react";
 import { Paper } from "../../../../shared/ui/Paper/Paper";
 import { Button } from "../../../../shared/ui/Button/Button";
+import { Link } from "react-router-dom";
+import { routes } from "../../../../constants";
 
 export function Members() {
   const {
+    roomId,
     getMembers,
     listRef,
     debouncedHandleScroll,
@@ -31,7 +34,7 @@ export function Members() {
   if (isLoading && !data?.users) {
     members = (
       <MembersListWrapper>
-        <Spinner size={128} className="self-center mt-8" />
+        <Spinner size={128} className="self-center" />
       </MembersListWrapper>
     );
   } else if (data?.isEmpty || !data?.users) {
@@ -65,8 +68,28 @@ export function Members() {
           <IconButton title="Refresh members" onClick={() => getMembers()}>
             <IconRefresh className="text-slate-600" strokeWidth="2" size={24} />
           </IconButton>
-          {isAdmin && <BlockedUsers />}
-          {isAdmin && <InviteButton />}
+          {isAdmin && (
+            <>
+              <Link to={routes.rooms.path + roomId + "/info/blocked"}>
+                <IconButton title="Blocked users">
+                  <IconUserCancel
+                    className="text-slate-600"
+                    strokeWidth="2"
+                    size={24}
+                  />
+                </IconButton>
+              </Link>
+              <Link to={routes.rooms.path + roomId + "/info/invite"}>
+                <IconButton title="Invite users">
+                  <IconPlus
+                    className="text-slate-600"
+                    strokeWidth="2"
+                    size={24}
+                  />
+                </IconButton>
+              </Link>
+            </>
+          )}
         </div>
       </div>
       {members}
@@ -87,7 +110,7 @@ function MembersListWrapper({
     <ul
       onScroll={onScroll}
       ref={listRef}
-      className="w-full p-4 overflow-scroll overscroll-none flex flex-col gap-2"
+      className="w-full grow p-4 overflow-scroll overscroll-none flex flex-col gap-2"
     >
       {children}
     </ul>
@@ -96,7 +119,7 @@ function MembersListWrapper({
 
 function NoMembers() {
   return (
-    <Text size="md" font="light" className="text-center">
+    <Text size="md" font="light" className="text-center select-none">
       There are no members in this room yet
     </Text>
   );
@@ -112,7 +135,6 @@ function Member({
   getMembers: ReturnType<typeof useMembers>["getMembers"];
 }) {
   const { openMenu, onClickMenuHandler } = useMember({
-    data,
     getMembers,
   });
 
@@ -138,6 +160,7 @@ function Member({
       <MemberContextMenu
         isYou={data.targetUserId === "self"}
         isAdmin={isAdmin}
+        data={data}
         onClick={onClickMenuHandler}
       />,
     );
@@ -185,10 +208,12 @@ function Member({
 function MemberContextMenu({
   isYou,
   isAdmin,
+  data,
   onClick,
 }: {
   isYou: boolean;
   isAdmin: boolean;
+  data: AccountReadType;
   onClick: ReturnType<typeof useMember>["onClickMenuHandler"];
 }) {
   return (
@@ -199,7 +224,7 @@ function MemberContextMenu({
         unstyled
         padding={24}
         className="hover:bg-slate-200 rounded-t-lg gap-4"
-        onClick={() => onClick("profile")}
+        onClick={() => onClick().profile(data.targetUserId)}
       >
         <>
           <IconUserScan
@@ -218,7 +243,7 @@ function MemberContextMenu({
         unstyled
         padding={24}
         className={`hover:bg-slate-200 ${!isAdmin || isYou ? "rounded-b-lg" : ""} gap-4`}
-        onClick={() => onClick("copy")}
+        onClick={() => onClick().copy(data.general?.username as string)}
       >
         <>
           <IconCopy className="text-slate-600" strokeWidth="1.5" size={24} />
@@ -235,7 +260,12 @@ function MemberContextMenu({
             unstyled
             padding={24}
             className="w-54 hover:bg-slate-200"
-            onClick={() => onClick("kick")}
+            onClick={() =>
+              onClick().kick(
+                data.targetUserId,
+                data.general?.username as string,
+              )
+            }
           >
             <>
               <IconKarate
@@ -255,7 +285,9 @@ function MemberContextMenu({
             unstyled
             padding={24}
             className="w-54 hover:bg-slate-200 rounded-b-lg"
-            onClick={() => onClick("ban")}
+            onClick={() =>
+              onClick().ban(data.targetUserId, data.general?.username as string)
+            }
           >
             <>
               <IconBan className="text-red-600" strokeWidth="1.5" size={24} />
@@ -267,21 +299,5 @@ function MemberContextMenu({
         </>
       )}
     </Paper>
-  );
-}
-
-function BlockedUsers() {
-  return (
-    <IconButton title="Blocked users">
-      <IconUserCancel className="text-slate-600" strokeWidth="2" size={24} />
-    </IconButton>
-  );
-}
-
-function InviteButton() {
-  return (
-    <IconButton title="Invite users">
-      <IconPlus className="text-slate-600" strokeWidth="2" size={24} />
-    </IconButton>
   );
 }

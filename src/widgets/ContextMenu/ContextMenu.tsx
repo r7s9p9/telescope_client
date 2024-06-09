@@ -91,7 +91,12 @@ export const ContextMenuProvider = ({
 
     // Prevent opening stock context menu in this context menu
     const handleContextMenu = (event: MouseEvent) => {
-      event.preventDefault();
+      if (
+        targetRef.current &&
+        targetRef.current.contains(event.target as Node)
+      ) {
+        event.preventDefault();
+      }
     };
 
     document.addEventListener("click", handleClickOutside);
@@ -119,7 +124,7 @@ export const ContextMenuProvider = ({
             left: data.position.x,
             top: data.position.y,
           }}
-          className="absolute"
+          className="absolute z-50"
         >
           {data.content}
         </div>

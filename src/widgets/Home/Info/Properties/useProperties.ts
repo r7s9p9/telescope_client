@@ -8,7 +8,7 @@ import { RoomInfoUpdate } from "../../../../shared/api/api.schema";
 import { checkUserId } from "../../../../shared/lib/uuid";
 import { UserId } from "../../../../types";
 
-export function useInfo() {
+export function useProperties() {
   const { run, roomId, storedInfo } = useLoadInfo();
   const queryAccount = useQueryAccount();
 

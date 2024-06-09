@@ -16,10 +16,12 @@ import { Rooms } from "../widgets/Home/Rooms/Rooms.tsx";
 import { StoreProvider } from "../shared/store/StoreProvider.tsx";
 import { ContextMenuProvider } from "../widgets/ContextMenu/ContextMenu.tsx";
 import { CreateRoom } from "../widgets/Home/CreateRoom/CreateRoom.tsx";
-import { ChatInfo } from "../widgets/Home/ChatInfo/ChatInfo.tsx";
+import { ChatInfo } from "../widgets/Home/Info/Info.tsx";
 import { Profile } from "../widgets/Home/Profile/Profile.tsx";
 import { WIP } from "../widgets/WIP/WIP.tsx";
 import { PopupProvider } from "../widgets/Popup/Popup.tsx";
+import { BlockedUsers } from "../widgets/Home/Info/Members/Blocked/Blocked.tsx";
+import { InviteUsers } from "../widgets/Home/Info/Members/Invite/Invite.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -57,7 +59,18 @@ const router = createBrowserRouter(
               path={routes.chatInfo.path}
               id={routes.chatInfo.id}
               element={<ChatInfo />}
-            />
+            >
+              <Route
+                path={routes.chatBlocked.path}
+                id={routes.chatBlocked.id}
+                element={<BlockedUsers />}
+              />
+              <Route
+                path={routes.chatInvite.path}
+                id={routes.chatInvite.id}
+                element={<InviteUsers />}
+              />
+            </Route>
           </Route>
         </Route>
         <Route

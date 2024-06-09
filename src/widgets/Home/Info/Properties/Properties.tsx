@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Text } from "../../../../shared/ui/Text/Text";
-import { useInfo } from "./useInfo";
+import { useProperties } from "./useProperties";
 import { Paper } from "../../../../shared/ui/Paper/Paper";
 import { Input } from "../../../../shared/ui/Input/Input";
 import { TextArea } from "../../../../shared/ui/TextArea/TextArea";
@@ -21,7 +21,7 @@ function InfoLine({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-export function Info() {
+export function Properties() {
   const {
     handleEditClick,
     isEdit,
@@ -30,7 +30,7 @@ export function Info() {
     creatorUsername,
     isInitialLoading,
     isAdmin,
-  } = useInfo();
+  } = useProperties();
 
   return (
     <Paper

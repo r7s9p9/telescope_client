@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { routes } from "../../../constants";
 
-export function useMain() {
+export function useInfo() {
   const { roomId } = useParams();
   const navigate = useNavigate();
 

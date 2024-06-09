@@ -64,6 +64,10 @@ export const serverRoute = {
     getMembers: endpoint + "/api/room/members",
     kick: endpoint + "/api/room/kick",
     ban: endpoint + "/api/room/block",
+    unban: endpoint + "/api/room/unblock",
+    blockedUsers: endpoint + "/api/room/blocked-users",
+    searchUsersToInvite: endpoint + "/api/room/search-users-to-invite",
+    invite: endpoint + "/api/room/invite",
   },
   message: {
     read: endpoint + "/api/message/read",

@@ -330,6 +330,16 @@ export const roomGetMembersSchema = z.object({
 
 export type RoomGetMembersType = z.infer<typeof roomGetMembersSchema>;
 
+export const roomBlockedUsersSchema = z.object({
+  success: z.boolean(),
+  access: z.boolean(),
+  isEmpty: z.boolean(),
+  roomId: roomIdSchema,
+  users: accountReadSchema.array().optional(),
+});
+
+export type RoomBlockedUsersType = z.infer<typeof roomBlockedUsersSchema>;
+
 export const searchRoomsSchema = z
   .object({
     success: z.boolean(),
@@ -364,3 +374,28 @@ export const roomBanMemberSchema = z.object({
 });
 
 export type RoomBanMemberType = z.infer<typeof roomBanMemberSchema>;
+
+export const roomUnbanUserSchema = z.object({
+  success: z.boolean(),
+  access: z.boolean(),
+});
+
+export type RoomUnbanUserType = z.infer<typeof roomUnbanUserSchema>;
+
+export const roomSearchUsersToInviteSchema = z.object({
+  success: z.boolean(),
+  access: z.boolean(),
+  isEmpty: z.boolean().optional(),
+  users: accountReadSchema.array().optional(),
+});
+
+export type RoomSearchUsersToInviteType = z.infer<
+  typeof roomSearchUsersToInviteSchema
+>;
+
+export const roomInviteUserSchema = z.object({
+  success: z.boolean(),
+  access: z.boolean(),
+});
+
+export type RoomInviteUserType = z.infer<typeof roomInviteUserSchema>;

@@ -1,31 +1,31 @@
 import { IconX } from "@tabler/icons-react";
-import { useMain } from "./useChatInfo";
+import { useInfo } from "./useInfo";
 import { IconButton } from "../../../shared/ui/IconButton/IconButton";
 import { Text } from "../../../shared/ui/Text/Text";
 import { Paper } from "../../../shared/ui/Paper/Paper";
 
-import { Info } from "./Info/Info";
+import { Properties } from "./Properties/Properties";
 import { Members } from "./Members/Members";
 import { Actions } from "./Actions/Actions";
+import { Outlet } from "react-router-dom";
 
 export function ChatInfo() {
-  const { handleCloseClick } = useMain();
-
   return (
-    <Paper className="flex flex-col border-l-2 border-slate-100 bg-slate-50">
-      <Title handleCloseClick={handleCloseClick} />
-      <Info />
-      <Members />
-      <Actions />
-    </Paper>
+    <>
+      <Paper className="flex flex-col border-l-2 border-slate-100 bg-slate-50">
+        <Title />
+        <Properties />
+        <Members />
+        <Actions />
+      </Paper>
+      <Outlet />
+    </>
   );
 }
 
-function Title({
-  handleCloseClick,
-}: {
-  handleCloseClick: ReturnType<typeof useMain>["handleCloseClick"];
-}) {
+function Title() {
+  const { handleCloseClick } = useInfo();
+
   return (
     <Paper
       padding={4}

@@ -9,6 +9,14 @@ export const routes = {
   createRoom: { path: "/rooms/create" as const, id: "createRoom" as const },
   chat: { path: "/rooms/:roomId" as const, id: "chat" as const },
   chatInfo: { path: "/rooms/:roomId/info" as const, id: "roomInfo" as const },
+  chatBlocked: {
+    path: "/rooms/:roomId/info/blocked" as const,
+    id: "roomBlocked" as const,
+  },
+  chatInvite: {
+    path: "/rooms/:roomId/info/invite" as const,
+    id: "roomInvite" as const,
+  },
 
   friends: { path: "/friends/" as const, id: "friends" as const },
   settings: { path: "/settings/" as const, id: "settings" as const },

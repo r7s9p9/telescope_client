@@ -59,6 +59,14 @@ import {
   RoomBanMemberType,
   roomKickMemberSchema,
   roomBanMemberSchema,
+  roomBlockedUsersSchema,
+  RoomBlockedUsersType,
+  roomUnbanUserSchema,
+  RoomUnbanUserType,
+  roomSearchUsersToInviteSchema,
+  RoomSearchUsersToInviteType,
+  roomInviteUserSchema,
+  RoomInviteUserType,
 } from "./api.schema";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
@@ -506,6 +514,79 @@ export function useQueryBanMember() {
     });
     if (!success) return { success: false as const };
     return { success: true as const, data: response as RoomBanMemberType };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryUnbanUserInRoom() {
+  const query = useQuery({ schema: roomUnbanUserSchema });
+
+  const run = async (roomId: RoomId, userId: UserId) => {
+    const { success, response } = await query.run(serverRoute.room.unban, {
+      roomId,
+      userIds: [userId],
+    });
+    if (!success) return { success: false as const };
+    return { success: true as const, data: response as RoomUnbanUserType };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryGetBlockedUsersInRoom() {
+  const query = useQuery({ schema: roomBlockedUsersSchema });
+
+  const run = async (roomId: RoomId) => {
+    const { success, response } = await query.run(
+      serverRoute.room.blockedUsers,
+      {
+        roomId,
+      },
+    );
+    if (!success) return { success: false as const };
+    return { success: true as const, data: response as RoomBlockedUsersType };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQuerySearchUsersToInvite() {
+  const query = useQuery({ schema: roomSearchUsersToInviteSchema });
+
+  const run = async (roomId: RoomId, q: string, limit = 10, offset = 0) => {
+    const { success, response } = await query.run(
+      serverRoute.room.searchUsersToInvite,
+      {
+        roomId,
+        limit,
+        offset,
+        q,
+      },
+    );
+    if (!success) return { success: false as const };
+    return {
+      success: true as const,
+      data: response as RoomSearchUsersToInviteType,
+    };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryInviteUser() {
+  const query = useQuery({ schema: roomInviteUserSchema });
+
+  const run = async (roomId: RoomId, userId: UserId) => {
+    const { success, response } = await query.run(serverRoute.room.invite, {
+      roomId,
+      userIds: [userId],
+    });
+    if (!success) return { success: false as const };
+    return {
+      success: true as const,
+      data: response as RoomInviteUserType,
+    };
   };
 
   return { run, isLoading: query.isLoading };
