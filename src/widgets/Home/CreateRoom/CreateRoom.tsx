@@ -25,7 +25,7 @@ export function CreateRoom() {
         padding={4}
         rounded="xl"
         shadow="xl"
-        className="w-2/3 flex flex-col bg-slate-50"
+        className="w-3/4 min-w-[350px] max-w-[650px] flex flex-col bg-slate-50"
       >
         <div className="flex justify-between items-center">
           <Text size="xl" font="light" letterSpacing className="self-center">
@@ -119,20 +119,19 @@ export function CreateRoom() {
             />
           }
         />
-        <div className="mt-4 w-full flex justify-end items-center">
-          <Button title="Create room" size="md" onClick={run}>
-            <>
-              <IconStar
-                className="text-slate-500"
-                strokeWidth="1.5"
-                size={24}
-              />
-              <Text size="md" font="light">
-                Create
-              </Text>
-            </>
-          </Button>
-        </div>
+        <Button
+          title="Create room"
+          size="md"
+          onClick={run}
+          className="w-32 self-end mt-4 justify-center"
+        >
+          <>
+            <IconStar className="text-slate-500" strokeWidth="1.5" size={24} />
+            <Text size="md" font="light">
+              Create
+            </Text>
+          </>
+        </Button>
       </Paper>
     </div>
   );

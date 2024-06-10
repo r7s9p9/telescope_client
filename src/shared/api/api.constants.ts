@@ -1,5 +1,10 @@
 import { RoomId, UserId } from "../../types";
-import { MessageDates, MessageType, SendMessageFormType } from "./api.schema";
+import {
+  AccountReadType,
+  MessageDates,
+  MessageType,
+  SendMessageFormType,
+} from "./api.schema";
 
 export const privacyRule = {
   everybody: "everybody" as const,
@@ -83,6 +88,18 @@ export const readAccountBody = (userId: UserId | "self") => {
     userId: userId,
     toRead: {
       general: ["username", "name", "bio"],
+    },
+  };
+};
+
+export const updateAccountBody = (
+  general?: Omit<AccountReadType["general"], "lastSeen">,
+  privacy?: Omit<AccountReadType["privacy"], "lastSeen">,
+) => {
+  return {
+    toUpdate: {
+      general,
+      privacy,
     },
   };
 };

@@ -9,6 +9,7 @@ import {
   readRoomList,
   sendMessage,
   serverRoute,
+  updateAccountBody,
   updateMessage,
 } from "./api.constants";
 import {
@@ -67,6 +68,8 @@ import {
   RoomSearchUsersToInviteType,
   roomInviteUserSchema,
   RoomInviteUserType,
+  accountUpdateSchema,
+  AccountUpdateType,
 } from "./api.schema";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
@@ -162,7 +165,6 @@ export function useQuery({ schema }: { schema: z.ZodTypeAny }) {
   return { isLoading, run };
 }
 
-// TODO make request validation factory
 function updateRoomValidator(payload: object) {
   const result = roomUpdateInfoSchema.safeParse(payload);
   if (!result.success) return { success: false as const, error: result.error };
@@ -240,6 +242,24 @@ export function useQueryAccount() {
     );
     if (!success) return { success: false as const };
     return { success: true as const, data: response as AccountReadType };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryUpdateAccount() {
+  const query = useQuery({ schema: accountUpdateSchema });
+
+  const run = async (
+    general?: Omit<AccountReadType["general"], "lastSeen">,
+    privacy?: Omit<AccountReadType["privacy"], "lastSeen">,
+  ) => {
+    const { success, response } = await query.run(
+      serverRoute.account.update,
+      updateAccountBody(general, privacy),
+    );
+    if (!success) return { success: false as const };
+    return { success: true as const, data: response as AccountUpdateType };
   };
 
   return { run, isLoading: query.isLoading };

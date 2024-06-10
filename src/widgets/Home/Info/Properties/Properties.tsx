@@ -10,13 +10,24 @@ import { IconCheck, IconEdit, IconX } from "@tabler/icons-react";
 import { formatDate } from "../../../../shared/lib/date";
 import { Spinner } from "../../../../shared/ui/Spinner/Spinner";
 
-function InfoLine({ label, children }: { label: string; children: ReactNode }) {
+function InfoLine({
+  label,
+  isLoading,
+  children,
+}: {
+  label: string;
+  isLoading: boolean;
+  children: ReactNode;
+}) {
   return (
-    <div className="h-8 flex items-center">
-      <Text size="sm" font="default" className="min-w-14">
+    <div className="h-8 w-full flex items-center">
+      <Text size="sm" font="default" className="min-w-14 select-none">
         {label}:
       </Text>
-      {children}
+      {isLoading && (
+        <div className="h-6 w-full rounded-lg bg-slate-100 animate-pulse" />
+      )}
+      {!isLoading && children}
     </div>
   );
 }
@@ -37,73 +48,63 @@ export function Properties() {
       padding={4}
       className="relative bg-slate-50 border-t-2 border-slate-100"
     >
-      {isInitialLoading && <InfoSkeleton />}
-      {!isInitialLoading && (
-        <>
-          <div className="flex flex-col gap-2 items-start w-full pr-24">
-            <InfoLine label="Name">
-              <Input
-                value={editable.name}
-                setValue={(val) => editable.setName(val)}
-                disabled={!isEdit}
-                unstyled={!isEdit}
-                size="sm"
-                className="bg-slate-50"
-              />
-            </InfoLine>
-            <InfoLine label="About">
-              <TextArea
-                size="sm"
-                minRows={1}
-                maxRows={4}
-                value={editable.about}
-                setValue={(val) => editable.setAbout(val)}
-                disabled={!isEdit}
-                unstyled={!isEdit}
-                className="bg-slate-50"
-              />
-            </InfoLine>
-            <InfoLine label="Type">
-              <Select
-                value={editable.type}
-                setValue={(val) =>
-                  editable.setType(val as "public" | "private" | "single")
-                }
-                disabled={!isEdit}
-                unstyled={!isEdit}
-                size="sm"
-                className="bg-slate-50"
-              >
-                <option value="public">Public</option>
-                <option value="private">Private</option>
-                <option value="single">Single</option>
-              </Select>
-            </InfoLine>
-            <InfoLine label="Creator">
-              {creatorUsername && (
-                <Text size="sm" font="light" className="ml-2">
-                  {creatorUsername}
-                </Text>
-              )}
-              {!creatorUsername && <Spinner size={16} className="ml-2" />}
-            </InfoLine>
-            <InfoLine label="Created">
-              <Text size="sm" font="light" className="ml-2">
-                {formatDate().info(storedInfo?.created as number)}
-              </Text>
-            </InfoLine>
-          </div>
-          {isAdmin && (
-            <EditGroup handleClick={handleEditClick} isEdit={isEdit} />
+      <div className="flex flex-col gap-2 items-start w-full pr-24">
+        <InfoLine isLoading={isInitialLoading} label="Name">
+          <Input
+            value={editable.name}
+            setValue={(val) => editable.setName(val)}
+            disabled={!isEdit}
+            unstyled={!isEdit}
+            size="sm"
+            className="bg-slate-50"
+          />
+        </InfoLine>
+        <InfoLine isLoading={isInitialLoading} label="About">
+          <TextArea
+            size="sm"
+            minRows={1}
+            maxRows={4}
+            value={editable.about}
+            setValue={(val) => editable.setAbout(val)}
+            disabled={!isEdit}
+            unstyled={!isEdit}
+            className="bg-slate-50"
+          />
+        </InfoLine>
+        <InfoLine isLoading={isInitialLoading} label="Type">
+          <Select
+            value={editable.type}
+            setValue={(val) =>
+              editable.setType(val as "public" | "private" | "single")
+            }
+            disabled={!isEdit}
+            unstyled={!isEdit}
+            size="sm"
+            className="bg-slate-50"
+          >
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+            <option value="single">Single</option>
+          </Select>
+        </InfoLine>
+        <InfoLine isLoading={isInitialLoading} label="Creator">
+          {creatorUsername && (
+            <Text size="sm" font="light" className="ml-2">
+              {creatorUsername}
+            </Text>
           )}
-        </>
-      )}
+          {!creatorUsername && <Spinner size={16} className="ml-2" />}
+        </InfoLine>
+        <InfoLine isLoading={isInitialLoading} label="Created">
+          <Text size="sm" font="light" className="ml-2">
+            {storedInfo?.created &&
+              formatDate().info(storedInfo?.created as number)}
+          </Text>
+        </InfoLine>
+      </div>
+      {isAdmin && <EditGroup handleClick={handleEditClick} isEdit={isEdit} />}
     </Paper>
   );
-}
-
-function InfoSkeleton() {
-  return <div className="w-full h-52 rounded-lg bg-slate-100 animate-pulse" />;
 }
 
 function EditGroup({

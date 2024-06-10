@@ -122,6 +122,21 @@ export const accountReadSchema = z.object({
 
 export type AccountReadType = z.infer<typeof accountReadSchema>;
 
+export const accountUpdateSchema = z.object({
+  general: z
+    .object({
+      success: z.boolean(),
+    })
+    .optional(),
+  privacy: z
+    .object({
+      success: z.boolean(),
+    })
+    .optional(),
+});
+
+export type AccountUpdateType = z.infer<typeof accountUpdateSchema>;
+
 export const logoutSchema = z.object({
   success: z.boolean(),
 });
