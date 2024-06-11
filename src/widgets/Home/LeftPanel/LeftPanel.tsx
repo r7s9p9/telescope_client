@@ -1,27 +1,14 @@
-import { NotifyStack } from "../widgets/Notification/Notification";
-import { PopupStack } from "../widgets/Popup/Popup";
-import { Link, Outlet } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { IconButton } from "../../../shared/ui/IconButton/IconButton";
 import {
   IconMessageCircle,
   IconSettings,
   IconUserCircle,
   IconUsersGroup,
 } from "@tabler/icons-react";
-import { routes } from "../constants";
-import { IconButton } from "../shared/ui/IconButton/IconButton";
+import { routes } from "../../../constants";
 
-export default function Home() {
-  return (
-    <div className="w-full h-full flex bg-slate-200">
-      <NotifyStack />
-      <PopupStack />
-      <LeftPanel />
-      <Outlet />
-    </div>
-  );
-}
-
-function LeftPanel() {
+export function LeftPanel() {
   return (
     <div className="shrink-0 h-full bg-slate-600 px-2 flex flex-col items-center gap-2">
       <Link to={routes.profile.path}>

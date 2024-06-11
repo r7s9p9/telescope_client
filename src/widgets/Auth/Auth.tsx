@@ -1,5 +1,5 @@
 import { Dispatch, ReactNode } from "react";
-import { NotifyStack } from "../widgets/Notification/Notification";
+import { NotifyStack } from "../Notification/Notification";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IconKey, IconMail, IconSend2, IconUser } from "@tabler/icons-react";
@@ -8,20 +8,20 @@ import {
   emailSchema,
   passwordSchema,
   usernameSchema,
-} from "../shared/api/api.schema";
+} from "../../shared/api/api.schema";
 import {
   useQueryCode,
   useQueryLogin,
   useQueryRegister,
-} from "../shared/api/api";
-import { routes } from "../constants";
-import { useNotify } from "../widgets/Notification/Notification";
-import { Spinner } from "../shared/ui/Spinner/Spinner";
-import { Text } from "../shared/ui/Text/Text";
-import { Paper } from "../shared/ui/Paper/Paper";
-import { InputField } from "../shared/ui/InputField/InputField";
-import { env } from "../shared/lib/env";
-import { Button } from "../shared/ui/Button/Button";
+} from "../../shared/api/api";
+import { routes } from "../../constants";
+import { useNotify } from "../Notification/Notification";
+import { Spinner } from "../../shared/ui/Spinner/Spinner";
+import { Text } from "../../shared/ui/Text/Text";
+import { Paper } from "../../shared/ui/Paper/Paper";
+import { InputField } from "../../shared/ui/InputField/InputField";
+import { env } from "../../shared/lib/env";
+import { Button } from "../../shared/ui/Button/Button";
 
 const message = {
   loggedOut:

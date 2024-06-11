@@ -7,8 +7,8 @@ export function WIP() {
     <div className="w-full h-full flex items-center justify-center">
       <Paper
         padding={4}
-        rounded="lg"
-        shadow="md"
+        rounded="xl"
+        shadow="xl"
         className="flex gap-2 items-center"
       >
         <IconAlertTriangle
