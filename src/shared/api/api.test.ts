@@ -1,7 +1,10 @@
 import { describe, expect, test } from "vitest";
 import { fetcher, useQuery } from "./api";
 import { serverRoute } from "./api.constants";
-import { accountReadSchema } from "./api.schema";
+import {
+  readAccountRequestSchema,
+  readAccountResponseSchema,
+} from "./api.schema";
 import { customRenderHook } from "../../../test/render";
 import { serverResponse } from "../../../test/mocks/constants";
 
@@ -69,12 +72,17 @@ describe("fetcher", () => {
 });
 
 describe("useQuery", () => {
+  // TODO add real-like requests
   test("Receiving data", async () => {
     const {
       result: {
         current: { isLoading, run },
       },
-    } = customRenderHook(() => useQuery({ schema: accountReadSchema }));
+    } = customRenderHook(() =>
+      useQuery({
+        responseSchema: readAccountResponseSchema,
+      }),
+    );
 
     expect(isLoading).toBeFalsy();
     const { success, response } = await run(serverRoute.account.read, {});
@@ -88,7 +96,12 @@ describe("useQuery", () => {
       result: {
         current: { isLoading, run },
       },
-    } = customRenderHook(() => useQuery({ schema: accountReadSchema }));
+    } = customRenderHook(() =>
+      useQuery({
+        requestSchema: readAccountRequestSchema,
+        responseSchema: readAccountResponseSchema,
+      }),
+    );
 
     expect(isLoading).toBeFalsy();
     const { success } = await run(serverRoute.test[401], {});
@@ -102,7 +115,12 @@ describe("useQuery", () => {
       result: {
         current: { isLoading, run },
       },
-    } = customRenderHook(() => useQuery({ schema: accountReadSchema }));
+    } = customRenderHook(() =>
+      useQuery({
+        requestSchema: readAccountRequestSchema,
+        responseSchema: readAccountResponseSchema,
+      }),
+    );
 
     expect(isLoading).toBeFalsy();
     const { success } = await run(serverRoute.test[403], {});
@@ -116,7 +134,12 @@ describe("useQuery", () => {
       result: {
         current: { isLoading, run },
       },
-    } = customRenderHook(() => useQuery({ schema: accountReadSchema }));
+    } = customRenderHook(() =>
+      useQuery({
+        requestSchema: readAccountRequestSchema,
+        responseSchema: readAccountResponseSchema,
+      }),
+    );
     expect(isLoading).toBeFalsy();
     const { success } = await run(serverRoute.test[404], {});
     expect(isLoading).toBeFalsy();
@@ -128,7 +151,12 @@ describe("useQuery", () => {
       result: {
         current: { isLoading, run },
       },
-    } = customRenderHook(() => useQuery({ schema: accountReadSchema }));
+    } = customRenderHook(() =>
+      useQuery({
+        requestSchema: readAccountRequestSchema,
+        responseSchema: readAccountResponseSchema,
+      }),
+    );
     expect(isLoading).toBeFalsy();
     const { success } = await run(serverRoute.test[500], {});
     expect(isLoading).toBeFalsy();
@@ -140,7 +168,12 @@ describe("useQuery", () => {
       result: {
         current: { isLoading, run },
       },
-    } = customRenderHook(() => useQuery({ schema: accountReadSchema }));
+    } = customRenderHook(() =>
+      useQuery({
+        requestSchema: readAccountRequestSchema,
+        responseSchema: readAccountResponseSchema,
+      }),
+    );
     expect(isLoading).toBeFalsy();
     const { success } = await run(serverRoute.test.empty, {});
     expect(isLoading).toBeFalsy();
@@ -152,7 +185,12 @@ describe("useQuery", () => {
       result: {
         current: { isLoading, run },
       },
-    } = customRenderHook(() => useQuery({ schema: accountReadSchema }));
+    } = customRenderHook(() =>
+      useQuery({
+        requestSchema: readAccountRequestSchema,
+        responseSchema: readAccountResponseSchema,
+      }),
+    );
     expect(isLoading).toBeFalsy();
     const { success } = await run(serverRoute.test.null, {});
     expect(isLoading).toBeFalsy();

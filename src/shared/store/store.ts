@@ -1,6 +1,6 @@
-import { RoomId } from "../../types";
+import { RoomId } from "../api/api.schema";
 import { useStoreProvider } from "./StoreProvider";
-import { MessageType, RoomsType } from "../api/api.schema";
+import { MessageType, ReadRoomsResponseType } from "../api/api.schema";
 import { StoreType } from "./types";
 
 export type StoreActionType = ReturnType<typeof useStore>;
@@ -89,7 +89,7 @@ export const useStore = () => {
       return store.rooms as StoreType["rooms"];
     };
 
-    const update = (data: Partial<RoomsType>) => {
+    const update = (data: Partial<ReadRoomsResponseType>) => {
       setStore((store) => ({
         ...store,
         rooms: {

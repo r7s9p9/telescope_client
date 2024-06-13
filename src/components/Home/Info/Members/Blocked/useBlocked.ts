@@ -1,0 +1,94 @@
+import { useNavigate, useParams } from "react-router-dom";
+import { RoomId, UserId } from "../../../../../shared/api/api.schema";
+import {
+  useQueryGetBlockedUsersInRoom,
+  useQueryUnbanUserInRoom,
+} from "../../../../../shared/api/api.model";
+import { useEffect, useState } from "react";
+import { useNotify } from "../../../../Notification/Notification";
+import { GetRoomBlockedUsersResponseType } from "../../../../../shared/api/api.schema";
+import { routes } from "../../../../../constants";
+import { useMenuContext } from "../../../../ContextMenu/ContextMenu";
+import { langError, langRoom } from "../../../../../locales/en";
+
+export function useBlocked() {
+  const { roomId } = useParams();
+  const queryRead = useQueryGetBlockedUsersInRoom();
+  const queryUnban = useQueryUnbanUserInRoom();
+  const notify = useNotify();
+  const navigate = useNavigate();
+  const { openMenu, closeMenu } = useMenuContext();
+
+  const [blocked, setBlocked] =
+    useState<GetRoomBlockedUsersResponseType["users"]>();
+
+  const read = async () => {
+    const { success, response, requestError, responseError } =
+      await queryRead.run({ roomId: roomId as RoomId });
+    if (!success) {
+      notify.show.error(
+        requestError || responseError || langError.UNKNOWN_MESSAGE,
+      );
+      return;
+    }
+    setBlocked(response.users);
+  };
+
+  const onClickMenuHandler = () => {
+    const unban = async (userId: UserId, username: string) => {
+      const { success, response, requestError, responseError } =
+        await queryUnban.run({ roomId: roomId as RoomId, userIds: [userId] });
+      if (!success) {
+        notify.show.error(
+          requestError || responseError || langError.UNKNOWN_MESSAGE,
+        );
+        closeMenu();
+        return;
+      }
+      if (!response.access) {
+        notify.show.error(langRoom.UNBAN_NO_RIGHT);
+        closeMenu();
+        return;
+      }
+      if (!response.success) {
+        notify.show.error(langRoom.UNBAN_FAIL(username));
+        closeMenu();
+        return;
+      }
+      notify.show.info(langRoom.UNBAN_SUCCESS(username));
+      read();
+      closeMenu();
+      return;
+    };
+
+    const copy = (username: string) => {
+      navigator.clipboard.writeText(username);
+      notify.show.info(langRoom.COPY_USERNAME);
+      closeMenu();
+    };
+
+    // TODO Pages for another users
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const profile = (userId: UserId) => {
+      navigate(routes.profile.path);
+      closeMenu();
+    };
+
+    return { unban, copy, profile };
+  };
+
+  useEffect(() => {
+    if (!blocked) read();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return {
+    roomId: roomId as RoomId,
+    reload: read,
+    isLoading: queryRead.isLoading,
+    isEmpty: !blocked,
+    blockedUsers: blocked,
+    openMenu,
+    onClickMenuHandler,
+  };
+}

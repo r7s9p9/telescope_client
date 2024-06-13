@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { render, renderHook } from "@testing-library/react";
-import { ContextMenuProvider } from "../src/сomponents/ContextMenu/ContextMenu";
-import { NotifyProvider } from "../src/сomponents/Notification/Notification";
+import { ContextMenuProvider } from "../src/components/ContextMenu/ContextMenu";
+import { NotifyProvider } from "../src/components/Notification/Notification";
 import { StoreProvider } from "../src/shared/store/StoreProvider";
 
 const wrapper = ({ children }: { children: ReactNode }) => (

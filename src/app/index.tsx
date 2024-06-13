@@ -6,32 +6,32 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
-import { Home } from "../сomponents/Home/Home.tsx";
+import { Home } from "../components/Home/Home.tsx";
 import "./index.css";
-import Auth from "../сomponents/Auth/Auth.tsx";
+import Auth from "../components/Auth/Auth.tsx";
 import { routes } from "../constants.ts";
-import { NotifyProvider } from "../сomponents/Notification/Notification.tsx";
-import { Chat } from "../сomponents/Home/Chat/Chat.tsx";
-import { Rooms } from "../сomponents/Home/Rooms/Rooms.tsx";
+import { NotifyProvider } from "../components/Notification/Notification.tsx";
+import { Chat } from "../components/Home/Chat/Chat.tsx";
+import { Rooms } from "../components/Home/Rooms/Rooms.tsx";
 import { StoreProvider } from "../shared/store/StoreProvider.tsx";
-import { ContextMenuProvider } from "../сomponents/ContextMenu/ContextMenu.tsx";
-import { CreateRoom } from "../сomponents/Home/CreateRoom/CreateRoom.tsx";
-import { ChatInfo } from "../сomponents/Home/Info/Info.tsx";
-import { Profile } from "../сomponents/Home/Profile/Profile.tsx";
-import { WIP } from "../сomponents/WIP/WIP.tsx";
-import { PopupProvider } from "../сomponents/Popup/Popup.tsx";
-import { BlockedUsers } from "../сomponents/Home/Info/Members/Blocked/Blocked.tsx";
-import { InviteUsers } from "../сomponents/Home/Info/Members/Invite/Invite.tsx";
-import { ErrorHome } from "../сomponents/Home/ErrorHome.tsx";
-import { ErrorAuth } from "../сomponents/Auth/ErrorAuth.tsx";
-import { ErrorProfile } from "../сomponents/Home/Profile/ErrorProfile.tsx";
-import { ErrorRooms } from "../сomponents/Home/Rooms/ErrorRooms.tsx";
-import { ErrorCreateRoom } from "../сomponents/Home/CreateRoom/ErrorCreateRoom.tsx";
-import { ErrorChat } from "../сomponents/Home/Chat/ErrorChat.tsx";
-import { ErrorInfo } from "../сomponents/Home/Info/ErrorInfo.tsx";
-import { ErrorBlocked } from "../сomponents/Home/Info/Members/Blocked/ErrorBlocked.tsx";
-import { ErrorInvite } from "../сomponents/Home/Info/Members/Invite/ErrorInvite.tsx";
-import { NoMatch } from "../сomponents/NoMatch/NoMatch.tsx";
+import { ContextMenuProvider } from "../components/ContextMenu/ContextMenu.tsx";
+import { CreateRoom } from "../components/Home/CreateRoom/CreateRoom.tsx";
+import { ChatInfo } from "../components/Home/Info/Info.tsx";
+import { Profile } from "../components/Home/Profile/Profile.tsx";
+import { WIP } from "../components/WIP/WIP.tsx";
+import { PopupProvider } from "../components/Popup/Popup.tsx";
+import { BlockedUsers } from "../components/Home/Info/Members/Blocked/Blocked.tsx";
+import { InviteUsers } from "../components/Home/Info/Members/Invite/Invite.tsx";
+import { ErrorHome } from "../components/Home/ErrorHome.tsx";
+import { ErrorAuth } from "../components/Auth/ErrorAuth.tsx";
+import { ErrorProfile } from "../components/Home/Profile/ErrorProfile.tsx";
+import { ErrorRooms } from "../components/Home/Rooms/ErrorRooms.tsx";
+import { ErrorCreateRoom } from "../components/Home/CreateRoom/ErrorCreateRoom.tsx";
+import { ErrorChat } from "../components/Home/Chat/ErrorChat.tsx";
+import { ErrorInfo } from "../components/Home/Info/ErrorInfo.tsx";
+import { ErrorBlocked } from "../components/Home/Info/Members/Blocked/ErrorBlocked.tsx";
+import { ErrorInvite } from "../components/Home/Info/Members/Invite/ErrorInvite.tsx";
+import { NoMatch } from "../components/NoMatch/NoMatch.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(

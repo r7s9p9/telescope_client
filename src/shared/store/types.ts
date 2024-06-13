@@ -1,19 +1,18 @@
-import { RoomId } from "../../types";
+import { GetMessagesResponseType, RoomId } from "../api/api.schema";
 import {
-  MessageReadType,
   MessageType,
-  RoomInfoType,
-  RoomsType,
+  ReadRoomInfoResponseType,
+  ReadRoomsResponseType,
 } from "../api/api.schema";
 
 export type StoreType = {
-  rooms: RoomsType;
+  rooms: ReadRoomsResponseType;
   chats: Record<
     RoomId,
     | {
         roomId: RoomId;
-        messages?: MessageReadType["messages"];
-        info: RoomInfoType["info"];
+        messages?: GetMessagesResponseType["messages"];
+        info: ReadRoomInfoResponseType["info"];
         allCount: number;
         isFirstLoad: boolean;
         isNewMessages: boolean;
