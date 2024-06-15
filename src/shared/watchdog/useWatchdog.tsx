@@ -1,14 +1,7 @@
-import {
-  ReactNode,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import { ReactNode, createContext, useContext, useEffect, useRef } from "react";
 import { healthCheck } from "../api/api";
 
-type RoutesType = Map<string, { disabled: boolean }>;
+type RoutesType = Set<string>;
 
 const CHECK_INTERVAL = 15000;
 
@@ -28,8 +21,7 @@ export function WatchdogProvider({ children }: { children: ReactNode }) {
   const routes = useRef<RoutesType>();
 
   const create = (route: string) => {
-    routes.current = new Map();
-    routes.current.set(route, { disabled: true });
+    routes.current = new Set([route]);
   };
 
   const report = (route: string) => {
@@ -37,30 +29,27 @@ export function WatchdogProvider({ children }: { children: ReactNode }) {
       create(route);
       return;
     }
-    routes.current.set(route, { disabled: true });
+    routes.current.add(route);
   };
 
   const getState = (route: string) => {
     if (!routes.current) return { disabled: false };
-    const state = routes.current.get(route);
-    if (!state) return { disabled: false };
-    if (state.disabled) return { disabled: true };
+    if (routes.current.has(route)) return { disabled: true };
     return { disabled: false };
   };
 
-  const reset = (route: string) => {
+  const remove = (route: string) => {
     if (!routes.current) return;
-    routes.current.set(route, { disabled: false });
+    routes.current.delete(route);
   };
 
-  const checker = useCallback(async () => {
+  const checker = async () => {
     if (!routes.current) return;
-    for (const [route, state] of routes.current) {
-      if (!state.disabled) continue;
+    for (const [route] of routes.current) {
       const { success } = await healthCheck(route);
-      if (success) reset(route);
+      if (success) remove(route);
     }
-  }, []);
+  };
 
   useEffect(() => {
     setInterval(checker, CHECK_INTERVAL);
