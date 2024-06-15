@@ -32,6 +32,7 @@ import { ErrorInfo } from "../components/Home/Info/ErrorInfo.tsx";
 import { ErrorBlocked } from "../components/Home/Info/Members/Blocked/ErrorBlocked.tsx";
 import { ErrorInvite } from "../components/Home/Info/Members/Invite/ErrorInvite.tsx";
 import { NoMatch } from "../components/NoMatch/NoMatch.tsx";
+import { WatchdogProvider } from "../shared/watchdog/useWatchdog.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -119,14 +120,16 @@ const router = createBrowserRouter(
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <StoreProvider>
-      <NotifyProvider>
-        <PopupProvider>
-          <ContextMenuProvider>
-            <RouterProvider router={router} />
-          </ContextMenuProvider>
-        </PopupProvider>
-      </NotifyProvider>
-    </StoreProvider>
+    <WatchdogProvider>
+      <StoreProvider>
+        <NotifyProvider>
+          <PopupProvider>
+            <ContextMenuProvider>
+              <RouterProvider router={router} />
+            </ContextMenuProvider>
+          </PopupProvider>
+        </NotifyProvider>
+      </StoreProvider>
+    </WatchdogProvider>
   </React.StrictMode>,
 );

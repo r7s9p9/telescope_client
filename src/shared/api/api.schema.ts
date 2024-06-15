@@ -42,7 +42,7 @@ export const passwordSchema = z
   .max(env.passwordRange.max);
 export const codeSchema = z.string().length(env.codeLength);
 
-export const nameSchema = z.string().max(env.nameLengthMax);
+export const nameSchema = z.string().min(2).max(env.nameLengthMax);
 export const bioSchema = z.string().max(env.bioLengthMax);
 export const lastSeenSchema = z.string();
 
@@ -571,8 +571,8 @@ export type SendMessageRequestType = z.infer<typeof sendMessageRequestSchema>;
 
 export const sendMessageResponseSchema = z
   .object({
-    access: z.literal(false),
-    success: z.literal(false),
+    access: z.boolean(),
+    success: z.boolean(),
   })
   .or(
     z.object({

@@ -134,10 +134,10 @@ export function useQueryLogin() {
     if (!success) {
       return {
         success: false as const,
-        requestError: requestError ? parseZodError(requestError) : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
+        requestError: requestError
+          ? parseZodError(requestError as ZodError)
           : undefined,
+        responseError,
       };
     }
 
@@ -166,10 +166,10 @@ export function useQueryCode() {
     if (!success) {
       return {
         success: false as const,
-        requestError: requestError ? parseZodError(requestError) : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
+        requestError: requestError
+          ? parseZodError(requestError as ZodError)
           : undefined,
+        responseError,
       };
     }
 
@@ -196,10 +196,10 @@ export function useQueryRegister() {
     if (!success) {
       return {
         success: false as const,
-        requestError: requestError ? parseZodError(requestError) : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
+        requestError: requestError
+          ? parseZodError(requestError as ZodError)
           : undefined,
+        responseError,
       };
     }
 
@@ -243,9 +243,7 @@ export function useQueryAccount() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -274,10 +272,10 @@ export function useQueryUpdateAccount() {
     if (!success) {
       return {
         success: false as const,
-        requestError: requestError ? parseZodError(requestError) : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
+        requestError: requestError
+          ? parseZodError(requestError as ZodError)
           : undefined,
+        responseError,
       };
     }
 
@@ -308,9 +306,7 @@ export function useQueryRooms() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -341,9 +337,7 @@ export function useQueryRoomInfo() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -372,10 +366,10 @@ export function useQuerySearchRooms() {
     if (!success) {
       return {
         success: false as const,
-        requestError: requestError ? parseZodError(requestError) : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
+        requestError: requestError
+          ? parseZodError(requestError as ZodError)
           : undefined,
+        responseError,
       };
     }
 
@@ -404,10 +398,10 @@ export function useQueryCreateRoom() {
     if (!success) {
       return {
         success: false as const,
-        requestError: requestError ? parseZodError(requestError) : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
+        requestError: requestError
+          ? parseZodError(requestError as ZodError)
           : undefined,
+        responseError,
       };
     }
 
@@ -436,10 +430,10 @@ export function useQueryUpdateRoom() {
     if (!success) {
       return {
         success: false as const,
-        requestError: requestError ? parseZodError(requestError) : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
+        requestError: requestError
+          ? parseZodError(requestError as ZodError)
           : undefined,
+        responseError,
       };
     }
 
@@ -470,9 +464,7 @@ export function useQueryDeleteRoom() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -503,9 +495,7 @@ export function useQueryLeaveRoom() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -536,9 +526,7 @@ export function useQueryJoinRoom() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -569,9 +557,7 @@ export function useQueryGetMembers() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -602,9 +588,7 @@ export function useQueryKickMember() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -635,9 +619,7 @@ export function useQueryBanMember() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -668,9 +650,7 @@ export function useQueryUnbanUserInRoom() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -701,9 +681,7 @@ export function useQueryGetBlockedUsersInRoom() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -732,10 +710,10 @@ export function useQuerySearchUsersToInvite() {
     if (!success) {
       return {
         success: false as const,
-        requestError: requestError ? parseZodError(requestError) : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
+        requestError: requestError
+          ? parseZodError(requestError as ZodError)
           : undefined,
+        responseError,
       };
     }
 
@@ -766,9 +744,7 @@ export function useQueryInviteUser() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -799,9 +775,7 @@ export function useQueryReadMessages() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -831,9 +805,7 @@ export function useQueryCompareMessages() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 
@@ -861,10 +833,10 @@ export function useQuerySendMessage() {
     if (!success) {
       return {
         success: false as const,
-        requestError: requestError ? parseZodError(requestError) : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
+        requestError: requestError
+          ? parseZodError(requestError as ZodError)
           : undefined,
+        responseError,
       };
     }
 
@@ -893,10 +865,10 @@ export function useQueryUpdateMessage() {
     if (!success) {
       return {
         success: false as const,
-        requestError: requestError ? parseZodError(requestError) : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
+        requestError: requestError
+          ? parseZodError(requestError as ZodError)
           : undefined,
+        responseError,
       };
     }
 
@@ -927,9 +899,7 @@ export function useQueryDeleteMessage() {
         requestError: requestError
           ? langError.REQUEST_COMMON_MESSAGE
           : undefined,
-        responseError: responseError
-          ? langError.RESPONSE_COMMON_MESSAGE
-          : undefined,
+        responseError,
       };
     }
 

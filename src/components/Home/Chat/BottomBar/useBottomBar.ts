@@ -47,7 +47,7 @@ export function useSend(roomId: RoomId) {
             roomId,
             message: { content: formData, created: editable.message.created },
           });
-        // TODO Make validation error visible in ui but not in notification
+
         if (!success) {
           notify.show.error(
             requestError?.text || responseError || langError.UNKNOWN_MESSAGE,

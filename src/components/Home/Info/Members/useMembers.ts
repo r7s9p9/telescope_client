@@ -24,6 +24,7 @@ export function useMembers() {
   const { roomId } = useParams();
   const query = useQueryGetMembers();
   const info = useLoadInfo();
+  const notify = useNotify();
 
   const listRef = useRef<HTMLUListElement>(null);
   const [data, setData] = useState<GetRoomsMembersResponseType | null>(null);
@@ -34,11 +35,14 @@ export function useMembers() {
       roomId: roomId as RoomId,
     });
 
-    // TODO
-    // Make error showing in UI
-    //
+    if (!success) {
+      notify.show.error(
+        requestError || responseError || langError.UNKNOWN_MESSAGE,
+      );
+      return;
+    }
 
-    if (success) setData(response);
+    setData(response);
   };
 
   const restoreScroll = useCallback(() => {

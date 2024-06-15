@@ -48,8 +48,13 @@ function AuthContainer({ type }: { type: "login" | "register" }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (location.state?.isLoggedOut) {
+    if (location.state?.loggedOut) {
       notify.show.info(langAuth.LOGGED_OUT);
+      // remove state from location
+      navigate({ pathname: location.pathname });
+    }
+    if (location.state?.sessionBlocked) {
+      notify.show.info(langAuth.SESSION_BLOCKED);
       // remove state from location
       navigate({ pathname: location.pathname });
     }

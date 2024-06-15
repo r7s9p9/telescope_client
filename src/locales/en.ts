@@ -1,7 +1,8 @@
 export const langError = {
   REQUEST_COMMON_MESSAGE:
-    "Error on the client side. Reload the page if the problem persists" as const,
-  RESPONSE_COMMON_MESSAGE: "Server side error. Please try again later" as const,
+    "Error on the client side. Reload the page if the problem persists." as const,
+  RESPONSE_COMMON_MESSAGE:
+    "This functionality is temporarily unavailable. Please try again later." as const,
   UNKNOWN_MESSAGE: "Something went wrong. Please try again later." as const,
 };
 
@@ -14,6 +15,8 @@ export const langAuth = {
   OUTDATED_EMAIL: "Email address is no longer valid" as const,
   REGISTER_SUCCESS: "You have successfully registered! Please sign in" as const,
   LOGGED_OUT: "You are logged out of your account" as const,
+  SESSION_BLOCKED:
+    "This session has been blocked - either from another device, or you have not visited your account from this device for a long time. Please login.",
 };
 
 export const langProfile = {

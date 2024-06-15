@@ -21,24 +21,6 @@ export type StoreType = {
       }
     | undefined
   >;
-  routesState: {
-    sessionRemove: boolean;
-    accountRead: boolean;
-    accountUpdate: boolean;
-    roomGetRoomList: boolean;
-    roomSearch: boolean;
-    roomReadInfo: boolean;
-    roomUpdateInfo: boolean;
-    roomCreate: boolean;
-    roomDelete: boolean;
-    roomLeave: boolean;
-    roomJoin: boolean;
-    messageRead: boolean;
-    messageCompare: boolean;
-    messageSend: boolean;
-    messageUpdate: boolean;
-    messageRemove: boolean;
-  };
 };
 
 export type StoreState = {

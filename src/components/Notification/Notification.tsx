@@ -10,6 +10,8 @@ import {
 } from "react";
 import { Paper } from "../../shared/ui/Paper/Paper";
 
+const NOTIFICATION_SHOW_TIME = 5000;
+
 const NotifyContext = createContext<NotifyType>({
   show: {
     info: () => {},
@@ -41,7 +43,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
   const hide = () => setData((data) => ({ ...data, isShow: false }));
 
   useEffect(() => {
-    if (data.isShow) setTimeout(() => hide(), 3000);
+    if (data.isShow) setTimeout(() => hide(), NOTIFICATION_SHOW_TIME);
   }, [data.isShow]);
 
   return (
@@ -61,7 +63,7 @@ export const NotifyStack = () => {
     case "info":
       Icon = (
         <IconInfoCircle
-          className="text-slate-600"
+          className="text-slate-600 shrink-0"
           strokeWidth="1.5"
           size={24}
         />
@@ -70,7 +72,7 @@ export const NotifyStack = () => {
     case "error":
       Icon = (
         <IconExclamationCircle
-          className="text-slate-600"
+          className="text-slate-600 shrink-0"
           strokeWidth="1.5"
           size={24}
         />
@@ -83,15 +85,17 @@ export const NotifyStack = () => {
       rounded="lg"
       shadow="md"
       padding={4}
-      className={`${data.type === "info" ? "ring-green-600" : "ring-red-600"} bg-slate-50 absolute z-50 w-1/2 left-1/4 ring-2 flex justify-between items-center duration-300 ease-in-out`}
+      className={`${data.type === "info" ? "ring-green-600" : "ring-red-600"} bg-slate-50 absolute z-50 w-1/2 left-1/4 ring-2 flex justify-between items-center gap-4 duration-300 ease-in-out`}
       style={{
         transform: data.isShow ? `translateY(50%)` : `translateY(-150%)`,
       }}
     >
       {Icon}
-      <Text size="md" font="light" className="text-center">
+      <Text size="md" font="light" className="text-center break-words">
+        {" "}
         {data.text}
       </Text>
+
       {Icon}
     </Paper>
   );
