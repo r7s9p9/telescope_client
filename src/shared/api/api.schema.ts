@@ -202,6 +202,41 @@ export type UpdateAccountResponseType = z.infer<
   typeof updateAccountResponseSchema
 >;
 
+export const sessionReadRequestSchema = z.object({});
+export type SessionReadRequestType = z.infer<typeof sessionReadRequestSchema>;
+
+export const sessionReadResponseSchema = z.object({
+  success: z.boolean(),
+  sessionArr: z.array(
+    z.object({
+      deviceName: z.string().optional(),
+      userAgent: z.string(),
+      ip: z.string(),
+      lastSeen: z.number(),
+      isFrozen: z.boolean(),
+      sessionId: z.string(),
+      isCurrent: z.boolean(),
+    }),
+  ),
+});
+
+export type SessionReadResponseType = z.infer<typeof sessionReadResponseSchema>;
+
+export const sessionDeleteRequestSchema = z.object({
+  sessionId: z.string().or(z.literal("self")),
+});
+export type SessionDeleteRequestType = z.infer<
+  typeof sessionDeleteRequestSchema
+>;
+
+export const sessionDeleteResponseSchema = z.object({
+  success: z.boolean(),
+  isExist: z.boolean().optional(),
+});
+export type SessionDeleteResponseType = z.infer<
+  typeof sessionDeleteResponseSchema
+>;
+
 const maxMessageTimestamp = 2000000000000 as const; // TODO move to .env
 const minMessageTimestamp = 1000000000000 as const; // TODO move to .env
 

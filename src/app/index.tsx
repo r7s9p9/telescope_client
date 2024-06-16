@@ -33,6 +33,8 @@ import { ErrorBlocked } from "../components/Home/Info/Members/Blocked/ErrorBlock
 import { ErrorInvite } from "../components/Home/Info/Members/Invite/ErrorInvite.tsx";
 import { NoMatch } from "../components/NoMatch/NoMatch.tsx";
 import { WatchdogProvider } from "../shared/watchdog/useWatchdog.tsx";
+import { Settings } from "../components/Home/Settings/Settings.tsx";
+import { Sessions } from "../components/Home/Settings/Sessions/Sessions.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -111,7 +113,12 @@ const router = createBrowserRouter(
         <Route
           path={routes.settings.path}
           id={routes.settings.id}
-          element={<WIP />}
+          element={<Settings />}
+        />
+        <Route
+          path={routes.sessions.path}
+          id={routes.sessions.id}
+          element={<Sessions />}
         />
       </Route>
     </>,

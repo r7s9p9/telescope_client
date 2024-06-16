@@ -188,5 +188,21 @@ export const formatDate = () => {
     return { result: dateFormatter(date, "upToYear"), range: "years" };
   }
 
-  return { roomList, message, bubble, info, member };
+  function session(value: number | string) {
+    const { success, date } = dateVerifier(value);
+    if (!success) {
+      console.error("Value is not a timestamp or Date object");
+      return { result: "Unknown" };
+    }
+
+    const nowDate = new Date();
+
+    if (isSameYear(date, nowDate)) {
+      return relativeTimeFormatter(date);
+    }
+
+    return { result: dateFormatter(date, "upToYear"), range: "years" };
+  }
+
+  return { roomList, message, bubble, info, member, session };
 };

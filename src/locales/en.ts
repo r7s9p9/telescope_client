@@ -62,3 +62,8 @@ export const langRoom = {
   DELETE_MESSAGE_FAIL:
     "The message could not be deleted. Perhaps the room does not exist or is temporarily unavailable" as const,
 };
+
+export const langSession = {
+  SESSION_DELETE_FAIL:
+    "An error occurred when trying to sign out of your account. Please try again or reload the page" as const,
+};

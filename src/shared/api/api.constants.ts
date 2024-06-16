@@ -24,6 +24,7 @@ export const serverRoute = {
     code: endpoint + "/api/auth/code",
   },
   session: {
+    read: endpoint + "/api/session/read",
     remove: endpoint + "/api/session/remove",
   },
   account: {

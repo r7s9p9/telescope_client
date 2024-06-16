@@ -99,6 +99,14 @@ import {
   compareMessagesResponseSchema,
   CompareMessagesRequestType,
   CompareMessagesResponseType,
+  sessionDeleteRequestSchema,
+  sessionDeleteResponseSchema,
+  SessionDeleteResponseType,
+  SessionDeleteRequestType,
+  SessionReadRequestType,
+  sessionReadRequestSchema,
+  sessionReadResponseSchema,
+  SessionReadResponseType,
 } from "./api.schema";
 import { useQuery } from "./api";
 import { serverRoute } from "./api.constants";
@@ -211,19 +219,67 @@ export function useQueryRegister() {
   return { run, isLoading: query.isLoading };
 }
 
-// export function useQueryLogout() {
-//   const query = useQuery({ responseSchema: logoutSchema });
+export function useQueryReadSessions() {
+  const query = useQuery({
+    requestSchema: sessionReadRequestSchema,
+    responseSchema: sessionReadResponseSchema,
+  });
 
-//   const run = async (sessionId: string | "self") => {
-//     const { success, response } = await query.run(serverRoute.session.remove, {
-//       sessionId: sessionId,
-//     });
-//     if (!success) return { success: false as const };
-//     return { success: true as const, data: response as LogoutType };
-//   };
+  const run = async (payload: SessionReadRequestType) => {
+    const { success, response, requestError, responseError } = await query.run(
+      serverRoute.session.read,
+      payload,
+    );
 
-//   return { run, isLoading: query.isLoading };
-// }
+    if (!success) {
+      return {
+        success: false as const,
+        requestError: requestError
+          ? langError.REQUEST_COMMON_MESSAGE
+          : undefined,
+        responseError,
+      };
+    }
+
+    return {
+      success: true as const,
+      response: response as SessionReadResponseType,
+    };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
+
+export function useQueryDeleteSession() {
+  const query = useQuery({
+    requestSchema: sessionDeleteRequestSchema,
+    responseSchema: sessionDeleteResponseSchema,
+  });
+
+  const run = async (payload: SessionDeleteRequestType) => {
+    const { success, response, requestError, responseError } = await query.run(
+      serverRoute.session.remove,
+      payload,
+    );
+
+    if (!success) {
+      return {
+        success: false as const,
+        requestError: requestError
+          ? langError.REQUEST_COMMON_MESSAGE
+          : undefined,
+        responseError,
+      };
+    }
+
+    return {
+      success: true as const,
+      response: response as SessionDeleteResponseType,
+    };
+  };
+
+  return { run, isLoading: query.isLoading };
+}
 
 export function useQueryAccount() {
   const query = useQuery({
