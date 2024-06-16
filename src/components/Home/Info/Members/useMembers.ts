@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   useQueryBanMember,
   useQueryGetMembers,
@@ -95,6 +95,7 @@ export function useMember({
   const { openMenu, closeMenu } = useMenuContext();
   const { roomId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const notify = useNotify();
 
   const kickQuery = useQueryKickMember();
@@ -102,8 +103,9 @@ export function useMember({
 
   function onClickMenuHandler() {
     const profile = (userId: string) => {
-      // TODO Pages for another users
-      if (userId === "self") navigate(routes.profile.path);
+      navigate(routes.profile.pathPart + userId, {
+        state: { prevPath: location.pathname },
+      });
       closeMenu();
     };
     const copy = (username: string) => {

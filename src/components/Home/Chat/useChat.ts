@@ -448,9 +448,9 @@ export function useInfo() {
 
   useEffect(() => {
     // Initial load data if no chat in store
-    if (!storedInfo) run();
+    run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storedInfo]);
+  }, []);
 
   // Update info
   useInterval(() => run(), INFO_UPDATE_INTERVAL);

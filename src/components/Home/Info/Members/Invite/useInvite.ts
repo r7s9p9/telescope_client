@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { RoomId, UserId } from "../../../../../shared/api/api.schema";
 import {
   useQueryInviteUser,
@@ -17,6 +17,7 @@ export function useInvite() {
   const queryInvite = useQueryInviteUser();
   const notify = useNotify();
   const navigate = useNavigate();
+  const location = useLocation();
   const { openMenu, closeMenu } = useMenuContext();
 
   const [inputValue, setInputValue] = useState("");
@@ -31,7 +32,6 @@ export function useInvite() {
         q: inputValue,
       });
     if (!success) {
-      // Move request error to UI
       notify.show.error(
         requestError?.q || responseError || langError.UNKNOWN_MESSAGE,
       );
@@ -84,10 +84,10 @@ export function useInvite() {
       closeMenu();
     };
 
-    // TODO Pages for another users
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const profile = (userId: UserId) => {
-      navigate(routes.profile.path);
+      navigate(routes.profile.pathPart + userId, {
+        state: { prevPath: location.pathname },
+      });
       closeMenu();
     };
 

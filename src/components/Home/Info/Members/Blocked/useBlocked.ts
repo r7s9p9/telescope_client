@@ -67,10 +67,10 @@ export function useBlocked() {
       closeMenu();
     };
 
-    // TODO Pages for another users
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const profile = (userId: UserId) => {
-      navigate(routes.profile.path);
+      navigate(routes.profile.pathPart + userId, {
+        state: { prevPath: location.pathname },
+      });
       closeMenu();
     };
 

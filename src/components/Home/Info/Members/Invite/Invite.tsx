@@ -66,13 +66,14 @@ export function InviteUsers() {
         padding={4}
         rounded="lg"
         shadow="md"
-        className="h-96 flex flex-col bg-slate-50"
+        className="h-[450px] flex flex-col bg-slate-50"
       >
         <Title roomId={roomId} />
         <Input
           size="md"
           value={inputValue}
           setValue={setInputValue}
+          placeholder="Enter user nickname..."
           className="mt-4"
           rightSection={
             <IconSearch className="text-slate-400" strokeWidth="1" size={24} />
@@ -112,7 +113,7 @@ function ListWrapper({
     <ul
       onScroll={onScroll}
       ref={listRef}
-      className="w-full h-[450px] overflow-scroll overscroll-none flex flex-col justify-center gap-2"
+      className="w-full h-[450px] mt-4 overflow-scroll overscroll-none flex flex-col gap-2"
     >
       {children}
     </ul>

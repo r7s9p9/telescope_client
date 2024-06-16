@@ -65,7 +65,7 @@ export function BlockedUsers() {
         padding={4}
         rounded="lg"
         shadow="md"
-        className="flex flex-col bg-slate-50"
+        className="h-[450px] flex flex-col bg-slate-50"
       >
         <Title roomId={roomId} reload={reload} />
         {blockedUsersContent}

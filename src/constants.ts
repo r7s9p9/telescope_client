@@ -4,7 +4,11 @@ export const routes = {
   code: { path: "/login/code" as const, id: "code" as const },
 
   home: { path: "/" as const, id: "home" },
-  profile: { path: "/profile/" as const, id: "profile" as const },
+  profile: {
+    path: "/profile/:userId" as const,
+    pathPart: "/profile/" as const,
+    id: "profile" as const,
+  },
   rooms: { path: "/rooms/" as const, id: "rooms" as const },
   createRoom: { path: "/rooms/create" as const, id: "createRoom" as const },
   chat: { path: "/rooms/:roomId" as const, id: "chat" as const },

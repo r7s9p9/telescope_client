@@ -43,7 +43,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
   const hide = () => setData((data) => ({ ...data, isShow: false }));
 
   useEffect(() => {
-    if (data.isShow) setTimeout(() => hide(), NOTIFICATION_SHOW_TIME);
+    if (data.isShow) setTimeout(hide, NOTIFICATION_SHOW_TIME);
   }, [data.isShow]);
 
   return (
@@ -92,7 +92,6 @@ export const NotifyStack = () => {
     >
       {Icon}
       <Text size="md" font="light" className="text-center break-words">
-        {" "}
         {data.text}
       </Text>
 

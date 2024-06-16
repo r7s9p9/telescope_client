@@ -11,7 +11,7 @@ export const Paper = forwardRef(function Paper(
     className,
     onContextMenu,
   }: {
-    children: ReactNode;
+    children?: ReactNode;
     padding?: number;
     rounded?: "sm" | "md" | "lg" | "xl";
     shadow?: "sm" | "md" | "lg" | "xl";
@@ -33,7 +33,7 @@ export const Paper = forwardRef(function Paper(
           ref={ref as ForwardedRef<HTMLLIElement>}
           className={`bg-slate-100 ${rounded ? `rounded-${rounded}` : ""}  ${shadow ? `shadow-${shadow}` : ""} ${padding ? `p-${padding}` : ""} ${className || ""}`}
         >
-          {children}
+          {children || ""}
         </li>
       )}
       {!inList && (
@@ -45,7 +45,7 @@ export const Paper = forwardRef(function Paper(
           ref={ref as ForwardedRef<HTMLDivElement>}
           className={`bg-slate-100 ${rounded ? `rounded-${rounded}` : ""}  ${shadow ? `shadow-${shadow}` : ""} ${padding ? `p-${padding}` : ""} ${className || ""}`}
         >
-          {children}
+          {children || ""}
         </div>
       )}
     </>

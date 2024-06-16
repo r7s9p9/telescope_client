@@ -11,7 +11,7 @@ import { routes } from "../../../constants";
 export function LeftPanel() {
   return (
     <div className="shrink-0 h-full bg-slate-600 px-2 flex flex-col items-center gap-2">
-      <Link to={routes.profile.path}>
+      <Link to={routes.profile.pathPart + "self"}>
         <IconButton title="Profile" noHover className="pt-2">
           <IconUserCircle strokeWidth="1" className="text-white" size={36} />
         </IconButton>
