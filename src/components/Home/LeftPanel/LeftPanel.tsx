@@ -32,7 +32,7 @@ export function LeftPanel() {
           <IconUsersGroup {...iconProps} />
         </IconButton>
       </Link>
-      <div className="grow"></div>
+      <div className="grow" />
       <Link to={routes.settings.path}>
         <IconButton title="Settings" noHover className="pb-2">
           <IconSettings {...iconProps} />

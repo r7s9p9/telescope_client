@@ -277,7 +277,7 @@ const roomTypeLimitedSchema = z.union([
   z.literal("private"),
   z.literal("single"),
 ]);
-export const roomAboutSchema = z.string().max(80);
+export const roomAboutSchema = z.string().max(80).optional();
 const roomCreatedSchema = z.number();
 
 export const readRoomInfoRequestSchema = z.object({

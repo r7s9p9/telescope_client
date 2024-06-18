@@ -46,13 +46,14 @@ export function useCreateRoom() {
       }));
       return;
     }
+
     if (!success) {
       notify.show.error(responseError || langError.UNKNOWN_MESSAGE);
       return;
     }
 
     if (response.success) {
-      loadRooms.run();
+      await loadRooms.run();
       navigate({ pathname: routes.rooms.path + response.roomId });
     } else {
       notify.show.error(langError.UNKNOWN_MESSAGE);

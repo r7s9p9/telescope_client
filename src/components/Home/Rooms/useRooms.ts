@@ -20,25 +20,19 @@ export function useLoadRooms() {
   const query = useQueryRooms();
   const notify = useNotify();
   const storeAction = useStore().rooms();
+  const allCount = storeAction.read().allCount;
   const storedRooms = storeAction.read().items;
 
   const run = useCallback(async () => {
-    const max = storedRooms?.length || ITEM_COUNT_FOR_INITIAL_LOADING;
+    const max = allCount || ITEM_COUNT_FOR_INITIAL_LOADING;
     const { success, response, requestError, responseError } = await query.run({
       range: { min: 0 as const, max },
     });
 
-    if (!success && requestError) {
-      notify.show.error(requestError);
-      return;
-    }
-    if (!success && responseError) {
-      notify.show.error(responseError);
-      return;
-    }
-
     if (!success) {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
+      notify.show.error(
+        requestError || responseError || langError.UNKNOWN_MESSAGE,
+      );
       return;
     }
 
@@ -61,17 +55,10 @@ export function useLoadMoreRooms() {
       const { success, response, requestError, responseError } =
         await query.run({ range: { min, max } });
 
-      if (!success && requestError) {
-        notify.show.error(requestError);
-        return;
-      }
-      if (!success && responseError) {
-        notify.show.error(responseError);
-        return;
-      }
-
       if (!success) {
-        notify.show.error(langError.UNKNOWN_MESSAGE);
+        notify.show.error(
+          requestError || responseError || langError.UNKNOWN_MESSAGE,
+        );
         return;
       }
 

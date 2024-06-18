@@ -11,7 +11,7 @@ export function Actions() {
   const popup = usePopup();
 
   return (
-    <div className="flex flex-col shrink-0 grow justify-end border-t-2 border-slate-100">
+    <div className="flex flex-col shrink-0 justify-end border-t-2 border-slate-100">
       <Button
         title="Copy link"
         size="md"
@@ -19,7 +19,7 @@ export function Actions() {
         onClick={handleCopy}
         className="hover:bg-slate-200 gap-4"
       >
-        <IconCopy className="text-slate-600 ml-24" strokeWidth="1" size={24} />
+        <IconCopy className="text-slate-600 ml-28" strokeWidth="1" size={24} />
         <Text size="md" font="light" className="text-slate-600">
           Copy link
         </Text>
@@ -41,7 +41,7 @@ export function Actions() {
           className="hover:bg-slate-200 gap-4"
         >
           <IconDoorExit
-            className="text-slate-600 ml-24"
+            className="text-slate-600 ml-28"
             strokeWidth="1"
             size={24}
           />
@@ -66,7 +66,7 @@ export function Actions() {
           }}
           className="hover:bg-slate-200 gap-4"
         >
-          <IconTrash className="text-red-600 ml-24" strokeWidth="1" size={24} />
+          <IconTrash className="text-red-600 ml-28" strokeWidth="1" size={24} />
           <Text size="md" font="light" className="text-red-600">
             Delete room
           </Text>

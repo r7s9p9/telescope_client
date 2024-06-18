@@ -21,17 +21,13 @@ const itemHeightStyle = { height: ITEM_HEIGHT + "px" };
 
 const SkeletonList = memo(({ count }: { count?: number }) => {
   if (!count) count = getRandomInt(4, 12);
-
-  if (count > 0) {
-    return Array(count)
-      .fill(1)
-      .map((_, i) => (
-        <li key={i}>
-          <ItemSkeleton />
-        </li>
-      ));
-  }
-  return null;
+  return Array(count)
+    .fill(1)
+    .map((_, i) => (
+      <li key={i}>
+        <ItemSkeleton />
+      </li>
+    ));
 });
 
 export function Rooms() {
