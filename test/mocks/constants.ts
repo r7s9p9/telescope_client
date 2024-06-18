@@ -17,6 +17,5 @@ export const serverResponse = {
       },
       init: { status: 200 },
     },
-    update: () => {},
   },
 };

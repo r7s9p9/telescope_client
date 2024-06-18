@@ -12,7 +12,7 @@ export function LeftPanel() {
   const iconProps = {
     strokeWidth: "1",
     className: "text-white",
-    size: 42,
+    size: 36,
   };
 
   return (

@@ -41,6 +41,12 @@ export const fetcher = async (route: string, body: object) => {
       credentials: "include",
       body: JSON.stringify(body),
     });
+    if (result.status === 404 || result.status === 500) {
+      return {
+        success: false as const,
+        error: `Status ${result.status}`,
+      };
+    }
     return {
       success: true as const,
       loggedOut: result.status === 401,
