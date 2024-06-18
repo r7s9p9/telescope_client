@@ -36,6 +36,9 @@ import { WatchdogProvider } from "../shared/watchdog/useWatchdog.tsx";
 import { Settings } from "../components/Home/Settings/Settings.tsx";
 import { Sessions } from "../components/Home/Settings/Sessions/Sessions.tsx";
 import { Privacy } from "../components/Home/Settings/Privacy/Privacy.tsx";
+import { ErrorSettings } from "../components/Home/Settings/ErrorSettings.tsx";
+import { ErrorSessions } from "../components/Home/Settings/Sessions/ErrorSessions.tsx";
+import { ErrorPrivacy } from "../components/Home/Settings/Privacy/ErrorPrivacy.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -115,16 +118,19 @@ const router = createBrowserRouter(
           path={routes.settings.path}
           id={routes.settings.id}
           element={<Settings />}
+          errorElement={<ErrorSettings />}
         />
         <Route
           path={routes.sessions.path}
           id={routes.sessions.id}
           element={<Sessions />}
+          errorElement={<ErrorSessions />}
         />
         <Route
           path={routes.privacy.path}
           id={routes.privacy.id}
           element={<Privacy />}
+          errorElement={<ErrorPrivacy />}
         />
       </Route>
     </>,
