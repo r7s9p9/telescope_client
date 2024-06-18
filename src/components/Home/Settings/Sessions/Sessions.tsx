@@ -4,48 +4,72 @@ import { Text } from "../../../../shared/ui/Text/Text";
 import { useSessions } from "./useSessions";
 import { parseUserAgent } from "../../../../shared/lib/userAgent";
 import {
+  IconArrowBackUp,
   IconBrandChrome,
   IconBrandEdge,
   IconBrandFirefox,
+  IconBrowser,
   IconDeviceDesktop,
   IconDeviceGamepad,
   IconDeviceMobile,
   IconDeviceTv,
   IconDeviceWatch,
-  IconLock,
   IconTrash,
 } from "@tabler/icons-react";
 import { formatDate } from "../../../../shared/lib/date";
 import { IconButton } from "../../../../shared/ui/IconButton/IconButton";
 import { usePopup } from "../../../Popup/Popup";
 import { ConfirmPopup } from "../../../../shared/ui/ConfirmPopup/ConfirmPopup";
+import { Button } from "../../../../shared/ui/Button/Button";
 
 export function Sessions() {
-  const { currentSession, otherSessions, isLoaded } = useSessions();
+  const {
+    currentSession,
+    otherSessions,
+    isLoaded,
+    remove,
+    isFromAnotherPage,
+    returnBack,
+  } = useSessions();
 
   if (!isLoaded) {
-    return <Loader />;
+    return (
+      <Wrapper isFromAnotherPage={isFromAnotherPage} returnBack={returnBack}>
+        <div className="h-full p-4 rounded-xl animate-pulse bg-slate-200" />
+      </Wrapper>
+    );
   }
 
   if (!currentSession) {
-    return <ServiceUnavailable />;
+    return (
+      <Wrapper isFromAnotherPage={isFromAnotherPage} returnBack={returnBack}>
+        <Text size="md" font="light" className="text-center">
+          Sorry, but this functionality is currently unavailable. Please try
+          again later.
+        </Text>
+      </Wrapper>
+    );
   }
 
   if (!otherSessions) {
     return (
-      <Wrapper>
-        <Session data={currentSession} />
+      <Wrapper isFromAnotherPage={isFromAnotherPage} returnBack={returnBack}>
+        <Session data={currentSession} remove={remove} />
       </Wrapper>
     );
   }
 
   const items = otherSessions.map((data) => (
-    <Session data={data} key={data.sessionId} />
+    <Session data={data} remove={remove} key={data.sessionId} />
   ));
 
   return (
-    <Wrapper>
-      <Session data={currentSession} key={currentSession.sessionId} />
+    <Wrapper isFromAnotherPage={isFromAnotherPage} returnBack={returnBack}>
+      <Session
+        data={currentSession}
+        remove={remove}
+        key={currentSession.sessionId}
+      />
       {items}
     </Wrapper>
   );
@@ -53,6 +77,7 @@ export function Sessions() {
 
 function Session({
   data,
+  remove,
 }: {
   data: {
     userAgent: string;
@@ -63,6 +88,7 @@ function Session({
     isCurrent: boolean;
     deviceName?: string;
   };
+  remove: ReturnType<typeof useSessions>["remove"];
 }) {
   const parsedUserAgent = parseUserAgent(data.userAgent);
   const lastSeen = formatDate().session(data.lastSeen);
@@ -71,9 +97,9 @@ function Session({
   const popup = usePopup();
 
   return (
-    <div className="relative rounded-l-full shrink-0 h-fit mb-4 hover:bg-slate-200 duration-300 ease-in-out flex justify-between">
+    <div className="relative rounded-r-2xl rounded-l-[100px] shrink-0 h-22 mb-4 hover:bg-slate-300 duration-300 ease-in-out flex justify-between">
       <DeviceIcon parsedUserAgent={parsedUserAgent} />
-      <div className="pl-4 grow flex flex-col justify-between">
+      <div className="pl-4 py-2 grow flex flex-col justify-between">
         <Text size="sm" font="light" capitalize>
           Device: {parsedUserAgent.device}
         </Text>
@@ -84,9 +110,9 @@ function Session({
           IP: {data.ip}
         </Text>
       </div>
-      <div className="self-end pr-1">
+      <div className="pr-2 py-2 flex flex-col justify-between">
         {data.isCurrent && (
-          <Text size="sm" font="light" className="text-green-600">
+          <Text size="sm" font="light">
             This device
           </Text>
         )}
@@ -96,38 +122,19 @@ function Session({
           </Text>
         )}
         {!data.isCurrent && (
-          <Text
-            size="sm"
-            font="light"
-            className={`${isOnline ? "text-green-600" : "text-slate-600"}`}
-          >
+          <Text size="sm" font="light">
             {isOnline ? "Online" : `Last seen: ${lastSeen.result}`}
           </Text>
         )}
       </div>
-      <div className="absolute right-1 top-1 flex gap-2">
+      {!data.isCurrent && (
         <IconButton
-          title="Block session"
-          className="hover:bg-slate-300"
+          title="Delete session"
+          className="hover:bg-slate-400 absolute bottom-1 right-1"
           onClick={() =>
             popup.show(
               ConfirmPopup({
-                onAgree: () => {},
-                onClose: popup.hide,
-                text: "Are you sure you want to lock this session?",
-              }),
-            )
-          }
-        >
-          <IconLock size={28} strokeWidth="1.5" className="text-slate-600" />
-        </IconButton>
-        <IconButton
-          title="Close session"
-          className="hover:bg-slate-300"
-          onClick={() =>
-            popup.show(
-              ConfirmPopup({
-                onAgree: () => {},
+                onAgree: () => remove(data.sessionId),
                 onClose: popup.hide,
                 text: "Are you sure you want to delete this session?",
               }),
@@ -136,7 +143,7 @@ function Session({
         >
           <IconTrash size={28} strokeWidth="1.5" className="text-slate-600" />
         </IconButton>
-      </div>
+      )}
     </div>
   );
 }
@@ -151,7 +158,7 @@ function DeviceIcon({
 
   const iconProps = {
     size: 72,
-    strokeWidth: "1",
+    strokeWidth: "0.75",
     className: "text-slate-600",
   };
 
@@ -183,21 +190,32 @@ function DeviceIcon({
       break;
     case "Edge":
       browserIcon = <IconBrandEdge {...iconProps} />;
+      break;
+    default:
+      browserIcon = <IconBrowser {...iconProps} />;
   }
 
   return (
     <div className="flex relative">
-      <div className="absolute left-0 top-0 rounded-full w-fit h-fit p-1 border-4 border-slate-400 bg-slate-100">
+      <div className="absolute left-0 top-0 rounded-full w-fit h-fit p-1 border-2 border-slate-400 bg-slate-100">
         {deviceIcon}
       </div>
-      <div className="pl-14 overflow-hidden rounded-full w-fit h-fit p-1 border-4 border-slate-400 bg-slate-100">
+      <div className="pl-14 overflow-hidden rounded-full w-fit h-fit p-1 border-2 border-slate-400 bg-slate-100">
         {browserIcon}
       </div>
     </div>
   );
 }
 
-function Wrapper({ children }: { children: ReactNode }) {
+function Wrapper({
+  children,
+  isFromAnotherPage,
+  returnBack,
+}: {
+  children: ReactNode;
+  isFromAnotherPage: boolean;
+  returnBack: ReturnType<typeof useSessions>["returnBack"];
+}) {
   return (
     <div className="w-full h-full flex items-center justify-center">
       <Paper
@@ -210,26 +228,27 @@ function Wrapper({ children }: { children: ReactNode }) {
           Sessions
         </Text>
         <div className="h-full overflow-scroll">{children}</div>
+        {isFromAnotherPage && (
+          <Button
+            title="Go back"
+            size="md"
+            onClick={returnBack}
+            disabled={!isFromAnotherPage}
+            className="w-32 justify-center mt-4 shrink-0"
+          >
+            <>
+              <IconArrowBackUp
+                className="text-slate-500"
+                strokeWidth="1.5"
+                size={24}
+              />
+              <Text size="md" font="light">
+                Go back
+              </Text>
+            </>
+          </Button>
+        )}
       </Paper>
     </div>
-  );
-}
-
-function Loader() {
-  return (
-    <Wrapper>
-      <div className="h-full p-4 rounded-xl animate-pulse bg-slate-200" />
-    </Wrapper>
-  );
-}
-
-function ServiceUnavailable() {
-  return (
-    <Wrapper>
-      <Text size="md" font="light">
-        Sorry, but this functionality is currently unavailable. Please try again
-        later.
-      </Text>
-    </Wrapper>
   );
 }

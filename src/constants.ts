@@ -25,4 +25,5 @@ export const routes = {
   friends: { path: "/friends/" as const, id: "friends" as const },
   settings: { path: "/settings/" as const, id: "settings" as const },
   sessions: { path: "/settings/sessions" as const, id: "sessions" as const },
+  privacy: { path: "/settings/privacy" as const, id: "privacy" as const },
 };

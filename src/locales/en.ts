@@ -66,4 +66,6 @@ export const langRoom = {
 export const langSession = {
   SESSION_DELETE_FAIL:
     "An error occurred when trying to sign out of your account. Please try again or reload the page" as const,
+  SESSION_DELETE_SUCCESS:
+    "The selected session was successfully deleted" as const,
 };

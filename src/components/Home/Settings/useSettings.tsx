@@ -18,7 +18,7 @@ export function useSettings() {
       });
     };
     const privacy = () => {
-      navigate(routes.profile.pathPart + "self", {
+      navigate(routes.privacy.path, {
         state: { prevPath: location.pathname },
       });
     };

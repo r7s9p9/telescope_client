@@ -149,7 +149,7 @@ export function Profile() {
 function Wrapper({ children }: { children: ReactNode }) {
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <div className="w-3/4 h-[400px] min-w-[350px] max-w-[650px]">
+      <div className="w-3/4 min-h-[400px] min-w-[350px] max-w-[650px]">
         {children}
       </div>
     </div>

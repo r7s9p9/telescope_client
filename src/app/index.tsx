@@ -35,6 +35,7 @@ import { NoMatch } from "../components/NoMatch/NoMatch.tsx";
 import { WatchdogProvider } from "../shared/watchdog/useWatchdog.tsx";
 import { Settings } from "../components/Home/Settings/Settings.tsx";
 import { Sessions } from "../components/Home/Settings/Sessions/Sessions.tsx";
+import { Privacy } from "../components/Home/Settings/Privacy/Privacy.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -119,6 +120,11 @@ const router = createBrowserRouter(
           path={routes.sessions.path}
           id={routes.sessions.id}
           element={<Sessions />}
+        />
+        <Route
+          path={routes.privacy.path}
+          id={routes.privacy.id}
+          element={<Privacy />}
         />
       </Route>
     </>,

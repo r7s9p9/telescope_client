@@ -50,9 +50,7 @@ export function Settings() {
           size="xl"
           unstyled
           padding={96}
-          onClick={() => {
-            popup.show(<WIP />);
-          }}
+          onClick={onClickHandler().privacy}
           className="gap-4 hover:bg-slate-200"
         >
           <IconLock strokeWidth="1.5" className="text-slate-600" size={28} />
