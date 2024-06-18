@@ -1,6 +1,9 @@
 import { useParams } from "react-router-dom";
-import { useCallback, useEffect, useMemo } from "react";
-import { useQueryRooms } from "../../../shared/api/api.model";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useQueryRooms,
+  useQuerySearchRooms,
+} from "../../../shared/api/api.model";
 import { useStore } from "../../../shared/store/store";
 import { useInterval } from "../../../shared/lib/useInterval";
 import { debounce } from "../../../shared/lib/debounce";
@@ -14,17 +17,21 @@ import {
 } from "./constants";
 import { useNotify } from "../../Notification/Notification";
 import { langError } from "../../../locales/en";
+import { SearchRoomsResponseType } from "../../../shared/api/api.schema";
 
 // Load for the first time and refresh
 export function useLoadRooms() {
   const query = useQueryRooms();
   const notify = useNotify();
   const storeAction = useStore().rooms();
-  const allCount = storeAction.read().allCount;
   const storedRooms = storeAction.read().items;
 
   const run = useCallback(async () => {
-    const max = allCount || ITEM_COUNT_FOR_INITIAL_LOADING;
+    let max: number = ITEM_COUNT_FOR_INITIAL_LOADING;
+    if (storedRooms && storedRooms.length > ITEM_COUNT_FOR_INITIAL_LOADING) {
+      max = storedRooms.length;
+    }
+
     const { success, response, requestError, responseError } = await query.run({
       range: { min: 0 as const, max },
     });
@@ -98,6 +105,38 @@ export function useRooms() {
   const loadRooms = useLoadRooms();
   const loadMoreRooms = useLoadMoreRooms();
 
+  const querySearch = useQuerySearchRooms();
+
+  const [search, setSearch] = useState({
+    value: "",
+    error: "",
+  });
+  const [foundRooms, setFoundRooms] = useState<SearchRoomsResponseType | null>(
+    null,
+  );
+
+  const isSearch = search.value !== "";
+
+  useEffect(() => {
+    const action = async () => {
+      const { success, response, requestError, responseError } =
+        await querySearch.run({ limit: 10, offset: 0, q: search.value });
+      if (!success) {
+        setSearch((prevState) => ({
+          ...prevState,
+          error: requestError?.q || responseError || langError.UNKNOWN_MESSAGE,
+        }));
+        return;
+      }
+      setSearch((prevState) => ({ ...prevState, error: "" }));
+      setFoundRooms(response);
+    };
+
+    if (isSearch) action();
+    if (!isSearch) setFoundRooms(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.value, isSearch]);
+
   // Reload rooms
   useInterval(() => {
     if (storedRooms) loadRooms.run();
@@ -153,8 +192,15 @@ export function useRooms() {
   return {
     isZeroItemCount,
     isAllLoaded,
-    storedData,
+    storedRooms: storedData.items,
+    allCount: storedData.allCount,
     roomId,
     debouncedHandleScroll,
+    foundRooms,
+    search,
+    setSearchValue: (value: string) =>
+      setSearch((prevState) => ({ ...prevState, value })),
+    isSearch,
+    isLoadingSearch: querySearch.isLoading,
   };
 }

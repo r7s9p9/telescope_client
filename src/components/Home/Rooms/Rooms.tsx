@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import React, { Dispatch, ReactNode, memo, useEffect, useState } from "react";
+import { UIEvent, ReactNode, memo } from "react";
 import { formatDate } from "../../../shared/lib/date";
 import { getRandomInt } from "../../../shared/lib/random";
 import { routes } from "../../../constants";
@@ -11,11 +11,9 @@ import {
   RoomId,
   SearchRoomsResponseType,
 } from "../../../shared/api/api.schema";
-import { useQuerySearchRooms } from "../../../shared/api/api.model";
 import { IconButton } from "../../../shared/ui/IconButton/IconButton";
 import { Input } from "../../../shared/ui/Input/Input";
 import { Text } from "../../../shared/ui/Text/Text";
-import { langError } from "../../../locales/en";
 
 const itemHeightStyle = { height: ITEM_HEIGHT + "px" };
 
@@ -35,54 +33,24 @@ export function Rooms() {
     isZeroItemCount,
     isAllLoaded,
     roomId,
-    storedData,
+    storedRooms,
+    allCount,
     debouncedHandleScroll,
+    foundRooms,
+    search,
+    setSearchValue,
+    isSearch,
+    isLoadingSearch,
   } = useRooms();
 
-  const storedRooms = storedData?.items;
-
-  const [searchValue, setSearchValue] = useState("");
-  const [searchError, setSearchError] = useState("");
-  const [foundRooms, setFoundRooms] = useState<SearchRoomsResponseType | null>(
-    null,
-  );
-
-  const querySearch = useQuerySearchRooms();
-
-  const isSearch = searchValue !== "";
-
-  useEffect(() => {
-    const action = async () => {
-      const { success, response, requestError, responseError } =
-        await querySearch.run({ limit: 10, offset: 0, q: searchValue });
-      if (!success && requestError?.q) {
-        setSearchError(requestError.q);
-        return;
-      }
-      if (!success && responseError) {
-        setSearchError(responseError);
-        return;
-      }
-      if (!success) {
-        setSearchError(langError.UNKNOWN_MESSAGE);
-        return;
-      }
-      setSearchError("");
-      setFoundRooms(response);
-    };
-    if (isSearch) action();
-    if (!isSearch) setFoundRooms(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchValue, isSearch]);
-
-  if (searchValue !== "") {
+  if (isSearch) {
     return (
-      <Wrapper searchValue={searchValue} setSearchValue={setSearchValue}>
+      <Wrapper searchValue={search.value} setSearchValue={setSearchValue}>
         <FoundRooms
-          isLoading={querySearch.isLoading}
+          isLoading={isLoadingSearch}
           data={foundRooms}
           openedRoomId={roomId as RoomId}
-          error={searchError}
+          error={search.error}
         />
       </Wrapper>
     );
@@ -90,14 +58,14 @@ export function Rooms() {
 
   if (isZeroItemCount)
     return (
-      <Wrapper searchValue={searchValue} setSearchValue={setSearchValue}>
+      <Wrapper searchValue={search.value} setSearchValue={setSearchValue}>
         <ListEmpty />
       </Wrapper>
     );
 
   if (!storedRooms) {
     return (
-      <Wrapper searchValue={searchValue} setSearchValue={setSearchValue}>
+      <Wrapper searchValue={search.value} setSearchValue={setSearchValue}>
         <SkeletonList />
       </Wrapper>
     );
@@ -111,14 +79,12 @@ export function Rooms() {
 
   return (
     <Wrapper
-      searchValue={searchValue}
+      searchValue={search.value}
       setSearchValue={setSearchValue}
       onScroll={debouncedHandleScroll}
     >
       {items}
-      {!isAllLoaded && (
-        <SkeletonList count={storedData.allCount - storedRooms.length} />
-      )}
+      {!isAllLoaded && <SkeletonList count={allCount - storedRooms.length} />}
     </Wrapper>
   );
 }
@@ -131,8 +97,8 @@ function Wrapper({
 }: {
   children: ReactNode;
   searchValue: string;
-  setSearchValue: Dispatch<React.SetStateAction<string>>;
-  onScroll?: (e: React.UIEvent<HTMLElement>) => void;
+  setSearchValue: (value: string) => void;
+  onScroll?: (e: UIEvent<HTMLElement>) => void;
 }) {
   return (
     <>
