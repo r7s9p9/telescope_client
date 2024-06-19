@@ -71,7 +71,7 @@ export function Profile() {
             <InputField
               label="Name"
               size="md"
-              value={data.name}
+              value={data.name || "Hidden by user privacy settings"}
               error={error.name}
               setValue={setName}
               disabled={isUploading || !isYourProfile}
@@ -82,7 +82,7 @@ export function Profile() {
               maxRows={6}
               label="Bio"
               size="md"
-              value={data.bio}
+              value={data.bio || "Hidden by user privacy settings"}
               error={error.bio}
               setValue={setBio}
               disabled={isUploading || !isYourProfile}

@@ -178,9 +178,15 @@ function Member({
         <Text size="sm" font="bold">
           @{data.general?.username}
         </Text>
-        <Text size="sm" font="light">
-          Name: {data.general?.name}
-        </Text>
+        {data.general?.name ? (
+          <Text size="sm" font="light">
+            Name: {data.general.name}{" "}
+          </Text>
+        ) : (
+          <Text size="sm" font="light" className="text-slate-600">
+            Name hidden
+          </Text>
+        )}
       </div>
       <div className="flex flex-col items-end">
         <Text

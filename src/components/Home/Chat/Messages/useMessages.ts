@@ -81,9 +81,7 @@ export function useMessage({
     type: "reply" | "edit" | "copy" | "delete",
   ) {
     // TODO
-    //
-    // if (type === "reply") {
-    // }
+    // if (type === "reply") {}
     if (type === "edit") {
       editAction.onEdit(message);
       closeMenu();

@@ -74,13 +74,6 @@ export function TextArea({
           // for height with 1 row
           target.style.height = `${height}px`;
         } else {
-          console.log(
-            "allRowsCount",
-            (target.scrollHeight - 2 * padding) / detector.clientHeight,
-          );
-          console.log(padding, "padding");
-          console.log(target.scrollHeight, "target.scrollHeight");
-          console.log(detector.clientHeight, "detector.clientHeight");
           // for height with 1+ row
           target.style.height = `${detector.clientHeight * allRowsCount + 2 * padding}px`;
         }

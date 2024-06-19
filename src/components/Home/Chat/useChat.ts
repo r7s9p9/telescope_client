@@ -168,6 +168,7 @@ export function useLoadNewerMessages() {
       if (response.messages) {
         storeAction.update().data({
           allCount: response.allCount ? response.allCount : 0,
+          //messages: response.messages.reverse().concat(storedMessages),
           messages: response.messages.concat(storedMessages),
           isNewMessages: true,
         });
@@ -176,7 +177,7 @@ export function useLoadNewerMessages() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryRead, roomId, storedMessages, storeAction]);
 
-  return { run: loadNewerMessages };
+  return { run: loadNewerMessages, isLoading: queryRead.isLoading };
 }
 
 function useLoadOlderMessages() {
@@ -202,10 +203,12 @@ function useLoadOlderMessages() {
         return;
       }
 
-      storeAction.update().data({
-        allCount: response.allCount ? response.allCount : 0,
-        messages: (storedMessages || []).concat(response.messages || []),
-      });
+      if (response.messages) {
+        storeAction.update().data({
+          allCount: response.allCount ? response.allCount : 0,
+          messages: (storedMessages || []).concat(response.messages),
+        });
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [queryRead, roomId, storedMessages, storeAction],
@@ -255,7 +258,7 @@ function useCompareMessages() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryCompare, storedMessages, roomId, storeAction, storedChat?.allCount]);
 
-  return { run: compareMessages };
+  return { run: compareMessages, isLoading: queryCompare.isLoading };
 }
 
 export function useChat() {
@@ -302,10 +305,14 @@ export function useChat() {
   }, [storedChat, storeAction, loadOlderMessages]);
 
   // Update messages
-  useInterval(() => loadNewerMessages.run(), CHAT_UPDATE_INTERVAL);
+  useInterval(() => {
+    if (!compareMessages.isLoading) loadNewerMessages.run();
+  }, CHAT_UPDATE_INTERVAL);
 
   // Compare existing messages
-  useInterval(() => compareMessages.run(), CHAT_COMPARE_INTERVAL);
+  useInterval(() => {
+    if (!loadNewerMessages.isLoading) compareMessages.run();
+  }, CHAT_COMPARE_INTERVAL);
 
   const onScrollLoader = useCallback(async () => {
     if (!isLoading && !isAllLoaded && storedMessages && storedChat.allCount) {
