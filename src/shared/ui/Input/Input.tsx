@@ -58,9 +58,12 @@ export function Input({
     <div className="relative shrink-0 w-full">
       {leftSection && (
         <div
-          // The content is in a square with a side equal to the height of the component
-          style={{ width: height, height }}
-          className="absolute left-0 bottom-0 flex items-center justify-center"
+          style={{
+            height,
+            gap: padding,
+            padding,
+          }}
+          className="absolute left-0 bottom-0 flex items-center justify-around"
         >
           {leftSection}
         </div>
@@ -84,9 +87,12 @@ export function Input({
       ></input>
       {rightSection && (
         <div
-          // The content is in a square with a side equal to the height of the component
-          style={{ width: height, height }}
-          className="absolute right-0 bottom-0 flex items-center justify-center"
+          style={{
+            height,
+            gap: padding,
+            padding,
+          }}
+          className="absolute right-0 bottom-0 flex items-center justify-around"
         >
           {rightSection}
         </div>

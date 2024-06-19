@@ -65,7 +65,7 @@ export function Messages({
     <ul
       ref={chat.messagesRef}
       onScroll={chat.debouncedHandleScroll}
-      className="relative overflow-y-scroll will-change-scroll overscroll-none scroll-auto grow w-full p-4 flex flex-col bg-slate-200"
+      className="relative overflow-y-auto will-change-scroll overscroll-none scroll-auto grow w-full p-4 flex flex-col bg-slate-200"
     >
       {children}
       <ScrollButton

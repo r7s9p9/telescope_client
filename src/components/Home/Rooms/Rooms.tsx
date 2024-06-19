@@ -3,7 +3,7 @@ import { UIEvent, ReactNode, memo } from "react";
 import { formatDate } from "../../../shared/lib/date";
 import { getRandomInt } from "../../../shared/lib/random";
 import { routes } from "../../../constants";
-import { IconCirclePlus, IconSearch } from "@tabler/icons-react";
+import { IconCirclePlus, IconSearch, IconX } from "@tabler/icons-react";
 import { useRooms } from "./useRooms";
 import { ITEM_HEIGHT } from "./constants";
 import {
@@ -45,7 +45,11 @@ export function Rooms() {
 
   if (isSearch) {
     return (
-      <Wrapper searchValue={search.value} setSearchValue={setSearchValue}>
+      <Wrapper
+        isSearch={isSearch}
+        searchValue={search.value}
+        setSearchValue={setSearchValue}
+      >
         <FoundRooms
           isLoading={isLoadingSearch}
           data={foundRooms}
@@ -58,14 +62,22 @@ export function Rooms() {
 
   if (isZeroItemCount)
     return (
-      <Wrapper searchValue={search.value} setSearchValue={setSearchValue}>
+      <Wrapper
+        isSearch={isSearch}
+        searchValue={search.value}
+        setSearchValue={setSearchValue}
+      >
         <ListEmpty />
       </Wrapper>
     );
 
   if (!storedRooms) {
     return (
-      <Wrapper searchValue={search.value} setSearchValue={setSearchValue}>
+      <Wrapper
+        isSearch={isSearch}
+        searchValue={search.value}
+        setSearchValue={setSearchValue}
+      >
         <SkeletonList />
       </Wrapper>
     );
@@ -79,6 +91,7 @@ export function Rooms() {
 
   return (
     <Wrapper
+      isSearch={isSearch}
       searchValue={search.value}
       setSearchValue={setSearchValue}
       onScroll={debouncedHandleScroll}
@@ -91,11 +104,13 @@ export function Rooms() {
 
 function Wrapper({
   children,
+  isSearch,
   searchValue,
   setSearchValue,
   onScroll,
 }: {
   children: ReactNode;
+  isSearch: boolean;
   searchValue: string;
   setSearchValue: (value: string) => void;
   onScroll?: (e: UIEvent<HTMLElement>) => void;
@@ -111,17 +126,29 @@ function Wrapper({
             placeholder="Search..."
             size="md"
             rightSection={
-              <IconSearch
-                className="text-slate-400"
-                strokeWidth="1"
-                size={24}
-              />
+              <>
+                {isSearch && (
+                  <IconX
+                    onClick={() => setSearchValue("")}
+                    className="text-slate-400 cursor-pointer"
+                    strokeWidth="1"
+                    size={24}
+                  />
+                )}
+                {!isSearch && (
+                  <IconSearch
+                    className="text-slate-400"
+                    strokeWidth="1"
+                    size={24}
+                  />
+                )}
+              </>
             }
           />
         </div>
         <ul
           onScroll={onScroll}
-          className="overflow-y-scroll overscroll-none scroll-smooth w-full flex flex-col bg-slate-50"
+          className="overflow-y-auto overscroll-none scroll-smooth w-full flex flex-col bg-slate-50"
         >
           {children}
         </ul>

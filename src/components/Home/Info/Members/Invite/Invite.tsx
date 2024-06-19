@@ -113,7 +113,7 @@ function ListWrapper({
     <ul
       onScroll={onScroll}
       ref={listRef}
-      className="w-full h-[450px] mt-4 overflow-scroll overscroll-none flex flex-col gap-2"
+      className="w-full h-[450px] mt-4 overflow-y-auto overscroll-none flex flex-col gap-2"
     >
       {children}
     </ul>

@@ -227,7 +227,7 @@ function Wrapper({
         <Text size="xl" font="light" className="select-none mb-4">
           Sessions
         </Text>
-        <div className="h-full overflow-scroll">{children}</div>
+        <div className="h-full overflow-y-auto">{children}</div>
         {isFromAnotherPage && (
           <Button
             title="Go back"

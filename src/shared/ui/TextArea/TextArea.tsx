@@ -66,7 +66,7 @@ export function TextArea({
       target.style.height = "auto";
 
       const allRowsCount = Math.floor(
-        target.scrollHeight / detector.clientHeight,
+        (target.scrollHeight - 2 * padding) / detector.clientHeight,
       );
 
       if (allRowsCount <= maxRows) {
@@ -74,38 +74,48 @@ export function TextArea({
           // for height with 1 row
           target.style.height = `${height}px`;
         } else {
+          console.log(
+            "allRowsCount",
+            (target.scrollHeight - 2 * padding) / detector.clientHeight,
+          );
+          console.log(padding, "padding");
+          console.log(target.scrollHeight, "target.scrollHeight");
+          console.log(detector.clientHeight, "detector.clientHeight");
           // for height with 1+ row
           target.style.height = `${detector.clientHeight * allRowsCount + 2 * padding}px`;
         }
       } else {
         // to hold the maximum specified number of rows
         target.style.height = `${detector.clientHeight * maxRows + 2 * padding}px`;
+        //target.scrollTop = target.scrollHeight;
       }
     }
   }, [textAreaRef, heightDetectorRef, maxRows, padding, value, height]);
 
   return (
-    <div className="relative shrink-0 w-full">
+    <div className="relative grow shrink-0 flex w-full">
       {leftSection && (
         <div
-          // The content is in a square with a side equal to the height of the component
-          style={{ width: height, height }}
-          className="absolute left-0 bottom-0 flex items-center justify-center"
+          style={{
+            height,
+            gap: padding,
+            padding,
+          }}
+          className="absolute right-0 bottom-0 flex items-center justify-around"
         >
           {leftSection}
         </div>
       )}
       <textarea
         ref={textAreaRef}
-        rows={minRows}
         value={value}
+        placeholder={placeholder}
+        rows={minRows}
         onChange={(e) => {
           setValue(e.currentTarget.value);
         }}
-        aria-multiline={true}
         aria-expanded={true}
         autoComplete="off"
-        placeholder={placeholder || ""}
         disabled={disabled}
         style={{
           // Since the height also determines the width of the left and right sections,
@@ -114,8 +124,9 @@ export function TextArea({
           paddingRight: rightSection ? height : padding,
           paddingBottom: padding,
           paddingTop: padding,
+          height,
         }}
-        className={`${textSize} font-light ${unstyled ? "" : "ring-2 ring-slate-200"} resize-none h-full w-full outline-none bg-slate-100 rounded-md enabled:hover:ring-slate-400 enabled:hover:bg-slate-50 enabled:hover:rounded-xl focus:ring-slate-400 focus:bg-slate-50 focus:rounded-xl duration-300 ease-in-out ${className || ""}`}
+        className={`${textSize} font-light ${unstyled ? "" : "ring-2 ring-slate-200"} resize-none h-auto w-full outline-none bg-slate-100 rounded-md enabled:hover:ring-slate-400 enabled:hover:bg-slate-50 enabled:hover:rounded-xl focus:ring-slate-400 focus:bg-slate-50 focus:rounded-xl duration-300 ease-in-out ${className || ""}`}
       />
       <p
         // Defines the height of one line of the same font as <textarea />
@@ -126,9 +137,12 @@ export function TextArea({
       </p>
       {rightSection && (
         <div
-          // The content is in a square with a side equal to the height of the component
-          style={{ width: height, height }}
-          className="absolute right-0 bottom-0 flex items-center justify-center"
+          style={{
+            height,
+            gap: padding,
+            padding,
+          }}
+          className="absolute right-0 bottom-0 flex items-center justify-around"
         >
           {rightSection}
         </div>

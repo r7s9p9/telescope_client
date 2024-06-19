@@ -49,13 +49,13 @@ export function InputField({
         <IconEyeClosed
           onClick={() => setShow(true)}
           size={28}
-          className={`absolute cursor-pointer text-slate-500 ${!show ? "z-10 opacity-100" : "z-0 opacity-0"}`}
+          className={`cursor-pointer text-slate-500 duration-300 ease-in-out ${!show ? "z-10 opacity-100" : "z-0 opacity-0"}`}
           strokeWidth="1"
         />
         <IconEye
           onClick={() => setShow(false)}
           size={28}
-          className={`absolute cursor-pointer text-slate-500 ${show ? "z-10 opacity-100" : "z-0 opacity-0"}`}
+          className={`absolute cursor-pointer text-slate-500 duration-300 ease-in-out ${show ? "z-10 opacity-100" : "z-0 opacity-0"}`}
           strokeWidth="1"
         />
       </>
