@@ -3,7 +3,6 @@ import { useInfo } from "./useInfo";
 import { IconButton } from "../../../shared/ui/IconButton/IconButton";
 import { Text } from "../../../shared/ui/Text/Text";
 import { Paper } from "../../../shared/ui/Paper/Paper";
-
 import { Properties } from "./Properties/Properties";
 import { Members } from "./Members/Members";
 import { Actions } from "./Actions/Actions";

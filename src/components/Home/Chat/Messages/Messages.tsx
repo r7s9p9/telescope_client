@@ -162,7 +162,7 @@ export function Message({
           {content.date}
         </Text>
       </div>
-      <Text size="sm" font="default" className="text-justify break-all">
+      <Text size="sm" font="default" className="text-justify break-words">
         {content.text}
       </Text>
     </Paper>

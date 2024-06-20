@@ -9,9 +9,7 @@ import { MessageDates, MessageType } from "../../../shared/api/api.schema";
 import { useInterval } from "../../../shared/lib/useInterval";
 import { useStore } from "../../../shared/store/store";
 import { debounce } from "../../../shared/lib/debounce";
-import { checkRoomId } from "../../../shared/lib/uuid";
-import { useNavigate, useParams } from "react-router-dom";
-import { routes } from "../../../constants";
+import { useParams } from "react-router-dom";
 import { getRandomArray, getRandomBoolean } from "../../../shared/lib/random";
 import { useNotify } from "../../Notification/Notification";
 import { langError } from "../../../locales/en";
@@ -262,7 +260,6 @@ function useCompareMessages() {
 }
 
 export function useChat() {
-  const navigate = useNavigate();
   const { roomId } = useParams();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -280,13 +277,6 @@ export function useChat() {
   const loadOlderMessages = useLoadOlderMessages();
   const loadNewerMessages = useLoadNewerMessages();
   const compareMessages = useCompareMessages();
-
-  // Initial actions
-  useEffect(() => {
-    // wrong roomId protection
-    if (roomId && !checkRoomId(roomId)) navigate(routes.home.path);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     // Initial load data if no chat in store

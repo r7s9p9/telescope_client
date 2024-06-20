@@ -287,16 +287,19 @@ export type ReadRoomInfoRequestType = z.infer<typeof readRoomInfoRequestSchema>;
 
 export const readRoomInfoResponseSchema = z.object({
   success: z.boolean(),
+  access: z.boolean(),
   roomId: roomIdSchema,
-  info: z.object({
-    name: roomNameSchema,
-    type: roomTypeSchema,
-    about: roomAboutSchema,
-    created: roomCreatedSchema,
-    creatorId: z.union([userIdSchema, selfIdSchema, serviceIdSchema]),
-    userCount: z.number(),
-    isMember: z.boolean(),
-  }),
+  info: z
+    .object({
+      name: roomNameSchema,
+      type: roomTypeSchema,
+      about: roomAboutSchema,
+      created: roomCreatedSchema,
+      creatorId: z.union([userIdSchema, selfIdSchema, serviceIdSchema]),
+      userCount: z.number(),
+      isMember: z.boolean(),
+    })
+    .optional(),
 });
 export type ReadRoomInfoResponseType = z.infer<
   typeof readRoomInfoResponseSchema
@@ -564,7 +567,7 @@ export const getMessagesResponseSchema = z.object({
   access: z.boolean(),
   success: z.boolean(),
   roomId: roomIdSchema,
-  allCount: z.number(),
+  allCount: z.number().optional(),
   messages: z.array(messageSchema).optional(),
 });
 export type GetMessagesResponseType = z.infer<typeof getMessagesResponseSchema>;

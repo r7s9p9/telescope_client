@@ -9,13 +9,17 @@ export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
     useTopBar(data);
 
   return (
-    <div className="w-full h-16 px-4 font-light flex justify-between items-center border-l-2 border-slate-100 bg-slate-50 select-none">
+    <div className="w-full min-w-[320px] h-16 px-4 flex justify-between items-center gap-4 border-l-2 border-slate-100 bg-slate-50 select-none">
       {!content.isInitialLoading && (
-        <div className="flex items-center shrink-0">
-          <div className="size-10 flex items-center justify-center text-2xl uppercase font-light rounded-full border-2 border-slate-400">
+        <div className="flex items-center shrink-0 gap-4">
+          <Text
+            size="xl"
+            font="light"
+            className="size-10 flex items-center justify-center uppercase rounded-full border-2 border-slate-400 "
+          >
             {content.name?.at(0)}
-          </div>
-          <div className="flex flex-col ml-4 py-2 grow">
+          </Text>
+          <div className="flex flex-col py-2 grow">
             <Text size="md" font="light">
               {content.name}
             </Text>
