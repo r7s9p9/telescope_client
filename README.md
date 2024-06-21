@@ -3,6 +3,17 @@
 This is a web client for exchanging messages within rooms that are created and managed by users.  
 If you need a server, then go [here](https://github.com/r7s9p9/telescope-server).
 
+## Stack
+
+- React
+- React Router
+- Typescript
+- Zod
+- TailwindCSS
+- Vite
+- Vitest
+- Docker & Docker Compose
+
 ## Get Started
 
 To get the telescope client running locally:
