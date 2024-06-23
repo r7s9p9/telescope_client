@@ -18,23 +18,27 @@ export function Settings() {
   const { onClickHandler } = useSettings();
   const popup = usePopup();
 
+  const iconProps = {
+    strokeWidth: "1.5",
+    className: "ml-2 text-slate-600",
+    size: 28,
+  };
+
   return (
     <Wrapper>
       <Paper
         padding={4}
-        rounded="xl"
         shadow="xl"
-        className="h-full flex flex-col bg-slate-50"
+        className="h-full w-full md:w-72 flex flex-col justify-center md:rounded-xl bg-slate-50"
       >
         <Button
           title="My Profile"
           size="xl"
           unstyled
-          padding={96}
           onClick={onClickHandler().profile}
-          className="gap-4 hover:bg-slate-200 rounded-t-lg"
+          className="gap-6 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100 md:rounded-t-lg"
         >
-          <IconUser strokeWidth="1.5" className="text-slate-600" size={28} />
+          <IconUser {...iconProps} />
           <Text
             size="xl"
             font="light"
@@ -49,11 +53,10 @@ export function Settings() {
           title="Privacy"
           size="xl"
           unstyled
-          padding={96}
           onClick={onClickHandler().privacy}
-          className="gap-4 hover:bg-slate-200"
+          className="gap-6 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100"
         >
-          <IconLock strokeWidth="1.5" className="text-slate-600" size={28} />
+          <IconLock {...iconProps} />
           <Text
             size="xl"
             font="light"
@@ -68,15 +71,10 @@ export function Settings() {
           title="Sessions"
           size="xl"
           unstyled
-          padding={96}
           onClick={onClickHandler().sessions}
-          className="gap-4 hover:bg-slate-200"
+          className="gap-6 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100"
         >
-          <IconDeviceDesktop
-            strokeWidth="1.5"
-            className="text-slate-600"
-            size={28}
-          />
+          <IconDeviceDesktop {...iconProps} />
           <Text
             size="xl"
             font="light"
@@ -91,17 +89,12 @@ export function Settings() {
           title="Language"
           size="xl"
           unstyled
-          padding={96}
           onClick={() => {
             popup.show(<WIP />);
           }}
-          className="gap-4 hover:bg-slate-200"
+          className="gap-6 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100"
         >
-          <IconLanguage
-            strokeWidth="1.5"
-            className="text-slate-600"
-            size={28}
-          />
+          <IconLanguage {...iconProps} />
           <Text
             size="xl"
             font="light"
@@ -116,7 +109,6 @@ export function Settings() {
           title="Logout"
           size="xl"
           unstyled
-          padding={96}
           onClick={() => {
             popup.show(
               ConfirmPopup({
@@ -126,9 +118,13 @@ export function Settings() {
               }),
             );
           }}
-          className="gap-4 hover:bg-slate-200 rounded-b-lg"
+          className="gap-6 hover:bg-slate-200 md:rounded-b-lg"
         >
-          <IconDoorExit strokeWidth="1.5" className="text-red-600" size={28} />
+          <IconDoorExit
+            strokeWidth="1.5"
+            className="text-red-600 ml-2"
+            size={28}
+          />
           <Text
             size="xl"
             font="light"
@@ -146,7 +142,7 @@ export function Settings() {
 
 function Wrapper({ children }: { children: ReactNode }) {
   return (
-    <div className="w-full self-center flex items-center justify-center">
+    <div className="w-screen md:w-full h-full md:h-fit self-center flex items-center justify-center">
       {children}
     </div>
   );

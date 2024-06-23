@@ -34,7 +34,7 @@ export function Members() {
   if (isLoading && !data?.users) {
     members = (
       <MembersListWrapper>
-        <Spinner size={128} className="self-center" />
+        <Spinner size={128} className="mt-16 self-center" />
       </MembersListWrapper>
     );
   } else if (data?.isEmpty || !data?.users) {
@@ -58,39 +58,35 @@ export function Members() {
     );
   }
 
+  const iconProps = {
+    className: "text-slate-600",
+    strokeWidth: "1.5",
+    size: 24,
+  };
+
   return (
     <>
-      <div className="flex flex-col p-4 border-y-2 border-slate-100">
-        <div className="flex items-center gap-2">
-          <Text size="xl" font="thin" uppercase letterSpacing className="grow">
-            Members
-          </Text>
-          <IconButton title="Refresh members" onClick={() => getMembers()}>
-            <IconRefresh className="text-slate-600" strokeWidth="2" size={24} />
-          </IconButton>
-          {isAdmin && (
-            <>
-              <Link to={routes.rooms.path + roomId + "/info/blocked"}>
-                <IconButton title="Blocked users">
-                  <IconUserCancel
-                    className="text-slate-600"
-                    strokeWidth="2"
-                    size={24}
-                  />
-                </IconButton>
-              </Link>
-              <Link to={routes.rooms.path + roomId + "/info/invite"}>
-                <IconButton title="Invite users">
-                  <IconPlus
-                    className="text-slate-600"
-                    strokeWidth="2"
-                    size={24}
-                  />
-                </IconButton>
-              </Link>
-            </>
-          )}
-        </div>
+      <div className="flex items-center gap-2 p-4 border-t-2 border-slate-100">
+        <Text size="xl" font="thin" uppercase letterSpacing className="grow">
+          Members
+        </Text>
+        <IconButton title="Refresh members" onClick={() => getMembers()}>
+          <IconRefresh {...iconProps} />
+        </IconButton>
+        {isAdmin && (
+          <>
+            <Link to={routes.rooms.path + roomId + "/info/blocked"}>
+              <IconButton title="Blocked users">
+                <IconUserCancel {...iconProps} />
+              </IconButton>
+            </Link>
+            <Link to={routes.rooms.path + roomId + "/info/invite"}>
+              <IconButton title="Invite users">
+                <IconPlus {...iconProps} />
+              </IconButton>
+            </Link>
+          </>
+        )}
       </div>
       {members}
     </>
@@ -110,7 +106,7 @@ function MembersListWrapper({
     <ul
       onScroll={onScroll}
       ref={listRef}
-      className="w-full grow p-4 overflow-y-auto overscroll-none flex flex-col gap-2"
+      className="w-full p-4 h-64 md:h-full overflow-y-auto overscroll-none flex flex-col grow gap-2 border-t-2 border-slate-100"
     >
       {children}
     </ul>

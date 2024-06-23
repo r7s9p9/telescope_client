@@ -97,53 +97,61 @@ function Session({
   const popup = usePopup();
 
   return (
-    <div className="relative rounded-r-2xl rounded-l-[100px] shrink-0 h-22 mb-4 hover:bg-slate-300 duration-300 ease-in-out flex justify-between">
+    <div className="relative rounded-r-xl rounded-l-[50px] shrink-0 h-22 mb-4 hover:bg-slate-200 duration-300 ease-in-out flex">
       <DeviceIcon parsedUserAgent={parsedUserAgent} />
-      <div className="pl-4 py-2 grow flex flex-col justify-between">
-        <Text size="sm" font="light" capitalize>
-          Device: {parsedUserAgent.device}
-        </Text>
-        <Text size="sm" font="light" capitalize>
-          Browser: {parsedUserAgent.browser}
-        </Text>
-        <Text size="sm" font="light">
-          IP: {data.ip}
-        </Text>
-      </div>
-      <div className="pr-2 py-2 flex flex-col justify-between">
-        {data.isCurrent && (
+      <div className="pl-4 flex flex-col md:flex-row md:grow">
+        <div className="md:py-2 md:grow flex flex-col md:justify-between">
+          <Text size="sm" font="light" capitalize>
+            Device: {parsedUserAgent.device}
+          </Text>
+          <Text size="sm" font="light" capitalize>
+            Browser: {parsedUserAgent.browser}
+          </Text>
           <Text size="sm" font="light">
-            This device
+            IP: {data.ip}
           </Text>
-        )}
-        {data.isFrozen && (
-          <Text size="sm" font="light" className="text-red-600">
-            Blocked
-          </Text>
-        )}
+          {!data.isCurrent && !isOnline && (
+            <Text size="sm" font="light">
+              {`Last seen: ${lastSeen.result}`}
+            </Text>
+          )}
+        </div>
+        <div className="pr-2 flex flex-col grow md:items-end justify-end md:justify-between">
+          {data.isCurrent && (
+            <Text size="sm" font="light" className="text-green-600">
+              This device
+            </Text>
+          )}
+
+          {data.isFrozen && (
+            <Text size="sm" font="light" className="text-red-600">
+              Blocked
+            </Text>
+          )}
+          {!data.isCurrent && isOnline && (
+            <Text size="sm" font="light" className="text-green-600">
+              "Online"
+            </Text>
+          )}
+        </div>
         {!data.isCurrent && (
-          <Text size="sm" font="light">
-            {isOnline ? "Online" : `Last seen: ${lastSeen.result}`}
-          </Text>
+          <IconButton
+            title="Delete session"
+            className="hover:bg-slate-400 absolute bottom-1 right-1"
+            onClick={() =>
+              popup.show(
+                ConfirmPopup({
+                  onAgree: () => remove(data.sessionId),
+                  onClose: popup.hide,
+                  text: "Are you sure you want to delete this session?",
+                }),
+              )
+            }
+          >
+            <IconTrash size={28} strokeWidth="1.5" className="text-slate-600" />
+          </IconButton>
         )}
       </div>
-      {!data.isCurrent && (
-        <IconButton
-          title="Delete session"
-          className="hover:bg-slate-400 absolute bottom-1 right-1"
-          onClick={() =>
-            popup.show(
-              ConfirmPopup({
-                onAgree: () => remove(data.sessionId),
-                onClose: popup.hide,
-                text: "Are you sure you want to delete this session?",
-              }),
-            )
-          }
-        >
-          <IconTrash size={28} strokeWidth="1.5" className="text-slate-600" />
-        </IconButton>
-      )}
     </div>
   );
 }
@@ -197,10 +205,10 @@ function DeviceIcon({
 
   return (
     <div className="flex relative">
-      <div className="absolute left-0 top-0 rounded-full w-fit h-fit p-1 border-2 border-slate-400 bg-slate-100">
+      <div className="absolute left-0 top-0 rounded-full w-fit h-fit p-0.5 border-2 border-slate-300 bg-slate-100">
         {deviceIcon}
       </div>
-      <div className="pl-14 overflow-hidden rounded-full w-fit h-fit p-1 border-2 border-slate-400 bg-slate-100">
+      <div className="pt-12 md:pt-1 md:pl-14 p-0.5 overflow-hidden rounded-full w-fit h-fit border-2 border-slate-300 bg-slate-100">
         {browserIcon}
       </div>
     </div>
@@ -220,9 +228,8 @@ function Wrapper({
     <div className="w-full h-full flex items-center justify-center">
       <Paper
         padding={4}
-        rounded="xl"
         shadow="xl"
-        className="w-3/4 h-[400px] min-w-[350px] max-w-[650px] flex flex-col"
+        className="w-full h-full md:w-3/4 md:h-[400px] md:min-w-[350px] md:max-w-[650px] md:rounded-xl flex flex-col"
       >
         <Text size="xl" font="light" className="select-none mb-4">
           Sessions

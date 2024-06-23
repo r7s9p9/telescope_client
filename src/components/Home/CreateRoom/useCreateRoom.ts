@@ -60,12 +60,17 @@ export function useCreateRoom() {
     }
   };
 
+  const cancel = () => {
+    navigate({ pathname: routes.rooms.path });
+  };
+
   return {
     form,
     setName,
     setAbout,
     handleSelectType,
     run,
+    cancel,
     isLoading: query.isLoading,
   };
 }

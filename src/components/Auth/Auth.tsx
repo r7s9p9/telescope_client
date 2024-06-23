@@ -1,26 +1,12 @@
-import { Dispatch, ReactNode } from "react";
+import { ReactNode } from "react";
 import { NotifyStack } from "../Notification/Notification";
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { IconKey, IconMail, IconSend2, IconUser } from "@tabler/icons-react";
-import {
-  useQueryCode,
-  useQueryLogin,
-  useQueryRegister,
-} from "../../shared/api/api.model";
-import { routes } from "../../constants";
-import { useNotify } from "../Notification/Notification";
 import { Spinner } from "../../shared/ui/Spinner/Spinner";
 import { Text } from "../../shared/ui/Text/Text";
 import { Paper } from "../../shared/ui/Paper/Paper";
 import { InputField } from "../../shared/ui/InputField/InputField";
 import { Button } from "../../shared/ui/Button/Button";
-import { langAuth, langError } from "../../locales/en";
-
-interface ShowItemState {
-  showItem: "login" | "register" | "code";
-  setShowItem: Dispatch<ShowItemState["showItem"]>;
-}
+import { useCode, useLogin, useMain, useRegister } from "./useAuth";
 
 export default function Auth({ type }: { type: "login" | "register" }) {
   return (
@@ -33,61 +19,17 @@ export default function Auth({ type }: { type: "login" | "register" }) {
 
 function Background({ children }: { children: ReactNode }) {
   return (
-    <div className="w-full h-full flex justify-center bg-slate-300">
+    <div className="w-full h-full flex justify-center bg-slate-100 md:bg-slate-300">
       {children}
     </div>
   );
 }
 
 function AuthContainer({ type }: { type: "login" | "register" }) {
-  const [showItem, setShowItem] = useState<ShowItemState["showItem"]>(type);
-  const [email, setEmail] = useState("");
-
-  const notify = useNotify();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (location.state?.loggedOut) {
-      notify.show.info(langAuth.LOGGED_OUT);
-      // remove state from location
-      navigate({ pathname: location.pathname });
-    }
-    if (location.state?.sessionBlocked) {
-      notify.show.info(langAuth.SESSION_BLOCKED);
-      // remove state from location
-      navigate({ pathname: location.pathname });
-    }
-  }, [location, navigate, notify.show]);
-
-  // /login/code route protection
-  useEffect(() => {
-    if (location.pathname === routes.code.path && showItem !== "code") {
-      navigate({ pathname: routes.login.path });
-    }
-  }, [location, navigate, showItem]);
-
-  function handleCodeRequired(email: string) {
-    setShowItem("code");
-    navigate({ pathname: routes.code.path });
-    setEmail(email);
-  }
-
-  const switchForm = {
-    toLogin: () => {
-      setEmail("");
-      setShowItem("login");
-      navigate({ pathname: routes.login.path });
-    },
-    toRegister: () => {
-      setEmail("");
-      setShowItem("register");
-      navigate({ pathname: routes.register.path });
-    },
-  };
+  const { showItem, switchForm, handleCodeRequired, email } = useMain({ type });
 
   return (
-    <div className="overflow-hidden relative flex flex-row justify-center items-center w-full h-full select-none">
+    <div className="overflow-hidden relative w-full h-full flex flex-row justify-center md:items-center select-none">
       <LoginForm
         isShow={showItem === "login"}
         handleCodeRequired={handleCodeRequired}
@@ -101,84 +43,6 @@ function AuthContainer({ type }: { type: "login" | "register" }) {
       />
     </div>
   );
-}
-
-function useLogin({
-  handleCodeRequired,
-}: {
-  handleCodeRequired: ReturnType<typeof Function>;
-}) {
-  const query = useQueryLogin();
-  const navigate = useNavigate();
-  const notify = useNotify();
-
-  const defaultForm = {
-    email: { value: "", error: "" },
-    password: { value: "", error: "" },
-  };
-
-  const [form, setForm] = useState(defaultForm);
-  const setEmail = (value: string) => {
-    setForm((prevForm) => ({ ...prevForm, email: { value, error: "" } }));
-  };
-  const setPassword = (value: string) => {
-    setForm((prevForm) => ({ ...prevForm, password: { value, error: "" } }));
-  };
-
-  const reset = () => {
-    setForm(defaultForm);
-  };
-
-  const run = async () => {
-    const { success, response, requestError, responseError } = await query.run({
-      email: form.email.value,
-      password: form.password.value,
-    });
-
-    if (!success && requestError) {
-      setForm((prevForm) => ({
-        ...prevForm,
-        email: {
-          ...prevForm.email,
-          error: requestError.email || "",
-        },
-        password: {
-          ...prevForm.password,
-          error: requestError.password || "",
-        },
-      }));
-      return;
-    }
-
-    if (!success && responseError) {
-      notify.show.error(responseError);
-      return;
-    }
-
-    if (!success) {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
-      return;
-    }
-
-    if (response?.success) {
-      if (response.code) {
-        handleCodeRequired(form.email.value);
-      } else {
-        navigate({ pathname: routes.home.path });
-      }
-    } else {
-      notify.show.error(langAuth.INCORRECT_CREDENTIALS);
-    }
-  };
-
-  return {
-    form,
-    setEmail,
-    setPassword,
-    run,
-    reset,
-    isLoading: query.isLoading,
-  };
 }
 
 function LoginForm({
@@ -200,14 +64,13 @@ function LoginForm({
   return (
     <Paper
       rounded="lg"
-      shadow="xl"
       padding={4}
       style={{
-        transform: isShow ? "" : "translateY(-125%)",
+        transform: isShow ? "" : "translateX(-125%)",
         opacity: isShow ? "1" : "0",
         zIndex: isShow ? 50 : 0,
       }}
-      className="absolute w-3/4 min-w-[480px] max-w-[600px] flex flex-col justify-center gap-2 duration-500 ease-in-out transform-gpu"
+      className="absolute w-full md:w-3/4 md:max-w-xl md:shadow-xl flex flex-col justify-center gap-2 duration-500 ease-in-out transform-gpu"
     >
       <div className="flex justify-between items-center">
         <Text size="xl" font="light" letterSpacing>
@@ -268,65 +131,6 @@ function LoginForm({
   );
 }
 
-function useCode({ email }: { email: string }) {
-  const query = useQueryCode();
-  const navigate = useNavigate();
-  const notify = useNotify();
-
-  const defaultForm = {
-    value: "",
-    error: "",
-  };
-
-  const [code, setCode] = useState(defaultForm);
-
-  const reset = () => {
-    setCode(defaultForm);
-  };
-
-  const run = async () => {
-    const { success, response, requestError, responseError } = await query.run({
-      code: code.value,
-      email,
-    });
-
-    if (!success && requestError) {
-      setCode((prevCode) => ({
-        ...prevCode,
-        error: requestError.code || "",
-      }));
-      if (requestError.email) {
-        notify.show.error(langAuth.OUTDATED_EMAIL);
-        navigate({ pathname: routes.login.path });
-        return;
-      }
-    }
-
-    if (!success && responseError) {
-      notify.show.error(responseError);
-      return;
-    }
-
-    if (!success) {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
-      return;
-    }
-
-    if (!response.success) notify.show.error(langAuth.BAD_CODE);
-    if (response.success) navigate({ pathname: routes.home.path });
-  };
-
-  return {
-    code,
-    setCode: (value: string) => {
-      setCode((prevCode) => ({ ...prevCode, value }));
-    },
-    run,
-    reset,
-    isLoading: query.isLoading,
-  };
-}
-
 function CodeForm({
   isShow,
   email,
@@ -344,14 +148,13 @@ function CodeForm({
   return (
     <Paper
       rounded="lg"
-      shadow="xl"
       padding={4}
       style={{
-        transform: isShow ? "" : "translateY(125%)",
+        transform: isShow ? "" : "translateX(125%)",
         opacity: isShow ? "1" : "0",
         zIndex: isShow ? 50 : 0,
       }}
-      className="absolute w-3/4 min-w-[480px] max-w-[600px] flex flex-col justify-center gap-2 duration-500 transform-gpu"
+      className="absolute w-full md:w-3/4 md:max-w-xl md:shadow-xl flex flex-col justify-center gap-2 duration-500 ease-in-out transform-gpu"
     >
       <div className="flex justify-between items-center">
         <Text size="xl" font="light" letterSpacing>
@@ -405,106 +208,6 @@ function CodeForm({
   );
 }
 
-function useRegister({
-  switchForm,
-}: {
-  switchForm: {
-    toLogin: () => void;
-    toRegister: () => void;
-  };
-}) {
-  const query = useQueryRegister();
-  const navigate = useNavigate();
-  const notify = useNotify();
-
-  const defaultForm = {
-    email: { value: "", error: "" },
-    username: { value: "", error: "" },
-    password: { value: "", error: "" },
-  };
-
-  const [form, setForm] = useState(defaultForm);
-  const setEmail = (value: string) => {
-    setForm((prevForm) => ({ ...prevForm, email: { value, error: "" } }));
-  };
-  const setUsername = (value: string) => {
-    setForm((prevForm) => ({ ...prevForm, username: { value, error: "" } }));
-  };
-  const setPassword = (value: string) => {
-    setForm((prevForm) => ({ ...prevForm, password: { value, error: "" } }));
-  };
-
-  const reset = () => {
-    setForm(defaultForm);
-  };
-
-  const run = async () => {
-    const { success, response, requestError, responseError } = await query.run({
-      email: form.email.value,
-      password: form.password.value,
-      username: form.username.value,
-    });
-
-    if (!success && requestError) {
-      setForm((prevForm) => ({
-        ...prevForm,
-        email: {
-          ...prevForm.email,
-          error: requestError.email || "",
-        },
-        username: {
-          ...prevForm.username,
-          error: requestError.username || "",
-        },
-        password: {
-          ...prevForm.password,
-          error: requestError.password || "",
-        },
-      }));
-      return;
-    }
-
-    if (!success && responseError) {
-      notify.show.error(responseError);
-      return;
-    }
-
-    if (!success) {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
-      return;
-    }
-
-    if (!response.success) {
-      switch (response.errorCode) {
-        case "EMAIL_ALREADY_EXISTS":
-          notify.show.error(langAuth.EMAIL_EXISTS);
-          break;
-        case "USERNAME_ALREADY_EXISTS":
-          notify.show.error(langAuth.USERNAME_EXISTS);
-          break;
-        default:
-          notify.show.error(langError.RESPONSE_COMMON_MESSAGE);
-          break;
-      }
-    } else {
-      notify.show.info(langAuth.REGISTER_SUCCESS);
-      reset();
-      navigate({ pathname: routes.login.path });
-      switchForm.toLogin();
-    }
-  };
-
-  return {
-    form,
-    setEmail,
-    setUsername,
-    setPassword,
-    run,
-    reset,
-    isLoading: query.isLoading,
-  };
-}
-
 function RegisterForm({
   isShow,
   switchForm,
@@ -521,14 +224,13 @@ function RegisterForm({
   return (
     <Paper
       rounded="lg"
-      shadow="xl"
       padding={4}
       style={{
-        transform: isShow ? "" : "translateY(125%)",
+        transform: isShow ? "" : "translateX(125%)",
         opacity: isShow ? "1" : "0",
         zIndex: isShow ? 50 : 0,
       }}
-      className="absolute w-3/4 min-w-[480px] max-w-[600px] flex flex-col justify-center gap-2 duration-500 transform-gpu"
+      className="absolute w-full md:w-3/4 md:max-w-xl md:shadow-xl flex flex-col justify-center gap-2 duration-500 ease-in-out transform-gpu"
     >
       <div className="flex justify-between items-center">
         <Text size="xl" font="light" letterSpacing>

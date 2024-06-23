@@ -33,10 +33,15 @@ export function useTopBar(data: ReturnType<typeof useInfo>) {
     navigate({ pathname: routes.rooms.path + data.roomId });
   };
 
+  const closeChat = () => {
+    navigate({ pathname: routes.rooms.path });
+  };
+
   return {
     content,
     openSideBar,
     closeSideBar,
+    closeChat,
     isSideBarExpanded: pathname.includes("/info"),
   };
 }

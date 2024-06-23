@@ -21,7 +21,7 @@ const noMessagesElement = (
 function Wrapper({ children }: { children: ReactNode }) {
   return (
     <>
-      <div className="relative w-full h-full flex flex-col bg-slate-200">
+      <div className="absolute top-0 left-0 md:relative h-full w-full flex flex-col bg-slate-200">
         {children}
       </div>
       <Outlet />

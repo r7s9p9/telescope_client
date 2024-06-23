@@ -117,7 +117,7 @@ function Wrapper({
 }) {
   return (
     <>
-      <div className="h-full flex flex-col w-1/2 min-w-64 max-w-sm bg-slate-50">
+      <div className="h-full flex flex-col md:w-1/2 md:min-w-64 max-w-sm bg-slate-50">
         <div className="pb-4 px-4 flex flex-col items-center">
           <Title />
           <Input
@@ -148,7 +148,7 @@ function Wrapper({
         </div>
         <ul
           onScroll={onScroll}
-          className="overflow-y-auto overscroll-none scroll-smooth w-full flex flex-col bg-slate-50"
+          className="overflow-y-auto overscroll-none scroll-smooth w-full flex flex-col grow bg-slate-50"
         >
           {children}
         </ul>
@@ -226,7 +226,7 @@ const FoundRoomsSkeleton = memo(() => {
   const skeleton = (
     <div
       style={itemHeightStyle}
-      className={`bg-slate-100 w-full flex flex-col px-4 py-2 justify-between select-none animate-pulse`}
+      className={`w-full flex flex-col px-4 py-2 justify-between select-none animate-pulse`}
     >
       <div className="w-48 h-4 bg-slate-200 rounded-full" />
       <div className="w-24 h-4 bg-slate-200 rounded-full" />

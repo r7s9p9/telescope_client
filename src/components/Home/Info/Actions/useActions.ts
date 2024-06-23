@@ -3,7 +3,7 @@ import {
   useQueryLeaveRoom,
 } from "../../../../shared/api/api.model";
 import { RoomId } from "../../../../shared/api/api.schema";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNotify } from "../../../Notification/Notification";
 import { useLoadRooms } from "../../Rooms/useRooms";
 import { useLocation } from "react-router-dom";
@@ -21,6 +21,12 @@ export function useActions() {
   const loadInfo = useLoadInfo();
   const loadRooms = useLoadRooms();
   const notify = useNotify();
+
+  const [isShow, setIsShow] = useState(false);
+
+  const switchIsShow = () => {
+    setIsShow(!isShow);
+  };
 
   async function handleLeave() {
     const { success, response, requestError, responseError } =
@@ -76,6 +82,8 @@ export function useActions() {
   }, []);
 
   return {
+    isShow,
+    switchIsShow,
     handleLeave,
     handleDelete,
     handleCopy,

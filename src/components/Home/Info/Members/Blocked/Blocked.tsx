@@ -35,7 +35,7 @@ export function BlockedUsers() {
   if (isLoading) {
     blockedUsersContent = (
       <ListWrapper>
-        <Spinner size={128} className="self-center" />
+        <Spinner size={128} className="m-auto" />
       </ListWrapper>
     );
   } else if (isEmpty) {
@@ -62,10 +62,8 @@ export function BlockedUsers() {
   return (
     <Overlay>
       <Paper
-        padding={4}
-        rounded="lg"
         shadow="md"
-        className="h-[450px] flex flex-col bg-slate-50"
+        className="h-screen w-screen md:h-[450px] md:w-full px-4 md:p-4 md:rounded-lg flex flex-col bg-slate-50"
       >
         <Title roomId={roomId} reload={reload} />
         {blockedUsersContent}
@@ -74,18 +72,24 @@ export function BlockedUsers() {
   );
 }
 
+const iconProps = {
+  className: "text-slate-600",
+  strokeWidth: "1",
+  size: 32,
+};
+
 function Title({ roomId, reload }: { roomId: RoomId; reload: () => void }) {
   return (
-    <div className="w-96 bg-slate-50 flex items-center justify-between gap-2">
+    <div className="h-14 md:w-96 bg-slate-50 flex items-center gap-2">
       <Text size="xl" font="thin" uppercase letterSpacing className="grow">
         Blocked users
       </Text>
       <IconButton title="Refresh users" onClick={reload}>
-        <IconRefresh className="text-slate-600" strokeWidth="1" size={32} />
+        <IconRefresh {...iconProps} />
       </IconButton>
       <Link to={routes.rooms.path + roomId + "/info"}>
         <IconButton title="Exit">
-          <IconX className="text-slate-600" strokeWidth="1" size={32} />
+          <IconX {...iconProps} />
         </IconButton>
       </Link>
     </div>
@@ -105,7 +109,7 @@ function ListWrapper({
     <ul
       onScroll={onScroll}
       ref={listRef}
-      className="w-full h-[450px] overflow-y-auto overscroll-none flex flex-col justify-center gap-2"
+      className="overflow-y-auto overscroll-none flex flex-col gap-2 grow pt-4 border-t-2 border-slate-100"
     >
       {children}
     </ul>
@@ -158,7 +162,7 @@ function BlockedUser({
       padding={2}
       rounded="md"
       inList
-      className="h-14 shrink-0 border-2 border-slate-200 bg-slate-50 hover:bg-slate-200 duration-300 ease-in-out flex"
+      className="h-14 shrink-0 border-2 border-slate-200 bg-slate-50 hover:bg-slate-200 duration-300 ease-in-out flex select-none"
     >
       <div className="grow flex flex-col">
         <Text size="sm" font="bold">

@@ -58,25 +58,19 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
 export const NotifyStack = () => {
   const data = useContext(NotifyViewContext);
 
+  const iconProps = {
+    className: "text-slate-600 shrink-0",
+    strokeWidth: "1.5",
+    size: 24,
+  };
+
   let Icon;
   switch (data.type) {
     case "info":
-      Icon = (
-        <IconInfoCircle
-          className="text-slate-600 shrink-0"
-          strokeWidth="1.5"
-          size={24}
-        />
-      );
+      Icon = <IconInfoCircle {...iconProps} />;
       break;
     case "error":
-      Icon = (
-        <IconExclamationCircle
-          className="text-slate-600 shrink-0"
-          strokeWidth="1.5"
-          size={24}
-        />
-      );
+      Icon = <IconExclamationCircle {...iconProps} />;
       break;
   }
 
@@ -85,9 +79,9 @@ export const NotifyStack = () => {
       rounded="lg"
       shadow="md"
       padding={4}
-      className={`${data.type === "info" ? "ring-green-600" : "ring-red-600"} bg-slate-50 absolute z-50 w-1/2 left-1/4 ring-2 flex justify-between items-center gap-4 duration-300 ease-in-out`}
+      className={`${data.type === "info" ? "ring-slate-400" : "ring-red-600"} absolute z-50 m-4 md:m-0 md:w-1/2 left-0 top-0 md:left-1/4 ring-2 flex justify-between items-center gap-4 duration-300 ease-in-out bg-slate-50 `}
       style={{
-        transform: data.isShow ? `translateY(50%)` : `translateY(-150%)`,
+        transform: data.isShow ? `translateY(25%)` : `translateY(-150%)`,
       }}
     >
       {Icon}

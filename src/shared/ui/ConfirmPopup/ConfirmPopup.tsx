@@ -15,9 +15,8 @@ export function ConfirmPopup({
   return (
     <Paper
       padding={4}
-      rounded="lg"
       shadow="md"
-      className="flex flex-col justify-center items-center"
+      className="w-screen md:w-fit flex flex-col items-center justify-center md:rounded-lg"
     >
       <Text
         size="md"
@@ -26,7 +25,7 @@ export function ConfirmPopup({
       >
         {text}
       </Text>
-      <div className="w-full flex justify-between items-between gap-8">
+      <div className="w-full flex justify-center items-between gap-8">
         <Button
           size="md"
           title="yes"

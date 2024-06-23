@@ -19,7 +19,7 @@ import { Button } from "../../../../shared/ui/Button/Button";
 
 export const MessagesSkeleton = React.memo(() => {
   function Skeleton() {
-    const width = getRandomInt(4, 8) * 64;
+    const width = getRandomInt(2, 6) * 64;
     const height = width / 3;
     const direction = getRandomBoolean();
 
@@ -65,7 +65,7 @@ export function Messages({
     <ul
       ref={chat.messagesRef}
       onScroll={chat.debouncedHandleScroll}
-      className="relative overflow-y-auto will-change-scroll overscroll-none scroll-auto grow w-full p-4 flex flex-col bg-slate-200"
+      className="relative overflow-y-auto will-change-scroll overscroll-none scroll-auto grow w-full p-4 flex flex-col border-t-2 border-slate-100 bg-slate-200"
     >
       {children}
       <ScrollButton
@@ -126,7 +126,11 @@ export function Message({
         padding={2}
         className="flex flex-col mt-4 self-center bg-slate-50 ring-2 ring-slate-200 select-none"
       >
-        <Text size="sm" font="default">
+        <Text
+          size="sm"
+          font="default"
+          className="text-center break-words max-w-xl"
+        >
           {content.text}
         </Text>
         <Text size="sm" font="thin" className="text-center">
@@ -152,9 +156,9 @@ export function Message({
       inList
       rounded="xl"
       padding={2}
-      className={`${content.type === "self" ? "self-end" : "self-start"} flex flex-col mt-4 bg-slate-50 rounded-xl shadow select-none`}
+      className={`${content.type === "self" ? "self-end" : "self-start"} max-w-xl flex flex-col mt-4 bg-slate-50 select-none`}
     >
-      <div className="flex flex-row justify-between gap-4 min-w-32 max-w-full text-sm">
+      <div className="flex flex-row justify-between gap-2 min-w-32 max-w-full">
         <Text size="sm" font="default" className="text-green-600">
           {content.type === "self" ? "You" : content.username}
         </Text>

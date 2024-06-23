@@ -1,35 +1,52 @@
 import { useInfo } from "../useChat";
 import { Text } from "../../../../shared/ui/Text/Text";
-import { IconLayoutSidebarRightExpand } from "@tabler/icons-react";
+import {
+  IconCircleArrowLeft,
+  IconLayoutSidebarRightExpand,
+} from "@tabler/icons-react";
 import { IconButton } from "../../../../shared/ui/IconButton/IconButton";
 import { useTopBar } from "./useTopBar";
 
 export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
-  const { content, openSideBar, closeSideBar, isSideBarExpanded } =
+  const { content, openSideBar, closeSideBar, closeChat, isSideBarExpanded } =
     useTopBar(data);
 
+  const iconProps = {
+    className: "text-slate-600",
+    strokeWidth: "1",
+    size: 32,
+  };
+
   return (
-    <div className="w-full min-w-[320px] h-16 px-4 flex justify-between items-center gap-4 border-l-2 border-slate-100 bg-slate-50 select-none">
+    <div className="relative shrink-0 w-full min-w-[320px] h-14 md:h-16 px-4 flex items-center md:border-x-2 border-slate-100 bg-slate-50 select-none">
+      <IconButton
+        title={"Close chat"}
+        onClick={closeChat}
+        className="md:invisible md:hidden mr-4"
+      >
+        <IconCircleArrowLeft {...iconProps} />
+      </IconButton>
       {!content.isInitialLoading && (
-        <div className="flex items-center shrink-0 gap-4">
-          <Text
-            size="xl"
-            font="light"
-            className="size-10 flex items-center justify-center uppercase rounded-full border-2 border-slate-400 "
-          >
-            {content.name?.at(0)}
-          </Text>
-          <div className="flex flex-col py-2 grow">
-            <Text size="md" font="light">
-              {content.name}
+        <>
+          <div className="flex items-center shrink-0 gap-4">
+            <Text
+              size="xl"
+              font="light"
+              className="size-10 hidden md:visible md:flex justify-center items-center uppercase rounded-full border-2 border-slate-400 "
+            >
+              {content.name?.at(0)}
             </Text>
-            <div className="flex flex-row gap-1">
+            <div className="flex flex-col">
+              <Text size="sm" font="light">
+                {content.name}
+              </Text>
               <Text size="sm" font="light">
                 {content.description}
               </Text>
             </div>
           </div>
-        </div>
+          <div className="grow" />
+        </>
       )}
       {content.isInitialLoading && <TopBarSkeleton />}
       <IconButton
@@ -37,11 +54,7 @@ export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
         onClick={isSideBarExpanded ? closeSideBar : openSideBar}
         style={{ transform: isSideBarExpanded ? "rotate(180deg)" : "" }}
       >
-        <IconLayoutSidebarRightExpand
-          className="text-slate-600"
-          strokeWidth="1"
-          size={32}
-        />
+        <IconLayoutSidebarRightExpand {...iconProps} />
       </IconButton>
     </div>
   );
@@ -49,11 +62,11 @@ export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
 
 function TopBarSkeleton() {
   return (
-    <div className="h-16 flex items-center animate-pulse">
-      <div className="size-10 bg-slate-200 rounded-full"></div>
-      <div className="ml-4 h-full flex flex-col justify-center gap-2">
-        <div className="w-64 h-6 rounded-md bg-slate-200" />
+    <div className="h-16 w-full flex items-center animate-pulse">
+      <div className="size-10 shrink-0 bg-slate-200 rounded-full"></div>
+      <div className="ml-4 h-full w-full flex flex-col justify-center gap-2">
         <div className="w-36 h-4 rounded-md bg-slate-200" />
+        <div className="w-24 h-4 rounded-md bg-slate-200" />
       </div>
     </div>
   );

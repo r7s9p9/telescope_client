@@ -64,7 +64,7 @@ export function InputField({
 
   return (
     <div className={`${padding ? `p-${padding}` : ""} ${className || ""}`}>
-      <div className="flex justify-between items-end py-1">
+      <div className="flex flex-wrap justify-between items-end py-1">
         <Text size={size} font="light">
           {label}
         </Text>

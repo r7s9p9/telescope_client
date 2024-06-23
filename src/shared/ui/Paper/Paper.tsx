@@ -31,7 +31,7 @@ export const Paper = forwardRef(function Paper(
             onContextMenu as React.MouseEventHandler<HTMLLIElement>
           }
           ref={ref as ForwardedRef<HTMLLIElement>}
-          className={`bg-slate-100 ${rounded ? `rounded-${rounded}` : ""}  ${shadow ? `shadow-${shadow}` : ""} ${padding ? `p-${padding}` : ""} ${className || ""}`}
+          className={`bg-slate-100 ${rounded && `rounded-${rounded}`} ${shadow && `shadow-${shadow}`} ${padding && `p-${padding}`} ${className || ""}`}
         >
           {children || ""}
         </li>
@@ -43,7 +43,7 @@ export const Paper = forwardRef(function Paper(
             onContextMenu as React.MouseEventHandler<HTMLDivElement>
           }
           ref={ref as ForwardedRef<HTMLDivElement>}
-          className={`bg-slate-100 ${rounded ? `rounded-${rounded}` : ""}  ${shadow ? `shadow-${shadow}` : ""} ${padding ? `p-${padding}` : ""} ${className || ""}`}
+          className={`bg-slate-100 ${rounded && `rounded-${rounded}`} ${shadow && `shadow-${shadow}`} ${padding && `p-${padding}`} ${className || ""}`}
         >
           {children || ""}
         </div>

@@ -20,8 +20,8 @@ export function BottomBarWrapper({
 
 function BottomBarSpinner() {
   return (
-    <div className="shrink-0 h-24 w-full flex items-center justify-center border-l-2 border-slate-100 bg-slate-50">
-      <Spinner size={64} />
+    <div className="shrink-0 h-16 md:h-24 w-full flex items-center justify-center border-l-2 border-slate-100 bg-slate-100 md:bg-slate-50">
+      <Spinner size={48} />
     </div>
   );
 }
@@ -79,7 +79,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           </IconButton>
         </div>
       )}
-      <div className="shrink-0 relative min-h-24 p-4 w-full flex items-center border-l-2 border-slate-100 bg-slate-50">
+      <div className="shrink-0 relative md:h-24 md:p-4 w-full flex items-center md:border-l-2 border-slate-100 bg-slate-50">
         <TextArea
           value={formData.text}
           setValue={(val) =>
@@ -88,6 +88,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           minRows={1}
           maxRows={6}
           size="xl"
+          className="ring-0 md:ring-2"
           rightSection={
             <IconButton
               title={"Send message"}

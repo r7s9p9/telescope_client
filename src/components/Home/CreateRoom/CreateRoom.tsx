@@ -1,5 +1,6 @@
 import {
   IconAbc,
+  IconArrowBackUp,
   IconBlockquote,
   IconStar,
   IconUser,
@@ -16,16 +17,15 @@ import { Spinner } from "../../../shared/ui/Spinner/Spinner";
 import { TextAreaField } from "../../../shared/ui/TextAreaField/TextAreaField";
 
 export function CreateRoom() {
-  const { form, setName, setAbout, handleSelectType, run, isLoading } =
+  const { form, setName, setAbout, handleSelectType, run, cancel, isLoading } =
     useCreateRoom();
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className="absolute left-0 right-0 md:relative w-full h-full flex items-center justify-center">
       <Paper
         padding={4}
-        rounded="xl"
         shadow="xl"
-        className="w-3/4 min-w-[350px] max-w-[650px] flex flex-col bg-slate-50"
+        className="w-full h-full md:h-fit md:w-3/4 md:min-w-[350px] md:max-w-[650px] md:rounded-xl flex flex-col bg-slate-50"
       >
         <div className="flex justify-between items-center">
           <Text size="xl" font="light" letterSpacing className="self-center">
@@ -119,20 +119,45 @@ export function CreateRoom() {
             />
           }
         />
-        <Button
-          title="Create room"
-          size="md"
-          onClick={run}
-          className="w-32 self-end mt-4 justify-center"
-        >
-          <>
-            <IconStar className="text-slate-500" strokeWidth="1.5" size={24} />
-            <Text size="md" font="light">
-              Create
-            </Text>
-          </>
-        </Button>
+        <div className="mt-4 flex items-center justify-between">
+          <Button
+            title="Cancel"
+            size="md"
+            onClick={cancel}
+            className="w-32 justify-center"
+          >
+            <>
+              <IconArrowBackUp
+                className="text-slate-500"
+                strokeWidth="1.5"
+                size={24}
+              />
+              <Text size="md" font="light">
+                Cancel
+              </Text>
+            </>
+          </Button>
+          <Button
+            title="Create room"
+            size="md"
+            onClick={run}
+            className="w-32 justify-center"
+          >
+            <>
+              <IconStar
+                className="text-slate-500"
+                strokeWidth="1.5"
+                size={24}
+              />
+              <Text size="md" font="light">
+                Create
+              </Text>
+            </>
+          </Button>
+        </div>
       </Paper>
     </div>
   );
 }
+
+//className="md:invisible md:hidden mr-4"

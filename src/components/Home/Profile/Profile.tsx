@@ -45,18 +45,17 @@ export function Profile() {
     <Wrapper>
       <Paper
         padding={4}
-        rounded="xl"
         shadow="xl"
-        className="w-full h-full flex flex-col bg-slate-50"
+        className="w-full h-full flex flex-col md:rounded-xl bg-slate-50"
       >
         <div className="flex justify-between items-center">
-          <Text size="xl" font="light" className="select-none text-center">
+          <Text size="xl" font="light" className="select-none">
             {title}
           </Text>
           {isUploading && <Spinner size={32} />}
         </div>
         {isExist && (
-          <div className="flex flex-col h-full justify-center">
+          <div className="flex flex-col justify-center">
             {isYourProfile && (
               <InputField
                 label="Username"
@@ -100,7 +99,7 @@ export function Profile() {
         )}
 
         <div className="mt-4 flex flex-row-reverse justify-between items-end">
-          {isYourProfile && (
+          {isExist && isYourProfile && (
             <Button
               title="Update profile"
               size="md"
@@ -149,7 +148,7 @@ export function Profile() {
 function Wrapper({ children }: { children: ReactNode }) {
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <div className="w-3/4 min-h-[400px] min-w-[350px] max-w-[650px]">
+      <div className="w-full h-full md:h-fit md:w-3/4 md:min-h-[400px] md:min-w-[350px] md:max-w-[650px]">
         {children}
       </div>
     </div>

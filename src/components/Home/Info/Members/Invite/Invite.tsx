@@ -63,12 +63,11 @@ export function InviteUsers() {
   return (
     <Overlay>
       <Paper
-        padding={4}
-        rounded="lg"
         shadow="md"
-        className="h-[450px] flex flex-col bg-slate-50"
+        className="h-screen w-screen md:h-[450px] md:w-full px-4 md:p-4 md:rounded-lg flex flex-col bg-slate-50"
       >
         <Title roomId={roomId} />
+        <div className="w-full border-t-2 border-slate-100" />
         <Input
           size="md"
           value={inputValue}
@@ -87,7 +86,7 @@ export function InviteUsers() {
 
 function Title({ roomId }: { roomId: RoomId }) {
   return (
-    <div className="w-96 bg-slate-50 flex items-center justify-between gap-2">
+    <div className="shrink-0 h-14 md:w-96 bg-slate-50 flex items-center gap-2">
       <Text size="xl" font="thin" uppercase letterSpacing className="grow">
         Invite users
       </Text>
@@ -113,7 +112,7 @@ function ListWrapper({
     <ul
       onScroll={onScroll}
       ref={listRef}
-      className="w-full h-[450px] mt-4 overflow-y-auto overscroll-none flex flex-col gap-2"
+      className="overflow-y-auto overscroll-none flex flex-col gap-2 grow pt-4"
     >
       {children}
     </ul>
@@ -172,9 +171,16 @@ function User({
         <Text size="sm" font="bold">
           @{data.general?.username}
         </Text>
-        <Text size="sm" font="light">
-          Name: {data.general?.name}
-        </Text>
+        {data.general?.name && (
+          <Text size="sm" font="light">
+            Name: {data.general?.name}
+          </Text>
+        )}
+        {!data.general?.name && (
+          <Text size="sm" font="light" className="text-slate-600">
+            Name hidden
+          </Text>
+        )}
       </div>
       <div className="flex flex-col items-end">
         <Text

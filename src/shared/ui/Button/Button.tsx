@@ -58,7 +58,7 @@ export function Button({
       onClick={onClick}
       formNoValidate={formNoValidate}
       style={{ height, paddingLeft: padding, paddingRight: padding }}
-      className={`${gap ? `gap-${gap}` : ""} ${unstyled ? "" : "bg-slate-100 ring-2 ring-slate-200 enabled:hover:ring-slate-400 enabled:hover:bg-slate-50 enabled:hover:rounded-xl rounded-md"} flex items-center duration-300 ease-in-out ${className || ""}`}
+      className={`${gap ? `gap-${gap}` : ""} ${unstyled ? "" : "bg-slate-100 ring-2 ring-slate-200 enabled:hover:ring-slate-400 enabled:hover:bg-slate-50 enabled:hover:rounded-xl rounded-md"} flex items-center outline-none duration-300 ease-in-out ${className || ""}`}
     >
       {children}
     </button>

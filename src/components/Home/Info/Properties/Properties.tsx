@@ -114,6 +114,12 @@ function EditGroup({
   handleClick: (str: "edit" | "cancel" | "send") => void;
   isEdit: boolean;
 }) {
+  const iconProps = {
+    strokeWidth: "1.5",
+    className: "text-slate-600",
+    size: 24,
+  };
+
   return (
     <div className="absolute right-4 top-4">
       <IconButton
@@ -121,12 +127,12 @@ function EditGroup({
         onClick={() => handleClick("edit")}
         style={{
           position: "absolute",
-          zIndex: isEdit ? 0 : 10,
+          zIndex: isEdit ? 0 : 1,
           opacity: isEdit ? "0" : "1",
         }}
         disabled={isEdit}
       >
-        <IconEdit strokeWidth="1" className="text-slate-600" size={24} />
+        <IconEdit {...iconProps} />
       </IconButton>
       <IconButton
         title="Cancel edit"
@@ -137,7 +143,7 @@ function EditGroup({
         disabled={!isEdit}
         className="z-0"
       >
-        <IconX strokeWidth="1" className="text-slate-600" size={24} />
+        <IconX {...iconProps} />
       </IconButton>
       <IconButton
         title="Update info"
@@ -147,7 +153,7 @@ function EditGroup({
         }}
         disabled={!isEdit}
       >
-        <IconCheck strokeWidth="1" className="text-slate-600" size={24} />
+        <IconCheck {...iconProps} />
       </IconButton>
     </div>
   );
