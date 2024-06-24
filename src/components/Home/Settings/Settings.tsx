@@ -19,24 +19,23 @@ export function Settings() {
   const popup = usePopup();
 
   const iconProps = {
-    strokeWidth: "1.5",
-    className: "ml-2 text-slate-600",
-    size: 28,
+    strokeWidth: "1",
+    className: "ml-1 text-slate-600",
+    size: 32,
   };
 
   return (
     <Wrapper>
       <Paper
-        padding={4}
         shadow="xl"
-        className="h-full w-full md:w-72 flex flex-col justify-center md:rounded-xl bg-slate-50"
+        className="h-full w-full md:w-72 md:p-4 flex flex-col justify-center md:rounded-xl bg-slate-50"
       >
         <Button
           title="My Profile"
           size="xl"
           unstyled
           onClick={onClickHandler().profile}
-          className="gap-6 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100 md:rounded-t-lg"
+          className="gap-4 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100 md:rounded-t-lg"
         >
           <IconUser {...iconProps} />
           <Text
@@ -54,7 +53,7 @@ export function Settings() {
           size="xl"
           unstyled
           onClick={onClickHandler().privacy}
-          className="gap-6 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100"
+          className="gap-4 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100"
         >
           <IconLock {...iconProps} />
           <Text
@@ -72,7 +71,7 @@ export function Settings() {
           size="xl"
           unstyled
           onClick={onClickHandler().sessions}
-          className="gap-6 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100"
+          className="gap-4 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100"
         >
           <IconDeviceDesktop {...iconProps} />
           <Text
@@ -92,7 +91,7 @@ export function Settings() {
           onClick={() => {
             popup.show(<WIP />);
           }}
-          className="gap-6 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100"
+          className="gap-4 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100"
         >
           <IconLanguage {...iconProps} />
           <Text
@@ -118,12 +117,12 @@ export function Settings() {
               }),
             );
           }}
-          className="gap-6 hover:bg-slate-200 md:rounded-b-lg"
+          className="gap-4 hover:bg-slate-200 md:rounded-b-lg"
         >
           <IconDoorExit
-            strokeWidth="1.5"
-            className="text-red-600 ml-2"
-            size={28}
+            strokeWidth="1"
+            className="text-red-600 ml-1"
+            size={32}
           />
           <Text
             size="xl"

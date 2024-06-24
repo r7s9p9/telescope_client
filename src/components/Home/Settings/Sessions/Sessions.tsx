@@ -205,10 +205,10 @@ function DeviceIcon({
 
   return (
     <div className="flex relative">
-      <div className="absolute left-0 top-0 rounded-full w-fit h-fit p-0.5 border-2 border-slate-300 bg-slate-100">
+      <div className="absolute left-0 top-0 rounded-full p-0.5 border-2 border-slate-300 bg-slate-50">
         {deviceIcon}
       </div>
-      <div className="pt-12 md:pt-1 md:pl-14 p-0.5 overflow-hidden rounded-full w-fit h-fit border-2 border-slate-300 bg-slate-100">
+      <div className="pt-14 md:pt-1 md:pl-14 p-0.5 overflow-hidden rounded-full border-2 border-slate-300 bg-slate-50">
         {browserIcon}
       </div>
     </div>

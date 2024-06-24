@@ -11,6 +11,7 @@ export const Paper = forwardRef(function Paper(
     className,
     onContextMenu,
   }: {
+    title?: ReactNode;
     children?: ReactNode;
     padding?: number;
     rounded?: "sm" | "md" | "lg" | "xl";

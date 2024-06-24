@@ -82,7 +82,7 @@ export function useMembers() {
     listRef,
     debouncedHandleScroll,
     data,
-    isLoading: query.isLoading,
+    isLoading: query.isLoading || !data,
     isAdmin: info.storedInfo?.creatorId === "self",
   };
 }

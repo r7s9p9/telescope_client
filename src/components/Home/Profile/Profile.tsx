@@ -158,7 +158,7 @@ function Wrapper({ children }: { children: ReactNode }) {
 function Loader() {
   return (
     <Wrapper>
-      <div className="w-full h-full p-4 rounded-xl animate-pulse bg-slate-50" />
+      <div className="w-full h-full p-4 md:rounded-xl animate-pulse bg-slate-50" />
     </Wrapper>
   );
 }

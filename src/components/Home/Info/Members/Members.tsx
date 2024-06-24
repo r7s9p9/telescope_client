@@ -31,19 +31,19 @@ export function Members() {
   } = useMembers();
 
   let members: JSX.Element = <></>;
-  if (isLoading && !data?.users) {
+  if (isLoading) {
     members = (
       <MembersListWrapper>
         <Spinner size={128} className="mt-16 self-center" />
       </MembersListWrapper>
     );
-  } else if (data?.isEmpty || !data?.users) {
+  } else if (!data?.users) {
     members = (
       <MembersListWrapper>
         <NoMembers />
       </MembersListWrapper>
     );
-  } else if (data.users) {
+  } else {
     members = (
       <MembersListWrapper listRef={listRef} onScroll={debouncedHandleScroll}>
         {data.users.map((user) => (
