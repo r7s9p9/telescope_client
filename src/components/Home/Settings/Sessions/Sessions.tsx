@@ -225,11 +225,11 @@ function Wrapper({
   returnBack: ReturnType<typeof useSessions>["returnBack"];
 }) {
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center border-t-2 border-slate-100 md:border-0">
       <Paper
         padding={4}
         shadow="xl"
-        className="w-full h-full md:w-3/4 md:h-[400px] md:min-w-[350px] md:max-w-[650px] md:rounded-xl flex flex-col"
+        className="w-full h-full md:w-3/4 md:h-[400px] md:min-w-[350px] md:max-w-[650px] md:rounded-xl flex flex-col bg-slate-50"
       >
         <Text size="xl" font="light" className="select-none mb-4">
           Sessions

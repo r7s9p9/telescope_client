@@ -117,7 +117,7 @@ function Wrapper({
 }) {
   return (
     <>
-      <div className="h-full flex flex-col md:w-1/2 md:min-w-64 max-w-sm bg-slate-50">
+      <div className="h-full flex flex-col md:w-1/2 md:min-w-64 max-w-sm bg-slate-50 border-t-2 border-slate-100 md:border-0">
         <div className="pb-4 px-4 flex flex-col items-center">
           <Title />
           <Input
@@ -148,13 +148,32 @@ function Wrapper({
         </div>
         <ul
           onScroll={onScroll}
-          className="overflow-y-auto overscroll-none scroll-smooth w-full flex flex-col grow bg-slate-50"
+          className="overflow-y-auto overscroll-none scroll-smooth w-full h-full flex flex-col"
         >
           {children}
         </ul>
       </div>
       <Outlet key={useLocation().pathname} />
     </>
+  );
+}
+
+function Title() {
+  return (
+    <div className="h-16 w-full flex justify-between items-center">
+      <Text size="xl" font="thin" uppercase letterSpacing>
+        Rooms
+      </Text>
+      <Link to={routes.createRoom.path}>
+        <IconButton title={"Create new room"} noHover>
+          <IconCirclePlus
+            strokeWidth="1"
+            className="text-slate-600"
+            size={32}
+          />
+        </IconButton>
+      </Link>
+    </div>
   );
 }
 
@@ -239,25 +258,6 @@ const FoundRoomsSkeleton = memo(() => {
     .fill(1)
     .map((_, i) => <li key={i}>{skeleton}</li>);
 });
-
-function Title() {
-  return (
-    <div className="h-16 w-full flex justify-between items-center">
-      <Text size="xl" font="thin" uppercase letterSpacing>
-        Rooms
-      </Text>
-      <Link to={routes.createRoom.path}>
-        <IconButton title={"Create new room"} noHover>
-          <IconCirclePlus
-            strokeWidth="1"
-            className="text-slate-600"
-            size={32}
-          />
-        </IconButton>
-      </Link>
-    </div>
-  );
-}
 
 function ListEmpty() {
   return (

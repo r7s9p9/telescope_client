@@ -11,7 +11,7 @@ import { Outlet } from "react-router-dom";
 export function ChatInfo() {
   return (
     <>
-      <Paper className="absolute top-0 left-0 md:relative h-full w-full md:w-fit flex flex-col bg-slate-50">
+      <Paper className="absolute top-0 left-0 md:relative h-full shrink-0 w-full md:w-72 flex flex-col bg-slate-50">
         <Title />
         <Properties />
         <Members />
@@ -28,7 +28,7 @@ function Title() {
   return (
     <Paper
       padding={4}
-      className="h-14 md:h-16 w-screen md:w-72 bg-slate-50 flex items-center justify-between"
+      className="h-14 md:h-16 w-full bg-slate-50 flex items-center justify-between"
     >
       <Text size="xl" font="thin" uppercase letterSpacing>
         Info

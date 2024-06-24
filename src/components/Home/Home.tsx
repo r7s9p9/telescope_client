@@ -8,7 +8,7 @@ export function Home() {
   useHome();
 
   return (
-    <div className="w-full h-full flex flex-col md:flex-row bg-slate-200">
+    <div className="h-screen w-screen flex flex-col md:flex-row overflow-hidden bg-slate-200">
       <NotifyStack />
       <PopupStack />
       <Panel />

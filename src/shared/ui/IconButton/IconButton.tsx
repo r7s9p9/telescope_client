@@ -57,7 +57,7 @@ export function IconButton({
         ref={buttonRef}
         onClick={onClick}
         formNoValidate={formNoValidate}
-        className={`${loading || disabled ? "" : "cursor-pointer"} ${!noHover ? "hover:bg-slate-200 p-1" : ""} rounded-full flex items-center justify-center opacity-75 hover:opacity-100 duration-300 ease-in-out ${className || ""}`}
+        className={`${loading || disabled ? "" : "cursor-pointer"} ${!noHover ? "hover:bg-slate-200 p-1" : ""} outline-none rounded-full flex items-center justify-center opacity-75 hover:opacity-100 duration-300 ease-in-out ${className || ""}`}
       >
         {Content}
       </button>

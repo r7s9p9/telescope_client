@@ -147,7 +147,7 @@ export function Profile() {
 
 function Wrapper({ children }: { children: ReactNode }) {
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center border-t-2 border-slate-100 md:border-0">
       <div className="w-full h-full md:h-fit md:w-3/4 md:min-h-[400px] md:min-w-[350px] md:max-w-[650px]">
         {children}
       </div>

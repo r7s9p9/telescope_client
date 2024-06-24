@@ -19,7 +19,7 @@ import { Button } from "../../../../shared/ui/Button/Button";
 
 export const MessagesSkeleton = React.memo(() => {
   function Skeleton() {
-    const width = getRandomInt(2, 6) * 64;
+    const width = getRandomInt(2, 5) * 64;
     const height = width / 3;
     const direction = getRandomBoolean();
 
@@ -124,13 +124,9 @@ export function Message({
         inList
         rounded="xl"
         padding={2}
-        className="flex flex-col mt-4 self-center bg-slate-50 ring-2 ring-slate-200 select-none"
+        className="flex flex-col mt-4 md:max-w-[75%] self-center bg-slate-50 ring-2 ring-slate-200 select-none"
       >
-        <Text
-          size="sm"
-          font="default"
-          className="text-center break-words max-w-xl"
-        >
+        <Text size="sm" font="default" className="text-center break-all">
           {content.text}
         </Text>
         <Text size="sm" font="thin" className="text-center">
@@ -156,9 +152,9 @@ export function Message({
       inList
       rounded="xl"
       padding={2}
-      className={`${content.type === "self" ? "self-end" : "self-start"} max-w-xl flex flex-col mt-4 bg-slate-50 select-none`}
+      className={`${content.type === "self" ? "self-end" : "self-start"} md:max-w-[75%] flex flex-col mt-4 bg-slate-50 select-none`}
     >
-      <div className="flex flex-row justify-between gap-2 min-w-32 max-w-full">
+      <div className="flex flex-row justify-between gap-2">
         <Text size="sm" font="default" className="text-green-600">
           {content.type === "self" ? "You" : content.username}
         </Text>
@@ -166,7 +162,7 @@ export function Message({
           {content.date}
         </Text>
       </div>
-      <Text size="sm" font="default" className="text-justify break-words">
+      <Text size="sm" font="default" className="text-justify break-all">
         {content.text}
       </Text>
     </Paper>

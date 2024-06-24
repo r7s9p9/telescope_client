@@ -114,7 +114,7 @@ export function Privacy() {
 
 function Wrapper({ children }: { children: ReactNode }) {
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center border-t-2 border-slate-100 md:border-0">
       <div className="w-full md:w-[500px] h-full md:h-fit">{children}</div>
     </div>
   );

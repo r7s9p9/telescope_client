@@ -79,7 +79,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           </IconButton>
         </div>
       )}
-      <div className="shrink-0 relative md:h-24 md:p-4 w-full flex items-center md:border-l-2 border-slate-100 bg-slate-50">
+      <div className="relative md:p-4 flex items-center md:border-l-2 border-slate-100 bg-slate-50">
         <TextArea
           value={formData.text}
           setValue={(val) =>

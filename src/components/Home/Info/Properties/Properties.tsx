@@ -48,7 +48,7 @@ export function Properties() {
       padding={4}
       className="relative bg-slate-50 border-t-2 border-slate-100"
     >
-      <div className="flex flex-col gap-2 items-start w-full pr-24">
+      <div className="flex flex-col gap-2 items-start w-full pr-[100px]">
         <InfoLine isLoading={isInitialLoading} label="Name">
           <Input
             value={editable.name}
@@ -115,7 +115,7 @@ function EditGroup({
   isEdit: boolean;
 }) {
   const iconProps = {
-    strokeWidth: "1.5",
+    strokeWidth: "1",
     className: "text-slate-600",
     size: 24,
   };

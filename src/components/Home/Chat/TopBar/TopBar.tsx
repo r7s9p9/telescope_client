@@ -19,13 +19,13 @@ export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
 
   return (
     <div className="relative shrink-0 w-full min-w-[320px] h-14 md:h-16 px-4 flex items-center md:border-x-2 border-slate-100 bg-slate-50 select-none">
-      <IconButton
-        title={"Close chat"}
+      <IconCircleArrowLeft
         onClick={closeChat}
-        className="md:invisible md:hidden mr-4"
-      >
-        <IconCircleArrowLeft {...iconProps} />
-      </IconButton>
+        strokeWidth="1"
+        size={32}
+        className="shrink-0 text-slate-600 md:invisible md:hidden mr-4"
+      />
+
       {!content.isInitialLoading && (
         <>
           <div className="flex items-center shrink-0 gap-4">
