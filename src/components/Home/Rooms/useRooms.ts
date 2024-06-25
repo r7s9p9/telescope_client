@@ -1,11 +1,11 @@
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   useQueryRooms,
   useQuerySearchRooms,
 } from "../../../shared/api/api.model";
 import { useStore } from "../../../shared/store/store";
-import { useInterval } from "../../../shared/lib/useInterval";
+import { useInterval } from "../../../shared/hooks/useInterval";
 import { debounce } from "../../../shared/lib/debounce";
 import {
   DEBOUNCE_SCROLL_DELAY,
@@ -203,4 +203,17 @@ export function useRooms() {
     isSearch,
     isLoadingSearch: querySearch.isLoading,
   };
+}
+
+export function useTitle() {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  const onCreate = () => {
+    navigate(`${pathname}/create`, {
+      state: { prevPath: pathname },
+    });
+  };
+
+  return { onCreate };
 }

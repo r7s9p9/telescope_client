@@ -1,4 +1,4 @@
-import { IconArrowBackUp, IconUpload } from "@tabler/icons-react";
+import { IconCircleArrowLeft, IconFileUpload } from "@tabler/icons-react";
 import { Button } from "../../../../shared/ui/Button/Button";
 import { Paper } from "../../../../shared/ui/Paper/Paper";
 import { Text } from "../../../../shared/ui/Text/Text";
@@ -19,6 +19,12 @@ export function Privacy() {
   if (!isLoaded) {
     return <Loader />;
   }
+
+  const iconProps = {
+    className: "text-slate-600",
+    strokeWidth: "1",
+    size: 24,
+  };
 
   return (
     <Wrapper>
@@ -72,15 +78,10 @@ export function Privacy() {
             title="Update profile"
             size="md"
             onClick={handleUpdate}
-            //   disabled={isUploading}
-            className="w-32 self-end justify-center"
+            className="w-36 self-end justify-center"
           >
             <>
-              <IconUpload
-                className="text-slate-500"
-                strokeWidth="1.5"
-                size={24}
-              />
+              <IconFileUpload {...iconProps} />
               <Text size="md" font="light">
                 Update
               </Text>
@@ -92,14 +93,10 @@ export function Privacy() {
               size="md"
               onClick={returnBack}
               disabled={!isFromAnotherPage}
-              className="w-32 justify-center"
+              className="w-36 justify-center"
             >
               <>
-                <IconArrowBackUp
-                  className="text-slate-500"
-                  strokeWidth="1.5"
-                  size={24}
-                />
+                <IconCircleArrowLeft {...iconProps} />
                 <Text size="md" font="light">
                   Go back
                 </Text>

@@ -7,7 +7,7 @@ export function useInfo() {
   const navigate = useNavigate();
 
   const exit = useCallback(() => {
-    navigate({ pathname: routes.rooms.path + roomId });
+    navigate({ pathname: `${routes.rooms.path}/${roomId}` });
   }, [navigate, roomId]);
 
   return {

@@ -6,7 +6,7 @@ import {
 } from "../../../shared/api/api.model";
 import { RoomId } from "../../../shared/api/api.schema";
 import { MessageDates, MessageType } from "../../../shared/api/api.schema";
-import { useInterval } from "../../../shared/lib/useInterval";
+import { useInterval } from "../../../shared/hooks/useInterval";
 import { useStore } from "../../../shared/store/store";
 import { debounce } from "../../../shared/lib/debounce";
 import { useParams } from "react-router-dom";

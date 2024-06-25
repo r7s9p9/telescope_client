@@ -10,9 +10,7 @@ import { Paper } from "../../../../../shared/ui/Paper/Paper";
 import { Text } from "../../../../../shared/ui/Text/Text";
 import { useBlocked } from "./useBlocked";
 import { Overlay } from "../../../../../shared/ui/Overlay/Overlay";
-import { RoomId, UserId } from "../../../../../shared/api/api.schema";
-import { routes } from "../../../../../constants";
-import { Link } from "react-router-dom";
+import { UserId } from "../../../../../shared/api/api.schema";
 import { ReactNode, RefObject } from "react";
 import { Spinner } from "../../../../../shared/ui/Spinner/Spinner";
 import { ReadAccountResponseType } from "../../../../../shared/api/api.schema";
@@ -21,13 +19,15 @@ import { Button } from "../../../../../shared/ui/Button/Button";
 
 export function BlockedUsers() {
   const {
-    roomId,
     reload,
     isLoading,
     isEmpty,
     blockedUsers,
     openMenu,
     onClickMenuHandler,
+    onClose,
+    contentRef,
+    overlayRef,
   } = useBlocked();
 
   let blockedUsersContent: JSX.Element = <></>;
@@ -60,12 +60,12 @@ export function BlockedUsers() {
   }
 
   return (
-    <Overlay>
+    <Overlay overlayRef={overlayRef} contentRef={contentRef}>
       <Paper
         shadow="md"
-        className="h-screen w-screen md:h-[450px] md:w-full px-4 md:p-4 md:rounded-lg flex flex-col bg-slate-50"
+        className="absolute bottom-0 left-0 md:relative w-screen h-1/2 md:h-[450px] md:w-full px-4 md:p-4 rounded-t-lg md:rounded-lg flex flex-col bg-slate-50"
       >
-        <Title roomId={roomId} reload={reload} />
+        <Title onClose={onClose} reload={reload} />
         {blockedUsersContent}
       </Paper>
     </Overlay>
@@ -78,20 +78,30 @@ const iconProps = {
   size: 32,
 };
 
-function Title({ roomId, reload }: { roomId: RoomId; reload: () => void }) {
+function Title({
+  reload,
+  onClose,
+}: {
+  reload: () => void;
+  onClose: () => void;
+}) {
   return (
     <div className="h-14 md:w-96 bg-slate-50 flex items-center gap-2">
-      <Text size="xl" font="thin" uppercase letterSpacing className="grow">
+      <Text
+        size="xl"
+        font="thin"
+        uppercase
+        letterSpacing
+        className="select-none grow"
+      >
         Blocked users
       </Text>
       <IconButton title="Refresh users" onClick={reload}>
         <IconRefresh {...iconProps} />
       </IconButton>
-      <Link to={routes.rooms.path + roomId + "/info"}>
-        <IconButton title="Exit">
-          <IconX {...iconProps} />
-        </IconButton>
-      </Link>
+      <IconButton title="Exit" onClick={onClose}>
+        <IconX {...iconProps} />
+      </IconButton>
     </div>
   );
 }
@@ -109,7 +119,7 @@ function ListWrapper({
     <ul
       onScroll={onScroll}
       ref={listRef}
-      className="overflow-y-auto overscroll-none flex flex-col gap-2 grow pt-4 border-t-2 border-slate-100"
+      className="overflow-y-auto overscroll-none flex flex-col gap-2 h-full py-4 border-t-2 border-slate-100"
     >
       {children}
     </ul>

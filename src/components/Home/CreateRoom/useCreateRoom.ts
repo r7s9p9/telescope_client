@@ -1,16 +1,28 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryCreateRoom } from "../../../shared/api/api.model";
 import { useLoadRooms } from "../Rooms/useRooms";
 import { useState } from "react";
 import { routes } from "../../../constants";
 import { langError } from "../../../locales/en";
 import { useNotify } from "../../Notification/Notification";
+import { useOnClickOutside } from "../../../shared/hooks/useOnClickOutside";
 
 export function useCreateRoom() {
   const query = useQueryCreateRoom();
   const loadRooms = useLoadRooms();
   const navigate = useNavigate();
+  const location = useLocation();
   const notify = useNotify();
+
+  const onClose = () => {
+    if (!location.state?.prevPath) {
+      navigate(routes.home.path);
+      return;
+    }
+    navigate(location.state?.prevPath);
+  };
+
+  const { contentRef, overlayRef } = useOnClickOutside({ onClose });
 
   const [form, setForm] = useState({
     name: { value: "", error: "" },
@@ -60,17 +72,15 @@ export function useCreateRoom() {
     }
   };
 
-  const cancel = () => {
-    navigate({ pathname: routes.rooms.path });
-  };
-
   return {
     form,
     setName,
     setAbout,
     handleSelectType,
     run,
-    cancel,
+    onClose,
     isLoading: query.isLoading,
+    contentRef,
+    overlayRef,
   };
 }

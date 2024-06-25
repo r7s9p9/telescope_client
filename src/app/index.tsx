@@ -77,8 +77,8 @@ const router = createBrowserRouter(
           errorElement={<ErrorRooms />}
         >
           <Route
-            path={routes.createRoom.path}
-            id={routes.createRoom.id}
+            path={routes.roomsCreateRoom.path}
+            id={routes.roomsCreateRoom.id}
             element={<CreateRoom />}
             errorElement={<ErrorCreateRoom />}
           />
@@ -89,11 +89,23 @@ const router = createBrowserRouter(
             errorElement={<ErrorChat />}
           >
             <Route
+              path={routes.chatCreateRoom.path}
+              id={routes.chatCreateRoom.id}
+              element={<CreateRoom />}
+              errorElement={<ErrorCreateRoom />}
+            />
+            <Route
               path={routes.chatInfo.path}
               id={routes.chatInfo.id}
               element={<ChatInfo />}
               errorElement={<ErrorInfo />}
             >
+              <Route
+                path={routes.chatInfoCreateRoom.path}
+                id={routes.chatInfoCreateRoom.id}
+                element={<CreateRoom />}
+                errorElement={<ErrorCreateRoom />}
+              />
               <Route
                 path={routes.chatBlocked.path}
                 id={routes.chatBlocked.id}

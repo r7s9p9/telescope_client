@@ -26,11 +26,11 @@ export function useTopBar(data: ReturnType<typeof useInfo>) {
   const { pathname } = useLocation();
 
   const openSideBar = () => {
-    navigate({ pathname: routes.rooms.path + data.roomId + "/info" });
+    navigate({ pathname: `${routes.rooms.path}/${data.roomId}/info` });
   };
 
   const closeSideBar = () => {
-    navigate({ pathname: routes.rooms.path + data.roomId });
+    navigate({ pathname: `${routes.rooms.path}/${data.roomId}` });
   };
 
   const closeChat = () => {

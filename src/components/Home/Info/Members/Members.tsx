@@ -16,18 +16,17 @@ import {
 } from "@tabler/icons-react";
 import { Paper } from "../../../../shared/ui/Paper/Paper";
 import { Button } from "../../../../shared/ui/Button/Button";
-import { Link } from "react-router-dom";
-import { routes } from "../../../../constants";
 
 export function Members() {
   const {
-    roomId,
     getMembers,
     listRef,
     debouncedHandleScroll,
     data,
     isLoading,
     isAdmin,
+    onClickBlocked,
+    onClickInvite,
   } = useMembers();
 
   let members: JSX.Element = <></>;
@@ -75,16 +74,12 @@ export function Members() {
         </IconButton>
         {isAdmin && (
           <>
-            <Link to={routes.rooms.path + roomId + "/info/blocked"}>
-              <IconButton title="Blocked users">
-                <IconUserCancel {...iconProps} />
-              </IconButton>
-            </Link>
-            <Link to={routes.rooms.path + roomId + "/info/invite"}>
-              <IconButton title="Invite users">
-                <IconPlus {...iconProps} />
-              </IconButton>
-            </Link>
+            <IconButton title="Blocked users">
+              <IconUserCancel {...iconProps} onClick={onClickBlocked} />
+            </IconButton>
+            <IconButton title="Invite users" onClick={onClickInvite}>
+              <IconPlus {...iconProps} />
+            </IconButton>
           </>
         )}
       </div>

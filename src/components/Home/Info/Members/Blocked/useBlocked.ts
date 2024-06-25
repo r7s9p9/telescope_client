@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { RoomId, UserId } from "../../../../../shared/api/api.schema";
 import {
   useQueryGetBlockedUsersInRoom,
@@ -10,6 +10,7 @@ import { GetRoomBlockedUsersResponseType } from "../../../../../shared/api/api.s
 import { routes } from "../../../../../constants";
 import { useMenuContext } from "../../../../ContextMenu/ContextMenu";
 import { langError, langRoom } from "../../../../../locales/en";
+import { useOnClickOutside } from "../../../../../shared/hooks/useOnClickOutside";
 
 export function useBlocked() {
   const { roomId } = useParams();
@@ -17,7 +18,18 @@ export function useBlocked() {
   const queryUnban = useQueryUnbanUserInRoom();
   const notify = useNotify();
   const navigate = useNavigate();
+  const location = useLocation();
   const { openMenu, closeMenu } = useMenuContext();
+
+  const onClose = () => {
+    if (!location.state?.prevPath) {
+      navigate(routes.home.path);
+      return;
+    }
+    navigate(location.state?.prevPath);
+  };
+
+  const { contentRef, overlayRef } = useOnClickOutside({ onClose });
 
   const [blocked, setBlocked] =
     useState<GetRoomBlockedUsersResponseType["users"]>();
@@ -83,12 +95,14 @@ export function useBlocked() {
   }, []);
 
   return {
-    roomId: roomId as RoomId,
     reload: read,
     isLoading: queryRead.isLoading,
     isEmpty: !blocked,
     blockedUsers: blocked,
     openMenu,
     onClickMenuHandler,
+    onClose,
+    contentRef,
+    overlayRef,
   };
 }

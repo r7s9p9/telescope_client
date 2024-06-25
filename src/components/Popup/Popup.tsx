@@ -1,12 +1,6 @@
-import {
-  ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ReactNode, createContext, useContext, useState } from "react";
 import { Overlay } from "../../shared/ui/Overlay/Overlay";
+import { useOnClickOutside } from "../../shared/hooks/useOnClickOutside";
 
 const PopupContext = createContext({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -43,29 +37,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
 export const PopupStack = () => {
   const data = useContext(PopupViewContext);
   const { hide } = useContext(PopupContext);
-
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        data.isShow &&
-        overlayRef.current &&
-        overlayRef.current.contains(event.target as Node) &&
-        contentRef.current &&
-        !contentRef.current.contains(event.target as Node)
-      ) {
-        hide();
-      }
-    };
-
-    document.addEventListener("click", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, [data, hide, contentRef]);
+  const { overlayRef, contentRef } = useOnClickOutside({ onClose: hide });
 
   return (
     data.isShow && (

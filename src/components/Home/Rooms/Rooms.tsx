@@ -4,7 +4,7 @@ import { formatDate } from "../../../shared/lib/date";
 import { getRandomInt } from "../../../shared/lib/random";
 import { routes } from "../../../constants";
 import { IconCirclePlus, IconSearch, IconX } from "@tabler/icons-react";
-import { useRooms } from "./useRooms";
+import { useRooms, useTitle } from "./useRooms";
 import { ITEM_HEIGHT } from "./constants";
 import {
   RoomType,
@@ -159,20 +159,16 @@ function Wrapper({
 }
 
 function Title() {
+  const { onCreate } = useTitle();
+
   return (
     <div className="h-16 w-full flex justify-between items-center">
       <Text size="xl" font="thin" uppercase letterSpacing>
         Rooms
       </Text>
-      <Link to={routes.createRoom.path}>
-        <IconButton title={"Create new room"} noHover>
-          <IconCirclePlus
-            strokeWidth="1"
-            className="text-slate-600"
-            size={32}
-          />
-        </IconButton>
-      </Link>
+      <IconButton title={"Create new room"} noHover onClick={onCreate}>
+        <IconCirclePlus strokeWidth="1" className="text-slate-600" size={32} />
+      </IconButton>
     </div>
   );
 }
@@ -323,7 +319,7 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
 
   return (
     <Link
-      to={routes.rooms.path + data.roomId}
+      to={`${routes.rooms.path}/${data.roomId}`}
       style={itemHeightStyle}
       className={`${isOpened ? "bg-slate-200 cursor-default" : "bg-slate-50"} w-full flex flex-col px-4 py-2 justify-between items-center hover:bg-slate-200 duration-300 ease-out`}
     >

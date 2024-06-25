@@ -90,7 +90,7 @@ function Title({ roomId }: { roomId: RoomId }) {
       <Text size="xl" font="thin" uppercase letterSpacing className="grow">
         Invite users
       </Text>
-      <Link to={routes.rooms.path + roomId + "/info"}>
+      <Link to={`${routes.rooms.path}/${roomId}/info`}>
         <IconButton title="Exit">
           <IconX className="text-slate-600" strokeWidth="1" size={32} />
         </IconButton>

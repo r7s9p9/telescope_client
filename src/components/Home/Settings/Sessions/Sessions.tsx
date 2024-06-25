@@ -4,11 +4,11 @@ import { Text } from "../../../../shared/ui/Text/Text";
 import { useSessions } from "./useSessions";
 import { parseUserAgent } from "../../../../shared/lib/userAgent";
 import {
-  IconArrowBackUp,
   IconBrandChrome,
   IconBrandEdge,
   IconBrandFirefox,
   IconBrowser,
+  IconCircleArrowLeft,
   IconDeviceDesktop,
   IconDeviceGamepad,
   IconDeviceMobile,
@@ -241,12 +241,12 @@ function Wrapper({
             size="md"
             onClick={returnBack}
             disabled={!isFromAnotherPage}
-            className="w-32 justify-center mt-4 shrink-0"
+            className="w-36 justify-center mt-4 shrink-0"
           >
             <>
-              <IconArrowBackUp
-                className="text-slate-500"
-                strokeWidth="1.5"
+              <IconCircleArrowLeft
+                className="text-slate-600"
+                strokeWidth="1"
                 size={24}
               />
               <Text size="md" font="light">

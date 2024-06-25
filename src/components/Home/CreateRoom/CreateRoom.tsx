@@ -1,11 +1,11 @@
 import {
   IconAbc,
-  IconArrowBackUp,
   IconBlockquote,
-  IconStar,
+  IconCirclePlus,
   IconUser,
   IconUsers,
   IconUsersGroup,
+  IconX,
 } from "@tabler/icons-react";
 import { Text } from "../../../shared/ui/Text/Text";
 import { Paper } from "../../../shared/ui/Paper/Paper";
@@ -13,28 +13,48 @@ import { Button } from "../../../shared/ui/Button/Button";
 import { SegmentedButton } from "../../../shared/ui/SegmentedButton/SegmentedButton";
 import { InputField } from "../../../shared/ui/InputField/InputField";
 import { useCreateRoom } from "./useCreateRoom";
-import { Spinner } from "../../../shared/ui/Spinner/Spinner";
 import { TextAreaField } from "../../../shared/ui/TextAreaField/TextAreaField";
+import { IconButton } from "../../../shared/ui/IconButton/IconButton";
+import { Overlay } from "../../../shared/ui/Overlay/Overlay";
 
 export function CreateRoom() {
-  const { form, setName, setAbout, handleSelectType, run, cancel, isLoading } =
-    useCreateRoom();
+  const {
+    form,
+    setName,
+    setAbout,
+    handleSelectType,
+    run,
+    onClose,
+    contentRef,
+    overlayRef,
+  } = useCreateRoom();
+
+  const iconProps = {
+    className: "text-slate-600",
+    strokeWidth: "1",
+    size: 24,
+  };
 
   return (
-    <div className="absolute left-0 right-0 md:relative w-full h-full flex items-center justify-center">
+    <Overlay contentRef={contentRef} overlayRef={overlayRef}>
       <Paper
         padding={4}
         shadow="xl"
-        className="w-full h-full md:h-fit md:w-3/4 md:min-w-[350px] md:max-w-[650px] md:rounded-xl flex flex-col bg-slate-50"
+        className="w-screen absolute bottom-0 left-0 md:relative md:w-3/4 md:min-w-[400px] md:max-w-[650px] rounded-t-xl md:rounded-xl flex flex-col bg-slate-50"
       >
         <div className="flex justify-between items-center">
-          <Text size="xl" font="light" letterSpacing className="self-center">
+          <Text
+            size="xl"
+            font="thin"
+            uppercase
+            letterSpacing
+            className="select-none"
+          >
             Create a room
           </Text>
-          <Spinner
-            size={32}
-            className={`${isLoading ? "opacity-100" : "opacity-0"}`}
-          />
+          <IconButton title="Exit" onClick={onClose}>
+            <IconX {...iconProps} size={32} />
+          </IconButton>
         </div>
         <InputField
           size="md"
@@ -45,7 +65,7 @@ export function CreateRoom() {
           rightSection={
             <IconAbc className="text-slate-500" strokeWidth="1" size={28} />
           }
-          className="w-full"
+          className="w-full mt-2 border-t-2 border-slate-100"
         />
         <SegmentedButton
           label="Type"
@@ -59,11 +79,7 @@ export function CreateRoom() {
             {
               label: (
                 <>
-                  <IconUsersGroup
-                    className="text-slate-600"
-                    strokeWidth="1"
-                    size={24}
-                  />
+                  <IconUsersGroup {...iconProps} />
                   <Text size="md" font="light">
                     Public
                   </Text>
@@ -74,11 +90,7 @@ export function CreateRoom() {
             {
               label: (
                 <>
-                  <IconUsers
-                    className="text-slate-600"
-                    strokeWidth="1"
-                    size={24}
-                  />
+                  <IconUsers {...iconProps} />
                   <Text size="md" font="light">
                     Private
                   </Text>
@@ -89,11 +101,7 @@ export function CreateRoom() {
             {
               label: (
                 <>
-                  <IconUser
-                    className="text-slate-600"
-                    strokeWidth="1"
-                    size={24}
-                  />
+                  <IconUser {...iconProps} />
                   <Text size="md" font="light">
                     Single
                   </Text>
@@ -111,53 +119,22 @@ export function CreateRoom() {
           value={form.about.value}
           setValue={setAbout}
           error={form.about.error}
-          rightSection={
-            <IconBlockquote
-              className="text-slate-500"
-              strokeWidth="1"
-              size={28}
-            />
-          }
+          rightSection={<IconBlockquote {...iconProps} />}
         />
-        <div className="mt-4 flex items-center justify-between">
-          <Button
-            title="Cancel"
-            size="md"
-            onClick={cancel}
-            className="w-32 justify-center"
-          >
-            <>
-              <IconArrowBackUp
-                className="text-slate-500"
-                strokeWidth="1.5"
-                size={24}
-              />
-              <Text size="md" font="light">
-                Cancel
-              </Text>
-            </>
-          </Button>
-          <Button
-            title="Create room"
-            size="md"
-            onClick={run}
-            className="w-32 justify-center"
-          >
-            <>
-              <IconStar
-                className="text-slate-500"
-                strokeWidth="1.5"
-                size={24}
-              />
-              <Text size="md" font="light">
-                Create
-              </Text>
-            </>
-          </Button>
-        </div>
+        <Button
+          title="Create room"
+          size="md"
+          onClick={run}
+          className="mt-4 md:w-36 w-full md:self-end justify-center"
+        >
+          <>
+            <IconCirclePlus {...iconProps} />
+            <Text size="md" font="light">
+              Create
+            </Text>
+          </>
+        </Button>
       </Paper>
-    </div>
+    </Overlay>
   );
 }
-
-//className="md:invisible md:hidden mr-4"

@@ -16,7 +16,7 @@ export function Panel() {
 
   return (
     <div className="shrink-0 w-full md:w-fit h-14 md:h-full bg-slate-50 md:bg-slate-600 px-4 md:px-2 py-2 flex md:flex-col items-center gap-4">
-      <Link to={routes.profile.pathPart + "self"}>
+      <Link to={routes.profile.pathPart + "/self"}>
         <IconButton title="Profile" noHover className="md:pt-2">
           <IconUserCircle
             {...iconProps}

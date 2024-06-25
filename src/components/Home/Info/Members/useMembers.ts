@@ -25,6 +25,20 @@ export function useMembers() {
   const query = useQueryGetMembers();
   const info = useLoadInfo();
   const notify = useNotify();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const onClickBlocked = () => {
+    navigate(`${location.pathname}/blocked`, {
+      state: { prevPath: location.pathname },
+    });
+  };
+
+  const onClickInvite = () => {
+    navigate(`${location.pathname}/invite`, {
+      state: { prevPath: location.pathname },
+    });
+  };
 
   const listRef = useRef<HTMLUListElement>(null);
   const [data, setData] = useState<GetRoomsMembersResponseType | null>(null);
@@ -84,6 +98,8 @@ export function useMembers() {
     data,
     isLoading: query.isLoading || !data,
     isAdmin: info.storedInfo?.creatorId === "self",
+    onClickBlocked,
+    onClickInvite,
   };
 }
 
