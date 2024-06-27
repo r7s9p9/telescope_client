@@ -117,7 +117,7 @@ function Wrapper({
 }) {
   return (
     <>
-      <div className="h-full flex flex-col md:w-1/2 md:min-w-64 max-w-sm bg-slate-50 border-t-2 border-slate-100 md:border-0">
+      <div className="h-full flex flex-col md:w-1/2 md:min-w-72 max-w-sm bg-slate-50 border-t-2 border-slate-100 md:border-0">
         <div className="pb-4 px-4 flex flex-col items-center">
           <Title />
           <Input
@@ -223,7 +223,7 @@ function FoundItem({
 
   return (
     <Link
-      to={routes.rooms.path + data.roomId}
+      to={`${routes.rooms.path}/${data.roomId}`}
       style={itemHeightStyle}
       className={`${isOpened ? "bg-slate-200 cursor-default" : "bg-slate-50"} w-full flex flex-col px-4 py-2 justify-between hover:bg-slate-200 duration-300 ease-out`}
     >

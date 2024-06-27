@@ -7,8 +7,7 @@ import {
 import { useActions } from "./useActions";
 import { Button } from "../../../../shared/ui/Button/Button";
 import { Text } from "../../../../shared/ui/Text/Text";
-import { ConfirmPopup } from "../../../../shared/ui/ConfirmPopup/ConfirmPopup";
-import { usePopup } from "../../../Popup/Popup";
+import { useConfirmPopup } from "../../../ConfirmPopup/ConfirmPopup";
 
 export function Actions() {
   const {
@@ -20,7 +19,7 @@ export function Actions() {
     isMember,
     isAdmin,
   } = useActions();
-  const popup = usePopup();
+  const confirmPopup = useConfirmPopup();
 
   const iconProps = {
     className: "text-slate-600 ml-2",
@@ -69,13 +68,15 @@ export function Actions() {
                 size="md"
                 unstyled
                 onClick={() => {
-                  popup.show(
-                    ConfirmPopup({
-                      onAgree: handleLeave,
-                      onClose: popup.hide,
-                      text: "Are you sure you want to leave the room?",
-                    }),
-                  );
+                  confirmPopup.show({
+                    onAgree: handleLeave,
+                    onClose: confirmPopup.hide,
+                    text: {
+                      question: "Are you sure you want to leave the room?",
+                      confirm: "Leave",
+                      cancel: "Cancel",
+                    },
+                  });
                 }}
                 className="hover:bg-slate-200 gap-4"
               >
@@ -89,13 +90,15 @@ export function Actions() {
                 size="md"
                 unstyled
                 onClick={() => {
-                  popup.show(
-                    ConfirmPopup({
-                      onAgree: handleDelete,
-                      onClose: popup.hide,
-                      text: "Are you sure you want to delete this room?",
-                    }),
-                  );
+                  confirmPopup.show({
+                    onAgree: handleDelete,
+                    onClose: confirmPopup.hide,
+                    text: {
+                      question: "Are you sure you want to delete this room?",
+                      confirm: "Delete",
+                      cancel: "Cancel",
+                    },
+                  });
                 }}
                 className="hover:bg-slate-200 gap-4"
               >

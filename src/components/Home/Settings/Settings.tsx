@@ -10,13 +10,13 @@ import {
   IconUser,
 } from "@tabler/icons-react";
 import { useSettings } from "./useSettings";
-import { usePopup } from "../../Popup/Popup";
-import { ConfirmPopup } from "../../../shared/ui/ConfirmPopup/ConfirmPopup";
-import { WIP } from "../../WIP/WIP";
+import { useConfirmPopup } from "../../ConfirmPopup/ConfirmPopup";
+import { useNotify } from "../../Notification/Notification";
 
 export function Settings() {
   const { onClickHandler } = useSettings();
-  const popup = usePopup();
+  const confirmPopup = useConfirmPopup();
+  const notify = useNotify();
 
   const iconProps = {
     strokeWidth: "1",
@@ -89,7 +89,7 @@ export function Settings() {
           size="xl"
           unstyled
           onClick={() => {
-            popup.show(<WIP />);
+            notify.show.info("This content is still in development");
           }}
           className="gap-4 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100"
         >
@@ -109,13 +109,15 @@ export function Settings() {
           size="xl"
           unstyled
           onClick={() => {
-            popup.show(
-              ConfirmPopup({
-                onAgree: onClickHandler().logout,
-                onClose: popup.hide,
-                text: "Are you sure you want to log out?",
-              }),
-            );
+            confirmPopup.show({
+              onAgree: onClickHandler().logout,
+              onClose: confirmPopup.hide,
+              text: {
+                question: "Are you sure you want to log out?",
+                confirm: "Logout",
+                cancel: "Cancel",
+              },
+            });
           }}
           className="gap-4 hover:bg-slate-200 md:rounded-b-lg"
         >

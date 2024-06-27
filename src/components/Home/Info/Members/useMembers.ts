@@ -119,16 +119,18 @@ export function useMember({
 
   function onClickMenuHandler() {
     const profile = (userId: string) => {
-      navigate(routes.profile.pathPart + userId, {
+      navigate(`${routes.profile.pathPart}/${userId}`, {
         state: { prevPath: location.pathname },
       });
       closeMenu();
     };
+
     const copy = (username: string) => {
       navigator.clipboard.writeText(username as string);
       notify.show.info(langRoom.COPY_USERNAME);
       closeMenu();
     };
+
     const kick = async (userId: string, username: string) => {
       if (userId !== "self") {
         const { success, response, requestError, responseError } =
@@ -163,6 +165,7 @@ export function useMember({
         }
       }
     };
+
     const ban = async (userId: string, username: string) => {
       // dummy protection
       if (userId !== "self") {
@@ -194,6 +197,7 @@ export function useMember({
         return;
       }
     };
+
     return { profile, copy, kick, ban };
   }
 

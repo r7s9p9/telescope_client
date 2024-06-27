@@ -18,8 +18,7 @@ import {
 } from "@tabler/icons-react";
 import { formatDate } from "../../../../shared/lib/date";
 import { IconButton } from "../../../../shared/ui/IconButton/IconButton";
-import { usePopup } from "../../../Popup/Popup";
-import { ConfirmPopup } from "../../../../shared/ui/ConfirmPopup/ConfirmPopup";
+import { useConfirmPopup } from "../../../ConfirmPopup/ConfirmPopup";
 import { Button } from "../../../../shared/ui/Button/Button";
 
 export function Sessions() {
@@ -94,7 +93,7 @@ function Session({
   const lastSeen = formatDate().session(data.lastSeen);
   const isOnline = lastSeen.range === "seconds";
 
-  const popup = usePopup();
+  const confirmPopup = useConfirmPopup();
 
   return (
     <div className="relative rounded-r-xl rounded-l-[50px] shrink-0 h-22 mb-4 hover:bg-slate-200 duration-300 ease-in-out flex">
@@ -139,13 +138,15 @@ function Session({
             title="Delete session"
             className="hover:bg-slate-400 absolute bottom-1 right-1"
             onClick={() =>
-              popup.show(
-                ConfirmPopup({
-                  onAgree: () => remove(data.sessionId),
-                  onClose: popup.hide,
-                  text: "Are you sure you want to delete this session?",
-                }),
-              )
+              confirmPopup.show({
+                onAgree: () => remove(data.sessionId),
+                onClose: confirmPopup.hide,
+                text: {
+                  question: "Are you sure you want to delete this session?",
+                  confirm: "Delete",
+                  cancel: "Cancel",
+                },
+              })
             }
           >
             <IconTrash size={28} strokeWidth="1.5" className="text-slate-600" />

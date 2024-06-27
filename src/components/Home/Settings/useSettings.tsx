@@ -5,7 +5,7 @@ import { useNotify } from "../../Notification/Notification";
 import { langError, langSession } from "../../../locales/en";
 
 export function useSettings() {
-  const location = useLocation();
+  const { pathname } = useLocation();
   const navigate = useNavigate();
   const notify = useNotify();
 
@@ -13,18 +13,18 @@ export function useSettings() {
 
   function onClickHandler() {
     const profile = () => {
-      navigate(routes.profile.pathPart + "self", {
-        state: { prevPath: location.pathname },
+      navigate(`${routes.profile.pathPart}/self`, {
+        state: { prevPath: pathname },
       });
     };
     const privacy = () => {
-      navigate(routes.privacy.path, {
-        state: { prevPath: location.pathname },
+      navigate(`${pathname}/privacy`, {
+        state: { prevPath: pathname },
       });
     };
     const sessions = () => {
-      navigate(routes.sessions.path, {
-        state: { prevPath: location.pathname },
+      navigate(`${pathname}/sessions`, {
+        state: { prevPath: pathname },
       });
     };
     const logout = async () => {

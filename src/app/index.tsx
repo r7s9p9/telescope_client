@@ -18,8 +18,7 @@ import { ContextMenuProvider } from "../components/ContextMenu/ContextMenu.tsx";
 import { CreateRoom } from "../components/Home/CreateRoom/CreateRoom.tsx";
 import { ChatInfo } from "../components/Home/Info/Info.tsx";
 import { Profile } from "../components/Home/Profile/Profile.tsx";
-import { WIP } from "../components/WIP/WIP.tsx";
-import { PopupProvider } from "../components/Popup/Popup.tsx";
+import { ConfirmPopupProvider } from "../components/ConfirmPopup/ConfirmPopup.tsx";
 import { BlockedUsers } from "../components/Home/Info/Members/Blocked/Blocked.tsx";
 import { InviteUsers } from "../components/Home/Info/Members/Invite/Invite.tsx";
 import { ErrorHome } from "../components/Home/ErrorHome.tsx";
@@ -122,11 +121,6 @@ const router = createBrowserRouter(
           </Route>
         </Route>
         <Route
-          path={routes.friends.path}
-          id={routes.friends.id}
-          element={<WIP />}
-        />
-        <Route
           path={routes.settings.path}
           id={routes.settings.id}
           element={<Settings />}
@@ -154,11 +148,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <WatchdogProvider>
       <StoreProvider>
         <NotifyProvider>
-          <PopupProvider>
+          <ConfirmPopupProvider>
             <ContextMenuProvider>
               <RouterProvider router={router} />
             </ContextMenuProvider>
-          </PopupProvider>
+          </ConfirmPopupProvider>
         </NotifyProvider>
       </StoreProvider>
     </WatchdogProvider>

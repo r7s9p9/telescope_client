@@ -10,6 +10,7 @@ import { RoomSearchUsersToInviteResponseType } from "../../../../../shared/api/a
 import { useMenuContext } from "../../../../ContextMenu/ContextMenu";
 import { routes } from "../../../../../constants";
 import { langError, langRoom } from "../../../../../locales/en";
+import { useOnClickOutside } from "../../../../../shared/hooks/useOnClickOutside";
 
 export function useInvite() {
   const { roomId } = useParams();
@@ -19,6 +20,16 @@ export function useInvite() {
   const navigate = useNavigate();
   const location = useLocation();
   const { openMenu, closeMenu } = useMenuContext();
+
+  const onClose = () => {
+    if (!location.state?.prevPath) {
+      navigate(routes.home.path);
+      return;
+    }
+    navigate(location.state?.prevPath);
+  };
+
+  const { contentRef, overlayRef } = useOnClickOutside({ onClose });
 
   const [inputValue, setInputValue] = useState("");
   const [data, setData] = useState<RoomSearchUsersToInviteResponseType>();
@@ -100,12 +111,14 @@ export function useInvite() {
   }, [inputValue]);
 
   return {
-    roomId: roomId as RoomId,
+    overlayRef,
+    contentRef,
     inputValue,
     setInputValue,
     users: data?.users,
     isLoading: querySearch.isLoading,
     openMenu,
     onClickMenuHandler,
+    onClose,
   };
 }

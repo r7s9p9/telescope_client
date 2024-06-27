@@ -18,18 +18,14 @@ export default function Auth({ type }: { type: "login" | "register" }) {
 }
 
 function Background({ children }: { children: ReactNode }) {
-  return (
-    <div className="w-full h-full flex justify-center bg-slate-100 md:bg-slate-300">
-      {children}
-    </div>
-  );
+  return <div className="w-screen h-screen bg-slate-300">{children}</div>;
 }
 
 function AuthContainer({ type }: { type: "login" | "register" }) {
   const { showItem, switchForm, handleCodeRequired, email } = useMain({ type });
 
   return (
-    <div className="overflow-hidden relative w-full h-full flex flex-row justify-center md:items-center select-none">
+    <div className="overflow-hidden relative w-full h-full flex flex-row items-end md:justify-center md:items-center select-none">
       <LoginForm
         isShow={showItem === "login"}
         handleCodeRequired={handleCodeRequired}
@@ -63,14 +59,13 @@ function LoginForm({
 
   return (
     <Paper
-      rounded="lg"
       padding={4}
       style={{
         transform: isShow ? "" : "translateX(-125%)",
         opacity: isShow ? "1" : "0",
         zIndex: isShow ? 50 : 0,
       }}
-      className="absolute w-full md:w-3/4 md:max-w-xl md:shadow-xl flex flex-col justify-center gap-2 duration-500 ease-in-out transform-gpu"
+      className="absolute w-full md:w-3/4 md:max-w-xl md:shadow-xl flex flex-col justify-center gap-2 rounded-t-xl md:rounded-xl duration-500 ease-in-out transform-gpu"
     >
       <div className="flex justify-between items-center">
         <Text size="xl" font="light" letterSpacing>
@@ -147,14 +142,13 @@ function CodeForm({
 
   return (
     <Paper
-      rounded="lg"
       padding={4}
       style={{
         transform: isShow ? "" : "translateX(125%)",
         opacity: isShow ? "1" : "0",
         zIndex: isShow ? 50 : 0,
       }}
-      className="absolute w-full md:w-3/4 md:max-w-xl md:shadow-xl flex flex-col justify-center gap-2 duration-500 ease-in-out transform-gpu"
+      className="absolute w-full md:w-3/4 md:max-w-xl md:shadow-xl flex flex-col justify-center gap-2 rounded-t-xl md:rounded-xl duration-500 ease-in-out transform-gpu"
     >
       <div className="flex justify-between items-center">
         <Text size="xl" font="light" letterSpacing>
@@ -223,14 +217,13 @@ function RegisterForm({
 
   return (
     <Paper
-      rounded="lg"
       padding={4}
       style={{
         transform: isShow ? "" : "translateX(125%)",
         opacity: isShow ? "1" : "0",
         zIndex: isShow ? 50 : 0,
       }}
-      className="absolute w-full md:w-3/4 md:max-w-xl md:shadow-xl flex flex-col justify-center gap-2 duration-500 ease-in-out transform-gpu"
+      className="absolute w-full md:w-3/4 md:max-w-xl md:shadow-xl flex flex-col justify-center gap-2 rounded-t-xl md:rounded-xl duration-500 ease-in-out transform-gpu"
     >
       <div className="flex justify-between items-center">
         <Text size="xl" font="light" letterSpacing>

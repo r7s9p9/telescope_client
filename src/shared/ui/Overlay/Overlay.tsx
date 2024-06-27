@@ -12,9 +12,14 @@ export function Overlay({
   return (
     <div
       ref={overlayRef}
-      className={`z-10 absolute left-0 top-0 w-screen h-screen flex items-center justify-center backdrop-blur-sm bg-opacity-50 bg-gray-600`}
+      className={`z-10 absolute left-0 bottom-0 w-screen h-screen flex justify-center backdrop-blur-sm bg-opacity-50 bg-gray-600`}
     >
-      <div ref={contentRef}>{children}</div>
+      <div
+        className="self-end md:self-center h-2/3 md:h-[500px] w-full md:w-[600px] "
+        ref={contentRef}
+      >
+        {children}
+      </div>
     </div>
   );
 }

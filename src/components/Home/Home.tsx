@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { NotifyStack } from "../Notification/Notification";
-import { PopupStack } from "../Popup/Popup";
+import { PopupStack } from "../ConfirmPopup/ConfirmPopup";
 import { Panel } from "./Panel/Panel";
 import { useHome } from "./useHome";
 
