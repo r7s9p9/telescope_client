@@ -51,8 +51,7 @@ export function Profile() {
     <Wrapper>
       <Paper
         padding={4}
-        shadow="xl"
-        className="w-full h-full flex flex-col md:rounded-xl bg-slate-50"
+        className="w-full h-full flex flex-col md:shadow-md md:rounded-xl bg-slate-50"
       >
         <div className="flex justify-between items-center">
           <Text size="xl" font="light" className="select-none">

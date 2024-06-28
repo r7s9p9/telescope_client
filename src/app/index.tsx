@@ -10,15 +10,15 @@ import { Home } from "../components/Home/Home.tsx";
 import "./index.css";
 import Auth from "../components/Auth/Auth.tsx";
 import { routes } from "../constants.ts";
-import { NotifyProvider } from "../components/Notification/Notification.tsx";
+import { NotifyProvider } from "../shared/features/Notification/Notification.tsx";
 import { Chat } from "../components/Home/Chat/Chat.tsx";
 import { Rooms } from "../components/Home/Rooms/Rooms.tsx";
 import { StoreProvider } from "../shared/store/StoreProvider.tsx";
-import { ContextMenuProvider } from "../components/ContextMenu/ContextMenu.tsx";
+import { ContextMenuProvider } from "../shared/features/ContextMenu/ContextMenu.tsx";
 import { CreateRoom } from "../components/Home/CreateRoom/CreateRoom.tsx";
 import { ChatInfo } from "../components/Home/Info/Info.tsx";
 import { Profile } from "../components/Home/Profile/Profile.tsx";
-import { ConfirmPopupProvider } from "../components/ConfirmPopup/ConfirmPopup.tsx";
+import { ConfirmPopupProvider } from "../shared/features/ConfirmPopup/ConfirmPopup.tsx";
 import { BlockedUsers } from "../components/Home/Info/Members/Blocked/Blocked.tsx";
 import { InviteUsers } from "../components/Home/Info/Members/Invite/Invite.tsx";
 import { ErrorHome } from "../components/Home/ErrorHome.tsx";
@@ -31,7 +31,7 @@ import { ErrorInfo } from "../components/Home/Info/ErrorInfo.tsx";
 import { ErrorBlocked } from "../components/Home/Info/Members/Blocked/ErrorBlocked.tsx";
 import { ErrorInvite } from "../components/Home/Info/Members/Invite/ErrorInvite.tsx";
 import { NoMatch } from "../components/NoMatch/NoMatch.tsx";
-import { WatchdogProvider } from "../shared/watchdog/useWatchdog.tsx";
+import { WatchdogProvider } from "../shared/api/watchdog/useWatchdog.tsx";
 import { Settings } from "../components/Home/Settings/Settings.tsx";
 import { Sessions } from "../components/Home/Settings/Sessions/Sessions.tsx";
 import { Privacy } from "../components/Home/Settings/Privacy/Privacy.tsx";
@@ -145,8 +145,8 @@ const router = createBrowserRouter(
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <WatchdogProvider>
-      <StoreProvider>
+    <StoreProvider>
+      <WatchdogProvider>
         <NotifyProvider>
           <ConfirmPopupProvider>
             <ContextMenuProvider>
@@ -154,7 +154,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             </ContextMenuProvider>
           </ConfirmPopupProvider>
         </NotifyProvider>
-      </StoreProvider>
-    </WatchdogProvider>
+      </WatchdogProvider>
+    </StoreProvider>
   </React.StrictMode>,
 );

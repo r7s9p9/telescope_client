@@ -7,7 +7,7 @@ import {
 import { useActions } from "./useActions";
 import { Button } from "../../../../shared/ui/Button/Button";
 import { Text } from "../../../../shared/ui/Text/Text";
-import { useConfirmPopup } from "../../../ConfirmPopup/ConfirmPopup";
+import { useConfirmPopup } from "../../../../shared/features/ConfirmPopup/ConfirmPopup";
 
 export function Actions() {
   const {

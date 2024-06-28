@@ -10,8 +10,8 @@ import { GetRoomsMembersResponseType } from "../../../../shared/api/api.schema";
 import { debounce } from "../../../../shared/lib/debounce";
 import { routes } from "../../../../constants";
 import { RoomId, UserId } from "../../../../shared/api/api.schema";
-import { useMenuContext } from "../../../ContextMenu/ContextMenu";
-import { useNotify } from "../../../Notification/Notification";
+import { useMenuContext } from "../../../../shared/features/ContextMenu/ContextMenu";
+import { useNotify } from "../../../../shared/features/Notification/Notification";
 import { langError, langRoom } from "../../../../locales/en";
 
 const DEBOUNCE_SCROLL_INTERVAL = 200;

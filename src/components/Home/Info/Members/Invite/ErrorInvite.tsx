@@ -1,14 +1,9 @@
 import { useRouteError } from "react-router-dom";
-import { Overlay } from "../../../../../shared/ui/Overlay/Overlay";
-import { ErrorBoundary } from "../../../../../shared/ui/ErrorBoundary/ErrorBoundary";
+import { ErrorBoundaryPopup } from "../../../../../shared/ui/ErrorBoundaryPopup/ErrorBoundaryPopup";
 
 export function ErrorInvite() {
   const error = useRouteError();
   console.error(error);
 
-  return (
-    <Overlay>
-      <ErrorBoundary size="xl" />
-    </Overlay>
-  );
+  return <ErrorBoundaryPopup />;
 }

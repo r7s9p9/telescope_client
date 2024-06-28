@@ -11,7 +11,7 @@ import { useStore } from "../../../shared/store/store";
 import { debounce } from "../../../shared/lib/debounce";
 import { useParams } from "react-router-dom";
 import { getRandomArray, getRandomBoolean } from "../../../shared/lib/random";
-import { useNotify } from "../../Notification/Notification";
+import { useNotify } from "../../../shared/features/Notification/Notification";
 import { langError } from "../../../locales/en";
 
 const INFO_UPDATE_INTERVAL = 10000 as const;

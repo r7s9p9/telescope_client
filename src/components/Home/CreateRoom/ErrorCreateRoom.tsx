@@ -1,13 +1,9 @@
 import { useRouteError } from "react-router-dom";
-import { ErrorBoundary } from "../../../shared/ui/ErrorBoundary/ErrorBoundary";
+import { ErrorBoundaryPopup } from "../../../shared/ui/ErrorBoundaryPopup/ErrorBoundaryPopup";
 
 export function ErrorCreateRoom() {
   const error = useRouteError();
   console.error(error);
 
-  return (
-    <div className="w-full h-full flex justify-center items-center">
-      <ErrorBoundary size="md" />
-    </div>
-  );
+  return <ErrorBoundaryPopup />;
 }

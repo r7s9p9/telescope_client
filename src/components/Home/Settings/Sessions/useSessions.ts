@@ -3,7 +3,7 @@ import {
   useQueryDeleteSession,
   useQueryReadSessions,
 } from "../../../../shared/api/api.model";
-import { useNotify } from "../../../Notification/Notification";
+import { useNotify } from "../../../../shared/features/Notification/Notification";
 import { langError, langSession } from "../../../../locales/en";
 import { SessionReadResponseType } from "../../../../shared/api/api.schema";
 import { useLocation, useNavigate } from "react-router-dom";

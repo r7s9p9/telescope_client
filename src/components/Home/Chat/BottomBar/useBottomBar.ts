@@ -9,7 +9,7 @@ import {
 } from "../../../../shared/api/api.model";
 import { RoomId } from "../../../../shared/api/api.schema";
 import { MessageType } from "../../../../shared/api/api.schema";
-import { useNotify } from "../../../Notification/Notification";
+import { useNotify } from "../../../../shared/features/Notification/Notification";
 import { langError, langRoom } from "../../../../locales/en";
 
 export function useSend(roomId: RoomId) {

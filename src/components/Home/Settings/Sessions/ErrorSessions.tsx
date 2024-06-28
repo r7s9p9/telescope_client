@@ -7,7 +7,7 @@ export function ErrorSessions() {
 
   return (
     <div className="w-full h-full flex justify-center items-center">
-      <ErrorBoundary size="md" />
+      <ErrorBoundary />
     </div>
   );
 }

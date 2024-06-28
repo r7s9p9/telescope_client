@@ -18,7 +18,7 @@ import {
 } from "@tabler/icons-react";
 import { formatDate } from "../../../../shared/lib/date";
 import { IconButton } from "../../../../shared/ui/IconButton/IconButton";
-import { useConfirmPopup } from "../../../ConfirmPopup/ConfirmPopup";
+import { useConfirmPopup } from "../../../../shared/features/ConfirmPopup/ConfirmPopup";
 import { Button } from "../../../../shared/ui/Button/Button";
 
 export function Sessions() {
@@ -229,8 +229,7 @@ function Wrapper({
     <div className="w-full h-full flex items-center justify-center border-t-2 border-slate-100 md:border-0">
       <Paper
         padding={4}
-        shadow="xl"
-        className="w-full h-full md:w-3/4 md:h-[400px] md:min-w-[350px] md:max-w-[650px] md:rounded-xl flex flex-col bg-slate-50"
+        className="w-full h-full md:w-3/4 md:h-[400px] md:min-w-[350px] md:max-w-[650px] md:rounded-xl flex flex-col shadow-md bg-slate-50"
       >
         <Text size="xl" font="light" className="select-none mb-4">
           Sessions

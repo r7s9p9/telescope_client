@@ -4,34 +4,31 @@ import React, {
   useState,
   useEffect,
   useRef,
+  RefObject,
+  useCallback,
 } from "react";
 
-type Data = {
-  isOpen: boolean;
-  isMoved: boolean;
-  position: { x: number; y: number };
-  content: React.ReactElement | null;
-};
-
 const dataDefault = {
-  isOpen: false,
-  isMoved: false,
+  isRender: false,
+  isShow: false,
   position: { x: 0, y: 0 },
-  content: null,
+  window: { width: 0, height: 0 },
+  content: null as React.ReactElement | null,
+  targetRef: null as RefObject<HTMLDivElement> | null,
 };
 
 const MenuContext = createContext<{
-  data: Data;
   openMenu: (
     event: React.MouseEvent<HTMLElement>,
     content: React.ReactElement,
   ) => void;
   closeMenu: () => void;
 }>({
-  data: dataDefault,
   openMenu: () => {},
   closeMenu: () => {},
 });
+
+const MenuViewContext = createContext(dataDefault);
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useMenuContext = () => useContext(MenuContext);
@@ -41,7 +38,7 @@ export const ContextMenuProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [data, setData] = useState<Data>(dataDefault);
+  const [data, setData] = useState(dataDefault);
   const targetRef = useRef<HTMLDivElement | null>(null);
 
   const openMenu = (
@@ -49,39 +46,42 @@ export const ContextMenuProvider = ({
     content: React.ReactElement,
   ) => {
     e.preventDefault();
-    if (!data.isOpen) {
+    if (!data.isRender) {
       setData({
-        isOpen: true,
-        isMoved: false,
+        isRender: true,
+        isShow: false,
         position: { x: e.clientX, y: e.clientY },
-        content: content,
+        window: { width: window.innerWidth, height: window.innerHeight },
+        content,
+        targetRef,
       });
     }
   };
 
-  const closeMenu = () => {
-    setData((prevData) => ({ ...prevData, isOpen: false }));
-  };
+  const closeMenu = () => setData(dataDefault);
+
+  const calcMenuPosition = useCallback(() => {
+    if (targetRef.current && !data.isShow) {
+      const maxX = data.window.width - targetRef.current.offsetWidth;
+      const maxY = data.window.height - targetRef.current.offsetHeight;
+
+      const x = Math.min(data.position.x, maxX);
+      const y = Math.min(data.position.y, maxY);
+
+      setData((prevData) => ({
+        ...prevData,
+        isShow: true,
+        position: { x, y },
+      }));
+    }
+  }, [data]);
 
   useEffect(() => {
-    if (targetRef.current && !data.isMoved) {
-      const maxX = window.innerWidth - targetRef.current.offsetWidth;
-      const maxY = window.innerHeight - targetRef.current.offsetHeight;
-
-      setData((prevData) => {
-        const x = Math.min(prevData.position.x, maxX);
-        const y = Math.min(prevData.position.y, maxY);
-        return {
-          ...prevData,
-          isMoved: true,
-          position: { x, y },
-        };
-      });
-    }
+    calcMenuPosition();
 
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        data.isOpen &&
+        data.isRender &&
         targetRef.current &&
         !targetRef.current.contains(event.target as Node)
       ) {
@@ -106,29 +106,36 @@ export const ContextMenuProvider = ({
       document.removeEventListener("click", handleClickOutside);
       document.removeEventListener("contextmenu", handleContextMenu);
     };
-  }, [data, targetRef]);
+  }, [calcMenuPosition, data]);
 
   return (
     <MenuContext.Provider
       value={{
-        data,
         openMenu,
         closeMenu,
       }}
     >
-      {children}
-      {data.isOpen && (
-        <div
-          ref={targetRef}
-          style={{
-            left: data.position.x,
-            top: data.position.y,
-          }}
-          className="absolute z-50"
-        >
-          {data.content}
-        </div>
-      )}
+      <MenuViewContext.Provider value={data}>
+        {children}
+      </MenuViewContext.Provider>
     </MenuContext.Provider>
+  );
+};
+
+export const ContextMenuStack = () => {
+  const data = useContext(MenuViewContext);
+  if (!data.isRender) return <></>;
+
+  return (
+    <div
+      ref={data.targetRef}
+      style={{
+        left: data.position.x,
+        top: data.position.y,
+      }}
+      className={`absolute z-50 ${data.isShow ? "visible" : "invisible"}`}
+    >
+      {data.content}
+    </div>
   );
 };

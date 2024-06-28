@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { NotifyStack } from "../Notification/Notification";
+import { NotifyStack } from "../../shared/features/Notification/Notification";
 import { IconKey, IconMail, IconSend2, IconUser } from "@tabler/icons-react";
 import { Spinner } from "../../shared/ui/Spinner/Spinner";
 import { Text } from "../../shared/ui/Text/Text";

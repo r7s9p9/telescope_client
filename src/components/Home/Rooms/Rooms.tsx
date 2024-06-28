@@ -14,6 +14,7 @@ import {
 import { IconButton } from "../../../shared/ui/IconButton/IconButton";
 import { Input } from "../../../shared/ui/Input/Input";
 import { Text } from "../../../shared/ui/Text/Text";
+import { Paper } from "../../../shared/ui/Paper/Paper";
 
 const itemHeightStyle = { height: ITEM_HEIGHT + "px" };
 
@@ -84,9 +85,11 @@ export function Rooms() {
   }
 
   const items = storedRooms.map((itemData) => (
-    <li key={itemData.roomId}>
-      <Item isOpened={roomId === itemData.roomId} data={itemData} />
-    </li>
+    <Item
+      key={itemData.roomId}
+      isOpened={roomId === itemData.roomId}
+      data={itemData}
+    />
   ));
 
   return (
@@ -117,7 +120,7 @@ function Wrapper({
 }) {
   return (
     <>
-      <div className="h-full flex flex-col md:w-1/2 md:min-w-72 max-w-sm bg-slate-50 border-t-2 border-slate-100 md:border-0">
+      <div className="h-full flex flex-col md:w-1/2 md:min-w-72 md:max-w-sm bg-slate-50 border-t-2 border-slate-100 md:border-0">
         <div className="pb-4 px-4 flex flex-col items-center">
           <Title />
           <Input
@@ -185,27 +188,30 @@ function FoundRooms({
   error: string;
 }) {
   if (isLoading) return <FoundRoomsSkeleton />;
+
+  const textProps = {
+    size: "md" as const,
+    font: "thin" as const,
+    className: "text-center",
+  };
+
   if (error) {
-    return (
-      <Text size="md" font="thin" className="text-center">
-        {error}
-      </Text>
-    );
+    return <Text {...textProps}>{error}</Text>;
   }
-  if (data && !data.isEmpty) {
+
+  if (data?.isEmpty) {
+    return <Text {...textProps}>No rooms found</Text>;
+  }
+
+  if (data) {
     const items = data.rooms.map((item) => (
-      <li key={item.roomId}>
-        <FoundItem isOpened={openedRoomId === item.roomId} data={item} />
-      </li>
+      <FoundItem
+        key={item.roomId}
+        isOpened={openedRoomId === item.roomId}
+        data={item}
+      />
     ));
     return <>{items}</>;
-  }
-  if (data?.isEmpty) {
-    return (
-      <Text size="md" font="thin" className="text-center">
-        No rooms found
-      </Text>
-    );
   }
 }
 
@@ -221,19 +227,25 @@ function FoundItem({
   if (data.userCount === 1) membersStr = "1 member";
   if (data.userCount > 1) membersStr = `${data.userCount} members`;
 
+  const textProps = {
+    size: "sm" as const,
+    font: "light" as const,
+  };
+
   return (
-    <Link
-      to={`${routes.rooms.path}/${data.roomId}`}
+    <li
       style={itemHeightStyle}
       className={`${isOpened ? "bg-slate-200 cursor-default" : "bg-slate-50"} w-full flex flex-col px-4 py-2 justify-between hover:bg-slate-200 duration-300 ease-out`}
     >
-      <Text size="sm" font="light" className="text-green-600">
-        {data.name}
-      </Text>
-      <Text size="sm" font="light" className="text-slate-600">
-        {membersStr}
-      </Text>
-    </Link>
+      <Link to={`${routes.rooms.path}/${data.roomId}`}>
+        <Text {...textProps} className="text-green-600">
+          {data.name}
+        </Text>
+        <Text {...textProps} className="text-slate-600">
+          {membersStr}
+        </Text>
+      </Link>
+    </li>
   );
 }
 
@@ -256,18 +268,84 @@ const FoundRoomsSkeleton = memo(() => {
 });
 
 function ListEmpty() {
+  const textProps = {
+    size: "sm" as const,
+    font: "light" as const,
+    className: "text-center",
+  };
   return (
-    <div
-      style={itemHeightStyle}
-      className="flex flex-col justify-center items-center w-full h-full px-4 bg-slate-200"
+    <Paper
+      padding={4}
+      rounded="md"
+      className="mt-1 mx-4 ring-2 ring-slate-200 bg-slate-100"
     >
-      <Text size="sm" font="light" className="text-center">
-        You don't have any rooms yet
-      </Text>
-      <Text size="sm" font="light" className="text-center">
+      <Text {...textProps}>You don't have any rooms yet</Text>
+      <Text {...textProps}>
         Create your own room or find a public room and join it
       </Text>
-    </div>
+    </Paper>
+  );
+}
+
+function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
+  const date = data.lastMessage
+    ? formatDate().roomList(data.lastMessage.created)
+    : ("Never" as const);
+
+  const lastMessage = data.lastMessage
+    ? data.lastMessage.content.text
+    : "There is no messages";
+
+  let username: JSX.Element = <></>;
+
+  const textProps = {
+    size: "sm" as const,
+    font: "light" as const,
+  };
+
+  if (data?.lastMessage?.authorId === "self") {
+    username = (
+      <Text {...textProps} className="text-green-600">
+        You:
+      </Text>
+    );
+  } else if (data?.lastMessage?.username) {
+    username = (
+      <Text {...textProps} className="text-gray-600">
+        {data.lastMessage.username}:
+      </Text>
+    );
+  } else if (data?.lastMessage?.authorId === "service") {
+    username = (
+      <Text {...textProps} className="text-blue-600">
+        Service:
+      </Text>
+    );
+  }
+
+  return (
+    <Link to={`${routes.rooms.path}/${data.roomId}`}>
+      <li
+        style={itemHeightStyle}
+        className={`${isOpened ? "bg-slate-200 cursor-default" : "bg-slate-50"} w-full flex flex-col px-4 py-2 justify-between items-center hover:bg-slate-200 duration-300 ease-out`}
+      >
+        <div className="w-full flex flex-row justify-between items-center gap-2">
+          <Text {...textProps} className="truncate text-gray-600">
+            {data.name}
+          </Text>
+          <Text {...textProps} className="text-gray-600">
+            {date}
+          </Text>
+        </div>
+        <div className="w-full flex flex-row gap-2 justify-start items-center">
+          {username}
+          <Text {...textProps} className="truncate text-gray-600">
+            {lastMessage}
+          </Text>
+          <UnreadCount count={data.unreadCount} />
+        </div>
+      </li>
+    </Link>
   );
 }
 
@@ -286,62 +364,6 @@ function ItemSkeleton() {
   );
 }
 
-function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
-  const date = data.lastMessage
-    ? formatDate().roomList(data.lastMessage.created)
-    : ("Never" as const);
-
-  const lastMessage = data.lastMessage
-    ? data.lastMessage.content.text
-    : "There is no messages";
-
-  let username: JSX.Element = <></>;
-
-  if (data?.lastMessage?.authorId === "self") {
-    username = (
-      <Text size="sm" font="light" className="text-green-600">
-        You:
-      </Text>
-    );
-  } else if (data?.lastMessage?.username) {
-    username = (
-      <Text size="sm" font="light" className="text-gray-600">
-        {data.lastMessage.username}:
-      </Text>
-    );
-  } else if (data?.lastMessage?.authorId === "service") {
-    username = (
-      <Text size="sm" font="light" className="text-blue-600">
-        Service:
-      </Text>
-    );
-  }
-
-  return (
-    <Link
-      to={`${routes.rooms.path}/${data.roomId}`}
-      style={itemHeightStyle}
-      className={`${isOpened ? "bg-slate-200 cursor-default" : "bg-slate-50"} w-full flex flex-col px-4 py-2 justify-between items-center hover:bg-slate-200 duration-300 ease-out`}
-    >
-      <div className="w-full flex flex-row justify-between items-center gap-2">
-        <Text size="sm" font="light" className="text-gray-600">
-          {data.name}
-        </Text>
-        <Text size="sm" font="light" className="text-gray-600">
-          {date}
-        </Text>
-      </div>
-      <div className="w-full flex flex-row gap-2 justify-start items-center">
-        {username}
-        <Text size="sm" font="light" className="truncate text-gray-600">
-          {lastMessage}
-        </Text>
-        <UnreadCount count={data.unreadCount} />
-      </div>
-    </Link>
-  );
-}
-
 function UnreadCount({ count }: { count: number }) {
   if (count !== 0) {
     return (
@@ -350,7 +372,7 @@ function UnreadCount({ count }: { count: number }) {
         <Text
           size="sm"
           font="light"
-          className="shrink-0 size-6 flex justify-center items-center bg-slate-300 rounded-full"
+          className="shrink-0 size-6 flex justify-center items-center rounded-full border-2 border-gray-400"
         >
           {count > 9 ? "9+" : count}
         </Text>

@@ -1,6 +1,6 @@
 import { IconExclamationCircle, IconInfoCircle } from "@tabler/icons-react";
 import { NotifyState, NotifyType } from "./types";
-import { Text } from "../../shared/ui/Text/Text";
+import { Text } from "../../ui/Text/Text";
 import {
   ReactNode,
   createContext,
@@ -8,7 +8,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Paper } from "../../shared/ui/Paper/Paper";
+import { Paper } from "../../ui/Paper/Paper";
 
 const NOTIFICATION_SHOW_TIME = 5000;
 
@@ -77,9 +77,8 @@ export const NotifyStack = () => {
   return (
     <Paper
       rounded="lg"
-      shadow="md"
       padding={4}
-      className={`${data.type === "info" ? "ring-slate-400" : "ring-red-600"} absolute z-50 m-4 md:m-0 md:w-1/2 left-0 top-0 md:left-1/4 ring-2 flex justify-between items-center gap-4 duration-300 ease-in-out bg-slate-50 `}
+      className={`${data.type === "info" ? "ring-slate-400" : "ring-red-600"} absolute z-50 m-4 md:m-0 md:w-1/2 left-0 top-0 md:left-1/4 ring-2 flex justify-between items-center gap-4 duration-300 ease-in-out shadow-md bg-slate-50 `}
       style={{
         transform: data.isShow ? `translateY(25%)` : `translateY(-150%)`,
       }}

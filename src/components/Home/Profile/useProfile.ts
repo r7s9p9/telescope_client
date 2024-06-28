@@ -3,7 +3,7 @@ import {
   useQueryAccount,
   useQueryUpdateAccount,
 } from "../../../shared/api/api.model";
-import { useNotify } from "../../Notification/Notification";
+import { useNotify } from "../../../shared/features/Notification/Notification";
 import { langError, langProfile } from "../../../locales/en";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { checkUserId } from "../../../shared/lib/uuid";

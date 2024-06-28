@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useContext, useEffect, useRef } from "react";
-import { healthCheck } from "../api/api";
+import { healthCheck } from "../api";
 
 type RoutesType = Set<string>;
 

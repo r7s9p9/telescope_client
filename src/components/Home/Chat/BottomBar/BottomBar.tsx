@@ -79,7 +79,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           </IconButton>
         </div>
       )}
-      <div className="relative md:p-4 flex items-center md:border-l-2 border-slate-100 bg-slate-50">
+      <div className="relative md:p-4 flex items-center md:border-x-2 border-slate-100 bg-slate-50">
         <TextArea
           value={formData.text}
           setValue={(val) =>
@@ -88,7 +88,8 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           minRows={1}
           maxRows={6}
           size="xl"
-          className="ring-0 md:ring-2"
+          unstyled
+          className="ring-0 md:ring-2 ring-slate-200"
           rightSection={
             <IconButton
               title={"Send message"}

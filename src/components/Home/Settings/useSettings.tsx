@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { routes } from "../../../constants";
 import { useQueryDeleteSession } from "../../../shared/api/api.model";
-import { useNotify } from "../../Notification/Notification";
+import { useNotify } from "../../../shared/features/Notification/Notification";
 import { langError, langSession } from "../../../locales/en";
 
 export function useSettings() {

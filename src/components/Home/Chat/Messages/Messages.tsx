@@ -177,7 +177,7 @@ function MessageContextMenu({
   onClickMenuHandler: ReturnType<typeof useMessage>["onClickMenuHandler"];
 }) {
   return (
-    <Paper rounded="lg" shadow="md" className="flex flex-col m-2">
+    <Paper rounded="lg" className="flex flex-col m-2 shadow-md">
       <Button
         title="Reply"
         size="md"

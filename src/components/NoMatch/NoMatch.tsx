@@ -5,23 +5,32 @@ import { routes } from "../../constants";
 
 export function NoMatch() {
   return (
-    <div className="w-full h-full flex justify-center items-center bg-slate-200">
+    <div className="w-screen h-screen flex justify-center items-center bg-slate-200">
       <Paper
         padding={4}
         rounded="xl"
-        shadow="xl"
-        className="w-1/2 min-w-[650px] max-w-[900px]"
+        className="flex flex-col m-4 shadow-md border-2 border-slate-400 bg-slate-50 "
       >
-        <Text size="xl" font="default" className="mb-4 text-center">
-          Error 404 - apparently this page does not exist...
+        <Text
+          size="xl"
+          font="thin"
+          uppercase
+          letterSpacing
+          className="select-none"
+        >
+          Error 404
         </Text>
-        <div className="flex justify-center">
-          <Text size="xl" font="light" className="text-center">
+        <div className="w-full my-2 border-2 border-slate-100" />
+        <Text size="md" font="light">
+          Apparently this page does not exist
+        </Text>
+        <div className="flex">
+          <Text size="md" font="light">
             However, you can always go&nbsp;
           </Text>
           <Link to={routes.home.path}>
             <Text
-              size="xl"
+              size="md"
               font="light"
               className="underline cursor-pointer text-blue-600"
             >

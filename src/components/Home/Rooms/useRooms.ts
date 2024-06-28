@@ -15,7 +15,7 @@ import {
   OVERSCREEN_ITEM_COUNT_TO_TRIGGER_FURTHER_LOADING,
   RELOAD_INTERVAL,
 } from "./constants";
-import { useNotify } from "../../Notification/Notification";
+import { useNotify } from "../../../shared/features/Notification/Notification";
 import { langError } from "../../../locales/en";
 import { SearchRoomsResponseType } from "../../../shared/api/api.schema";
 

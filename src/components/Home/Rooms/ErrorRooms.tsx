@@ -6,8 +6,8 @@ export function ErrorRooms() {
   console.error(error);
 
   return (
-    <div className="h-full flex flex-col w-1/2 min-w-64 max-w-sm bg-slate-50">
-      <ErrorBoundary size="md" />
+    <div className="h-full flex justify-center items-center md:items-start md:w-1/2 md:min-w-64 md:max-w-sm md:bg-slate-50">
+      <ErrorBoundary />
     </div>
   );
 }

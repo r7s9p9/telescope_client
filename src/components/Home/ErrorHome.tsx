@@ -6,8 +6,8 @@ export function ErrorHome() {
   console.error(error);
 
   return (
-    <div className="w-full h-full flex justify-center items-center bg-slate-200">
-      <ErrorBoundary size="xl" />
+    <div className="w-screen h-screen flex justify-center items-center bg-slate-200">
+      <ErrorBoundary />
     </div>
   );
 }

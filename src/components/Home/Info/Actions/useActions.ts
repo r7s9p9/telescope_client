@@ -4,7 +4,7 @@ import {
 } from "../../../../shared/api/api.model";
 import { RoomId } from "../../../../shared/api/api.schema";
 import { useEffect, useState } from "react";
-import { useNotify } from "../../../Notification/Notification";
+import { useNotify } from "../../../../shared/features/Notification/Notification";
 import { useLoadRooms } from "../../Rooms/useRooms";
 import { useLocation } from "react-router-dom";
 import { useNavigate, useParams } from "react-router-dom";

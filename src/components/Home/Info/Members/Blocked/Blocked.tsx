@@ -188,7 +188,7 @@ function UserContextMenu({
   onClickMenuHandler: ReturnType<typeof useBlocked>["onClickMenuHandler"];
 }) {
   return (
-    <Paper rounded="lg" shadow="md" className="flex flex-col m-2 w-56">
+    <Paper rounded="lg" className="flex flex-col m-2 w-56 shadow-md">
       <Button
         title="Go to profile"
         size="md"

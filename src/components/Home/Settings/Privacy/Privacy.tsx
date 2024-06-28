@@ -30,8 +30,7 @@ export function Privacy() {
     <Wrapper>
       <Paper
         padding={4}
-        shadow="xl"
-        className="w-full h-full flex flex-col md:rounded-xl bg-slate-50"
+        className="w-full h-full flex flex-col md:shadow-md md:rounded-xl bg-slate-50"
       >
         <div className="flex justify-between items-center">
           <Text size="xl" font="light" className="select-none text-center">
@@ -120,7 +119,7 @@ function Wrapper({ children }: { children: ReactNode }) {
 function Loader() {
   return (
     <Wrapper>
-      <div className="w-full h-full p-4 rounded-xl animate-pulse bg-slate-50" />
+      <div className="w-full h-full p-4 md:rounded-xl animate-pulse bg-slate-50" />
     </Wrapper>
   );
 }

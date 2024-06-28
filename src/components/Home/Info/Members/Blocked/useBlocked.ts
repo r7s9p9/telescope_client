@@ -5,10 +5,10 @@ import {
   useQueryUnbanUserInRoom,
 } from "../../../../../shared/api/api.model";
 import { useEffect, useState } from "react";
-import { useNotify } from "../../../../Notification/Notification";
+import { useNotify } from "../../../../../shared/features/Notification/Notification";
 import { GetRoomBlockedUsersResponseType } from "../../../../../shared/api/api.schema";
 import { routes } from "../../../../../constants";
-import { useMenuContext } from "../../../../ContextMenu/ContextMenu";
+import { useMenuContext } from "../../../../../shared/features/ContextMenu/ContextMenu";
 import { langError, langRoom } from "../../../../../locales/en";
 import { useOnClickOutside } from "../../../../../shared/hooks/useOnClickOutside";
 

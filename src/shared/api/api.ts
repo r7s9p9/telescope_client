@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
 import { z } from "zod";
-import { useWatchdog } from "../watchdog/useWatchdog";
+import { useWatchdog } from "./watchdog/useWatchdog";
 import { langError } from "../../locales/en";
 
 const FAILURE_THRESHOLD = 3;

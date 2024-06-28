@@ -4,7 +4,7 @@ import { useLoadRooms } from "../Rooms/useRooms";
 import { useState } from "react";
 import { routes } from "../../../constants";
 import { langError } from "../../../locales/en";
-import { useNotify } from "../../Notification/Notification";
+import { useNotify } from "../../../shared/features/Notification/Notification";
 import { useOnClickOutside } from "../../../shared/hooks/useOnClickOutside";
 
 export function useCreateRoom() {
@@ -66,7 +66,7 @@ export function useCreateRoom() {
 
     if (response.success) {
       await loadRooms.run();
-      navigate({ pathname: routes.rooms.path + response.roomId });
+      navigate({ pathname: `${routes.rooms.path}/${response.roomId}` });
     } else {
       notify.show.error(langError.UNKNOWN_MESSAGE);
     }

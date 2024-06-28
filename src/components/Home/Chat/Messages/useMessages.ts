@@ -1,11 +1,11 @@
 import { useEdit } from "../useChat";
-import { useMenuContext } from "../../../ContextMenu/ContextMenu";
+import { useMenuContext } from "../../../../shared/features/ContextMenu/ContextMenu";
 import { RoomId } from "../../../../shared/api/api.schema";
 import { useStore } from "../../../../shared/store/store";
 import { useQueryDeleteMessage } from "../../../../shared/api/api.model";
 import { MessageType } from "../../../../shared/api/api.schema";
 import { formatDate } from "../../../../shared/lib/date";
-import { useNotify } from "../../../Notification/Notification";
+import { useNotify } from "../../../../shared/features/Notification/Notification";
 import { langError, langRoom } from "../../../../locales/en";
 
 function useDelete(roomId: RoomId) {

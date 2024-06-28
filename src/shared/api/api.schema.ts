@@ -266,6 +266,7 @@ export type MessageType = z.infer<typeof messageSchema>;
 export type MessageDates = z.infer<typeof messageDatesSchema>;
 
 export const roomNameSchema = z.string().min(4).max(32);
+
 const roomTypeSchema = z.union([
   z.literal("public"),
   z.literal("private"),

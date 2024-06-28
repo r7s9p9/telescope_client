@@ -4,7 +4,7 @@ import {
   useQueryLogin,
   useQueryRegister,
 } from "../../shared/api/api.model";
-import { useNotify } from "../Notification/Notification";
+import { useNotify } from "../../shared/features/Notification/Notification";
 import { Dispatch, useEffect, useState } from "react";
 import { langAuth, langError } from "../../locales/en";
 import { routes } from "../../constants";

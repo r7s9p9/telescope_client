@@ -4,10 +4,10 @@ import {
   useQueryInviteUser,
   useQuerySearchUsersToInvite,
 } from "../../../../../shared/api/api.model";
-import { useNotify } from "../../../../Notification/Notification";
+import { useNotify } from "../../../../../shared/features/Notification/Notification";
 import { useCallback, useEffect, useState } from "react";
 import { RoomSearchUsersToInviteResponseType } from "../../../../../shared/api/api.schema";
-import { useMenuContext } from "../../../../ContextMenu/ContextMenu";
+import { useMenuContext } from "../../../../../shared/features/ContextMenu/ContextMenu";
 import { routes } from "../../../../../constants";
 import { langError, langRoom } from "../../../../../locales/en";
 import { useOnClickOutside } from "../../../../../shared/hooks/useOnClickOutside";

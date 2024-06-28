@@ -25,19 +25,19 @@ export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
         size={32}
         className="shrink-0 text-slate-600 md:invisible md:hidden mr-4"
       />
-
       {!content.isInitialLoading && (
         <>
-          <div className="flex items-center shrink-0 gap-4">
+          <div className="flex items-center gap-4">
             <Text
               size="xl"
               font="light"
-              className="size-10 hidden md:visible md:flex justify-center items-center uppercase rounded-full border-2 border-slate-400 "
+              uppercase
+              className="size-10 hidden md:flex justify-center items-center rounded-full border-2 border-gray-400 "
             >
               {content.name?.at(0)}
             </Text>
-            <div className="flex flex-col">
-              <Text size="sm" font="light">
+            <div className="max-w-48 flex flex-col">
+              <Text size="sm" font="light" className="truncate">
                 {content.name}
               </Text>
               <Text size="sm" font="light">
@@ -53,6 +53,7 @@ export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
         title={"Show more"}
         onClick={isSideBarExpanded ? closeSideBar : openSideBar}
         style={{ transform: isSideBarExpanded ? "rotate(180deg)" : "" }}
+        className="shrink-0"
       >
         <IconLayoutSidebarRightExpand {...iconProps} />
       </IconButton>
