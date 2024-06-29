@@ -129,7 +129,7 @@ function Session({
           )}
           {!data.isCurrent && isOnline && (
             <Text size="sm" font="light" className="text-green-600">
-              "Online"
+              Online
             </Text>
           )}
         </div>

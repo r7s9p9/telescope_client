@@ -5,7 +5,7 @@ import {
   useQueryKickMember,
 } from "../../../../shared/api/api.model";
 import { useLoadInfo } from "../../Chat/useChat";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, UIEvent } from "react";
 import { GetRoomsMembersResponseType } from "../../../../shared/api/api.schema";
 import { debounce } from "../../../../shared/lib/debounce";
 import { routes } from "../../../../constants";
@@ -66,7 +66,7 @@ export function useMembers() {
   }, [listRef, scrollTop]);
 
   const handleScroll = useCallback(
-    (e: React.UIEvent<HTMLElement>) => {
+    (e: UIEvent<HTMLElement>) => {
       if (listRef.current) {
         const target = e.nativeEvent.target as HTMLElement;
         setScrollTop(target.scrollTop);

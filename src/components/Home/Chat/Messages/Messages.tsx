@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, memo } from "react";
 import {
   IconArrowDown,
   IconCopy,
@@ -17,7 +17,8 @@ import { Paper } from "../../../../shared/ui/Paper/Paper";
 import { RoomId } from "../../../../shared/api/api.schema";
 import { Button } from "../../../../shared/ui/Button/Button";
 
-export const MessagesSkeleton = React.memo(() => {
+// eslint-disable-next-line react/display-name
+export const MessagesSkeleton = memo(() => {
   function Skeleton() {
     const width = getRandomInt(2, 5) * 64;
     const height = width / 3;

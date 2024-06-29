@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { UIEvent, ReactNode, memo } from "react";
+import { UIEvent, ReactNode, memo, JSX } from "react";
 import { formatDate } from "../../../shared/lib/date";
 import { getRandomInt } from "../../../shared/lib/random";
 import { routes } from "../../../constants";
@@ -18,6 +18,7 @@ import { Paper } from "../../../shared/ui/Paper/Paper";
 
 const itemHeightStyle = { height: ITEM_HEIGHT + "px" };
 
+// eslint-disable-next-line react/display-name
 const SkeletonList = memo(({ count }: { count?: number }) => {
   if (!count) count = getRandomInt(4, 12);
   return Array(count)
@@ -115,7 +116,9 @@ function Wrapper({
   children: ReactNode;
   isSearch: boolean;
   searchValue: string;
+  // eslint-disable-next-line no-unused-vars
   setSearchValue: (value: string) => void;
+  // eslint-disable-next-line no-unused-vars
   onScroll?: (e: UIEvent<HTMLElement>) => void;
 }) {
   return (
@@ -249,6 +252,7 @@ function FoundItem({
   );
 }
 
+// eslint-disable-next-line react/display-name
 const FoundRoomsSkeleton = memo(() => {
   const skeleton = (
     <div
@@ -279,7 +283,7 @@ function ListEmpty() {
       rounded="md"
       className="mt-1 mx-4 ring-2 ring-slate-200 bg-slate-100"
     >
-      <Text {...textProps}>You don't have any rooms yet</Text>
+      <Text {...textProps}>You don&apos;t have any rooms yet</Text>
       <Text {...textProps}>
         Create your own room or find a public room and join it
       </Text>

@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 type CallbackFunction<T extends unknown[]> = (...args: T) => void;
 
 export function debounce<T extends unknown[]>(

@@ -9,7 +9,7 @@ import { Paper } from "../../../../../shared/ui/Paper/Paper";
 import { Text } from "../../../../../shared/ui/Text/Text";
 import { useBlocked } from "./useBlocked";
 import { UserId } from "../../../../../shared/api/api.schema";
-import { ReactNode, RefObject } from "react";
+import { ReactNode, RefObject, JSX, UIEvent, MouseEvent } from "react";
 import { Spinner } from "../../../../../shared/ui/Spinner/Spinner";
 import { ReadAccountResponseType } from "../../../../../shared/api/api.schema";
 import { formatDate } from "../../../../../shared/lib/date";
@@ -88,7 +88,8 @@ function ListWrapper({
 }: {
   children: ReactNode;
   listRef?: RefObject<HTMLUListElement>;
-  onScroll?: (e: React.UIEvent<HTMLElement>) => void;
+  // eslint-disable-next-line no-unused-vars
+  onScroll?: (e: UIEvent<HTMLElement>) => void;
 }) {
   return (
     <ul
@@ -134,7 +135,7 @@ function BlockedUser({
     }
   }
 
-  function onContextHandler(e: React.MouseEvent<HTMLElement, MouseEvent>) {
+  function onContextHandler(e: MouseEvent<HTMLElement>) {
     openMenu(
       e,
       <UserContextMenu data={data} onClickMenuHandler={onClickMenuHandler} />,

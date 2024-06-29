@@ -15,7 +15,7 @@ const defaultData = {
 };
 
 const ConfirmPopupContext = createContext({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
   show: (_options: typeof defaultData) => {},
   hide: () => {},
 });

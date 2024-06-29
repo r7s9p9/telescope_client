@@ -1,5 +1,5 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, UIEvent } from "react";
 import {
   useQueryRooms,
   useQuerySearchRooms,
@@ -149,7 +149,7 @@ export function useRooms() {
   }, []);
 
   const handleScroll = useCallback(
-    async (e: React.UIEvent<HTMLElement>) => {
+    async (e: UIEvent<HTMLElement>) => {
       if (!isAllLoaded && !isZeroItemCount && storedRooms) {
         const target = e.nativeEvent.target as HTMLElement;
         const lastVisibleIndex = Math.ceil(

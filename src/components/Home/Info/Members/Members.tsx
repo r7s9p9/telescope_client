@@ -1,5 +1,5 @@
 import { Spinner } from "../../../../shared/ui/Spinner/Spinner";
-import { ReactNode, RefObject } from "react";
+import { ReactNode, RefObject, UIEvent, JSX, MouseEvent } from "react";
 import { ReadAccountResponseType } from "../../../../shared/api/api.schema";
 import { formatDate } from "../../../../shared/lib/date";
 import { useMembers, useMember } from "./useMembers";
@@ -95,7 +95,8 @@ function MembersListWrapper({
 }: {
   children: ReactNode;
   listRef?: RefObject<HTMLUListElement>;
-  onScroll?: (e: React.UIEvent<HTMLElement>) => void;
+  // eslint-disable-next-line no-unused-vars
+  onScroll?: (e: UIEvent<HTMLElement>) => void;
 }) {
   return (
     <ul
@@ -145,7 +146,7 @@ function Member({
     }
   }
 
-  function onContextHandler(e: React.MouseEvent<HTMLElement, MouseEvent>) {
+  function onContextHandler(e: MouseEvent<HTMLElement>) {
     openMenu(
       e,
       <MemberContextMenu
@@ -214,7 +215,7 @@ function MemberContextMenu({
   onClick: ReturnType<typeof useMember>["onClickMenuHandler"];
 }) {
   return (
-    <Paper rounded="lg" shadow="md" className="flex flex-col m-2 w-56">
+    <Paper rounded="lg" className="flex flex-col m-2 w-56 shadow-md">
       <Button
         title="Go to profile"
         size="md"

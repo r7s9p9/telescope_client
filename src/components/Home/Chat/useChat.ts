@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, UIEvent } from "react";
 import {
   useQueryCompareMessages,
   useQueryReadMessages,
@@ -324,7 +324,7 @@ export function useChat() {
   ]);
 
   const handleScroll = useCallback(
-    (e: React.UIEvent<HTMLElement>) => {
+    (e: UIEvent<HTMLElement>) => {
       const target = e.nativeEvent.target as HTMLElement;
       const scrollPercent = 1 - target.scrollTop / target.scrollHeight;
       const isLoadNeeded =

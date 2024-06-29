@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, MutableRefObject, CSSProperties } from "react";
 
 function getStyle(size: "sm" | "md" | "xl") {
   let height;
@@ -42,8 +42,8 @@ export function Button({
   unstyled?: boolean;
   disabled?: boolean;
   className?: string;
-  buttonRef?: React.MutableRefObject<HTMLButtonElement | null>;
-  style?: React.CSSProperties;
+  buttonRef?: MutableRefObject<HTMLButtonElement | null>;
+  style?: CSSProperties;
   formNoValidate?: boolean;
   onClick?: () => void;
 }) {

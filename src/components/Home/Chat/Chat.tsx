@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, JSX } from "react";
 import { MessageType } from "../../../shared/api/api.schema";
 import { isSameDay } from "../../../shared/lib/date";
 import { useChat, useInfo } from "./useChat";
@@ -31,7 +31,9 @@ function Wrapper({ children }: { children: ReactNode }) {
 
 function messageParser(
   items: ReturnType<typeof useChat>["messages"],
+  // eslint-disable-next-line no-unused-vars
   dateBubble: (created: number) => JSX.Element,
+  // eslint-disable-next-line no-unused-vars
   message: (content: MessageType) => JSX.Element,
 ) {
   if (!items || items.length === 0) return { isEmpty: true as const };

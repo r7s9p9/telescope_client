@@ -1,4 +1,10 @@
-import { ForwardedRef, ReactNode, forwardRef } from "react";
+import {
+  ForwardedRef,
+  ReactNode,
+  forwardRef,
+  CSSProperties,
+  MouseEventHandler,
+} from "react";
 
 export const Paper = forwardRef(function Paper(
   {
@@ -14,9 +20,9 @@ export const Paper = forwardRef(function Paper(
     padding?: number;
     rounded?: "sm" | "md" | "lg" | "xl";
     inList?: boolean;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
     className?: string;
-    onContextMenu?: React.MouseEventHandler<HTMLDivElement | HTMLLIElement>;
+    onContextMenu?: MouseEventHandler<HTMLDivElement | HTMLLIElement>;
   },
   ref?: ForwardedRef<HTMLDivElement | HTMLLIElement>,
 ) {
@@ -25,9 +31,7 @@ export const Paper = forwardRef(function Paper(
       {inList && (
         <li
           style={style}
-          onContextMenu={
-            onContextMenu as React.MouseEventHandler<HTMLLIElement>
-          }
+          onContextMenu={onContextMenu as MouseEventHandler<HTMLLIElement>}
           ref={ref as ForwardedRef<HTMLLIElement>}
           className={`bg-slate-100 ${rounded && `rounded-${rounded}`} ${padding && `p-${padding}`} ${className || ""}`}
         >
@@ -37,9 +41,7 @@ export const Paper = forwardRef(function Paper(
       {!inList && (
         <div
           style={style}
-          onContextMenu={
-            onContextMenu as React.MouseEventHandler<HTMLDivElement>
-          }
+          onContextMenu={onContextMenu as MouseEventHandler<HTMLDivElement>}
           ref={ref as ForwardedRef<HTMLDivElement>}
           className={`bg-slate-100 ${rounded && `rounded-${rounded}`} ${padding && `p-${padding}`} ${className || ""}`}
         >

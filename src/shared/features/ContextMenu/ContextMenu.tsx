@@ -6,6 +6,8 @@ import React, {
   useRef,
   RefObject,
   useCallback,
+  MouseEvent,
+  ReactElement,
 } from "react";
 
 const dataDefault = {
@@ -19,8 +21,10 @@ const dataDefault = {
 
 const MenuContext = createContext<{
   openMenu: (
-    event: React.MouseEvent<HTMLElement>,
-    content: React.ReactElement,
+    // eslint-disable-next-line no-unused-vars
+    event: MouseEvent<HTMLElement>,
+    // eslint-disable-next-line no-unused-vars
+    content: ReactElement,
   ) => void;
   closeMenu: () => void;
 }>({

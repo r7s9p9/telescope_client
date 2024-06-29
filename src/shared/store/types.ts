@@ -1,3 +1,4 @@
+import React from "react";
 import { GetMessagesResponseType, RoomId } from "../api/api.schema";
 import {
   MessageType,

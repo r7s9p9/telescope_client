@@ -6,9 +6,9 @@ type RoutesType = Set<string>;
 const CHECK_INTERVAL = 15000;
 
 const WatchdogContext = createContext({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   report: (_route: string) => {},
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   getState: (_route: string) => {
     return { disabled: false };
   },

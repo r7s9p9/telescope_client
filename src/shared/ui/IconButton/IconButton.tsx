@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, MutableRefObject, CSSProperties } from "react";
 import { Spinner } from "../Spinner/Spinner";
 
 export function IconButton({
@@ -26,8 +26,8 @@ export function IconButton({
   loaderSize?: number;
   // outside loaderType only for icons
   className?: string;
-  buttonRef?: React.MutableRefObject<HTMLButtonElement | null>;
-  style?: React.CSSProperties;
+  buttonRef?: MutableRefObject<HTMLButtonElement | null>;
+  style?: CSSProperties;
   formNoValidate?: boolean;
   onClick?: () => void;
 }) {

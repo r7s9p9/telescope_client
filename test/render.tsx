@@ -16,6 +16,7 @@ const wrapper = ({ children }: { children: ReactNode }) => (
 );
 
 export const customRenderHook = <TArgs extends unknown[], TResult>(
+  // eslint-disable-next-line no-unused-vars
   callback: (initialProps: TArgs) => TResult,
 ) => renderHook(callback, { wrapper });
 

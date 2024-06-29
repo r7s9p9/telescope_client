@@ -5,6 +5,7 @@ import {
   useEffect,
   useRef,
   useState,
+  JSX,
 } from "react";
 import { Text } from "../Text/Text";
 import { delay } from "../../lib/delay";
@@ -38,6 +39,7 @@ export function SegmentedButton({
 }: {
   elements: { label: JSX.Element; value: string }[];
   elementClassName?: string;
+  // eslint-disable-next-line no-unused-vars
   onSelected: (value: string) => void;
   defaultValue?: string;
   type: "horizontal" | "vertical";

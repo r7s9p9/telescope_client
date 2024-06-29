@@ -111,6 +111,7 @@ function EditGroup({
   handleClick,
   isEdit,
 }: {
+  // eslint-disable-next-line no-unused-vars
   handleClick: (str: "edit" | "cancel" | "send") => void;
   isEdit: boolean;
 }) {
