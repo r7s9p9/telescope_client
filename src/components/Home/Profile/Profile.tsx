@@ -103,7 +103,7 @@ export function Profile() {
           />
         )}
 
-        <div className="mt-4 flex flex-row-reverse justify-between items-end">
+        <div className="mt-4 flex flex-row-reverse justify-between items-end grow">
           {isExist && isYourProfile && (
             <Button
               title="Update profile"

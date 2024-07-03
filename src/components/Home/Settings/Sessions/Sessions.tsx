@@ -99,7 +99,7 @@ function Session({
     <div className="relative rounded-r-xl rounded-l-[50px] shrink-0 h-22 mb-4 hover:bg-slate-200 duration-300 ease-in-out flex">
       <DeviceIcon parsedUserAgent={parsedUserAgent} />
       <div className="pl-4 flex flex-col md:flex-row md:grow">
-        <div className="md:py-2 md:grow flex flex-col md:justify-between">
+        <div className="md:grow flex flex-col md:justify-between">
           <Text size="sm" font="light" capitalize>
             Device: {parsedUserAgent.device}
           </Text>
@@ -121,7 +121,6 @@ function Session({
               This device
             </Text>
           )}
-
           {data.isFrozen && (
             <Text size="sm" font="light" className="text-red-600">
               Blocked
@@ -209,7 +208,7 @@ function DeviceIcon({
       <div className="absolute left-0 top-0 rounded-full p-0.5 border-2 border-slate-300 bg-slate-50">
         {deviceIcon}
       </div>
-      <div className="pt-14 md:pt-1 md:pl-14 p-0.5 overflow-hidden rounded-full border-2 border-slate-300 bg-slate-50">
+      <div className="pt-14 p-0.5 md:p-0.5 md:pl-14 overflow-hidden rounded-full border-2 border-slate-300 bg-slate-50">
         {browserIcon}
       </div>
     </div>
