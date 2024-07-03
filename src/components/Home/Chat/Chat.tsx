@@ -18,17 +18,6 @@ const noMessagesElement = (
   </li>
 );
 
-function Wrapper({ children }: { children: ReactNode }) {
-  return (
-    <>
-      <div className="absolute top-0 left-0 md:relative h-full w-full flex flex-col bg-slate-200">
-        {children}
-      </div>
-      <Outlet />
-    </>
-  );
-}
-
 function messageParser(
   items: ReturnType<typeof useChat>["messages"],
   // eslint-disable-next-line no-unused-vars
@@ -52,6 +41,17 @@ function messageParser(
   }
 
   return { isEmpty: false as const, readyMessages };
+}
+
+function Wrapper({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <div className="absolute top-0 left-0 md:relative flex grow h-full flex-col bg-slate-200">
+        {children}
+      </div>
+      <Outlet />
+    </>
+  );
 }
 
 export function Chat() {

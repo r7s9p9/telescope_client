@@ -22,7 +22,9 @@ export function useCreateRoom() {
     navigate(location.state?.prevPath);
   };
 
-  const { contentRef, overlayRef } = useOnClickOutside({ onClose });
+  const { contentRef, overlayRef } = useOnClickOutside({
+    onClickOutside: onClose,
+  });
 
   const [form, setForm] = useState({
     name: { value: "", error: "" },

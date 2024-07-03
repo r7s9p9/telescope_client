@@ -50,7 +50,9 @@ export function ConfirmPopupProvider({ children }: { children: ReactNode }) {
 export const PopupStack = () => {
   const data = useContext(ConfirmPopupViewContext);
   const { hide } = useContext(ConfirmPopupContext);
-  const { overlayRef, contentRef } = useOnClickOutside({ onClose: hide });
+  const { overlayRef, contentRef } = useOnClickOutside({
+    onClickOutside: hide,
+  });
 
   return (
     data.isShow && (

@@ -29,7 +29,9 @@ export function useBlocked() {
     navigate(location.state?.prevPath);
   };
 
-  const { contentRef, overlayRef } = useOnClickOutside({ onClose });
+  const { contentRef, overlayRef } = useOnClickOutside({
+    onClickOutside: onClose,
+  });
 
   const [blocked, setBlocked] =
     useState<GetRoomBlockedUsersResponseType["users"]>();

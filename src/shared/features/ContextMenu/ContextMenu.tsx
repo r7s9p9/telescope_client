@@ -1,22 +1,23 @@
-import React, {
+import {
   createContext,
   useContext,
   useState,
   useEffect,
-  useRef,
   RefObject,
   useCallback,
   MouseEvent,
   ReactElement,
+  ReactNode,
 } from "react";
+import { useOnClickOutside } from "../../hooks/useOnClickOutside";
 
 const dataDefault = {
   isRender: false,
   isShow: false,
   position: { x: 0, y: 0 },
   window: { width: 0, height: 0 },
-  content: null as React.ReactElement | null,
-  targetRef: null as RefObject<HTMLDivElement> | null,
+  content: null as ReactElement | null,
+  contentRef: null as RefObject<HTMLDivElement> | null,
 };
 
 const MenuContext = createContext<{
@@ -34,21 +35,12 @@ const MenuContext = createContext<{
 
 const MenuViewContext = createContext(dataDefault);
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useMenuContext = () => useContext(MenuContext);
 
-export const ContextMenuProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
   const [data, setData] = useState(dataDefault);
-  const targetRef = useRef<HTMLDivElement | null>(null);
 
-  const openMenu = (
-    e: React.MouseEvent<HTMLElement>,
-    content: React.ReactElement,
-  ) => {
+  const openMenu = (e: MouseEvent<HTMLElement>, content: ReactElement) => {
     e.preventDefault();
     if (!data.isRender) {
       setData({
@@ -57,17 +49,22 @@ export const ContextMenuProvider = ({
         position: { x: e.clientX, y: e.clientY },
         window: { width: window.innerWidth, height: window.innerHeight },
         content,
-        targetRef,
+        contentRef,
       });
     }
   };
 
   const closeMenu = () => setData(dataDefault);
 
+  const { contentRef } = useOnClickOutside({
+    onClickOutside: data.isShow ? closeMenu : () => {},
+    detectWithoutOverlayRef: true,
+  });
+
   const calcMenuPosition = useCallback(() => {
-    if (targetRef.current && !data.isShow) {
-      const maxX = data.window.width - targetRef.current.offsetWidth;
-      const maxY = data.window.height - targetRef.current.offsetHeight;
+    if (contentRef.current && !data.isShow) {
+      const maxX = data.window.width - contentRef.current.offsetWidth;
+      const maxY = data.window.height - contentRef.current.offsetHeight;
 
       const x = Math.min(data.position.x, maxX);
       const y = Math.min(data.position.y, maxY);
@@ -78,39 +75,11 @@ export const ContextMenuProvider = ({
         position: { x, y },
       }));
     }
-  }, [data]);
+  }, [contentRef, data]);
 
   useEffect(() => {
-    calcMenuPosition();
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        data.isRender &&
-        targetRef.current &&
-        !targetRef.current.contains(event.target as Node)
-      ) {
-        closeMenu();
-      }
-    };
-
-    // Prevent opening stock context menu in this context menu
-    const handleContextMenu = (event: MouseEvent) => {
-      if (
-        targetRef.current &&
-        targetRef.current.contains(event.target as Node)
-      ) {
-        event.preventDefault();
-      }
-    };
-
-    document.addEventListener("click", handleClickOutside);
-    document.addEventListener("contextmenu", handleContextMenu);
-
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-      document.removeEventListener("contextmenu", handleContextMenu);
-    };
-  }, [calcMenuPosition, data]);
+    if (data.isRender) calcMenuPosition();
+  }, [calcMenuPosition, data.isRender]);
 
   return (
     <MenuContext.Provider
@@ -132,7 +101,7 @@ export const ContextMenuStack = () => {
 
   return (
     <div
-      ref={data.targetRef}
+      ref={data.contentRef}
       style={{
         left: data.position.x,
         top: data.position.y,

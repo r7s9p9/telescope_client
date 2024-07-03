@@ -27,7 +27,7 @@ export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
       />
       {!content.isInitialLoading && (
         <>
-          <div className="flex items-center gap-4">
+          <div className="grow flex items-center gap-4 truncate">
             <Text
               size="xl"
               font="light"
@@ -36,8 +36,8 @@ export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
             >
               {content.name?.at(0)}
             </Text>
-            <div className="max-w-48 flex flex-col">
-              <Text size="sm" font="light" className="truncate">
+            <div className="grow flex flex-col">
+              <Text size="sm" font="light">
                 {content.name}
               </Text>
               <Text size="sm" font="light">
@@ -45,7 +45,6 @@ export function TopBar({ data }: { data: ReturnType<typeof useInfo> }) {
               </Text>
             </div>
           </div>
-          <div className="grow" />
         </>
       )}
       {content.isInitialLoading && <TopBarSkeleton />}

@@ -164,37 +164,37 @@ function Member({
       padding={2}
       rounded="md"
       inList
-      className="h-14 shrink-0 border-2 border-slate-200 bg-slate-50 hover:bg-slate-200 duration-300 ease-in-out flex"
+      className="w-full h-14 shrink-0 flex border-2 border-slate-200 bg-slate-50 hover:bg-slate-200 duration-300 ease-in-out select-none"
     >
-      <div className="grow flex flex-col">
-        <Text size="sm" font="bold">
+      <div className="grow flex flex-col justify-center truncate">
+        <Text size="sm" font="default" className="truncate">
           @{data.general?.username}
         </Text>
         {data.general?.name ? (
-          <Text size="sm" font="light">
-            Name: {data.general.name}{" "}
+          <Text size="sm" font="light" className="truncate">
+            {data.general.name}
           </Text>
         ) : (
-          <Text size="sm" font="light" className="text-slate-600">
+          <Text size="sm" font="light" className="text-slate-600 truncate">
             Name hidden
           </Text>
         )}
       </div>
-      <div className="flex flex-col items-end">
+      <div className="shrink-0 flex flex-col justify-center items-end">
         <Text
           size="sm"
           font="light"
           capitalize
           className={
             memberState === "online" || memberState === "you"
-              ? "text-green-600 select-none"
-              : "text-slate-600 select-none"
+              ? "text-green-600"
+              : "text-slate-600"
           }
         >
           {memberState}
         </Text>
         {memberState === "offline" && (
-          <Text size="sm" font="light" className="select-none">
+          <Text size="sm" font="light">
             {lastSeenStr}
           </Text>
         )}

@@ -22,7 +22,9 @@ export function ErrorBoundaryPopup({
     }
   };
 
-  const { contentRef, overlayRef } = useOnClickOutside({ onClose });
+  const { contentRef, overlayRef } = useOnClickOutside({
+    onClickOutside: onClose,
+  });
 
   return (
     <Popup

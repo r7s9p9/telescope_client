@@ -20,7 +20,7 @@ export function BottomBarWrapper({
 
 function BottomBarSpinner() {
   return (
-    <div className="shrink-0 h-16 md:h-24 w-full flex items-center justify-center border-l-2 border-slate-100 bg-slate-100 md:bg-slate-50">
+    <div className="shrink-0 h-16 md:h-24 w-full flex items-center justify-center md:border-x-2 border-slate-100 bg-slate-50">
       <Spinner size={48} />
     </div>
   );
@@ -32,7 +32,7 @@ function BottomBarNoMember({ roomId }: { roomId: RoomId }) {
   return (
     <>
       {!join.isLoading && (
-        <div className="shrink-0 relative h-24 w-full flex items-center justify-center border-l-2 border-slate-100 bg-slate-50">
+        <div className="shrink-0 relative h-16 md:h-24 md:p-4 flex items-center justify-center md:border-x-2 border-slate-100 bg-slate-50">
           <Button
             title="Join room"
             size="md"
@@ -79,7 +79,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           </IconButton>
         </div>
       )}
-      <div className="relative md:p-4 flex items-center md:border-x-2 border-slate-100 bg-slate-50">
+      <div className="relative md:h-24 md:p-4 flex items-center md:border-x-2 border-slate-100 bg-slate-50">
         <TextArea
           value={formData.text}
           setValue={(val) =>

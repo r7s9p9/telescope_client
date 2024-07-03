@@ -29,7 +29,9 @@ export function useInvite() {
     navigate(location.state?.prevPath);
   };
 
-  const { contentRef, overlayRef } = useOnClickOutside({ onClose });
+  const { contentRef, overlayRef } = useOnClickOutside({
+    onClickOutside: onClose,
+  });
 
   const [inputValue, setInputValue] = useState("");
   const [data, setData] = useState<RoomSearchUsersToInviteResponseType>();

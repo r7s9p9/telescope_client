@@ -4,14 +4,20 @@ import { render, renderHook } from "@testing-library/react";
 import { ContextMenuProvider } from "../src/shared/features/ContextMenu/ContextMenu";
 import { NotifyProvider } from "../src/shared/features/Notification/Notification";
 import { StoreProvider } from "../src/shared/store/StoreProvider";
+import { ConfirmPopupProvider } from "../src/shared/features/ConfirmPopup/ConfirmPopup";
+import { WatchdogProvider } from "../src/shared/api/watchdog/useWatchdog";
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <StoreProvider>
-    <NotifyProvider>
-      <ContextMenuProvider>
-        <MemoryRouter>{children}</MemoryRouter>
-      </ContextMenuProvider>
-    </NotifyProvider>
+    <WatchdogProvider>
+      <NotifyProvider>
+        <ConfirmPopupProvider>
+          <ContextMenuProvider>
+            <MemoryRouter>{children}</MemoryRouter>
+          </ContextMenuProvider>
+        </ConfirmPopupProvider>
+      </NotifyProvider>
+    </WatchdogProvider>
   </StoreProvider>
 );
 
