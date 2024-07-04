@@ -44,6 +44,10 @@ To get the telescope client running locally:
 
 ## Screenshots
 
-| ![Chat](docs/images/readme-screenshot-01.png)     | ![Create a room](docs/images/readme-screenshot-02.png) | ![New room](docs/images/readme-screenshot-03.png) |
-| ------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------- |
-| ![Settings](docs/images/readme-screenshot-04.png) | ![Sessions](docs/images/readme-screenshot-05.png)      | ![Profile](docs/images/readme-screenshot-06.png)  |
+| ![Create an account](docs/images/readme-screenshot-01-mobile.png) | ![Create an account](docs/images/readme-screenshot-01-desktop.png)
+| ------------------------------------------------- | ------------------------------------------------------ |
+| ![Profile](docs/images/readme-screenshot-02-mobile.png) | ![Profile](docs/images/readme-screenshot-02-desktop.png) |
+| ![Settings](docs/images/readme-screenshot-04-mobile.png) | ![Settings](docs/images/readme-screenshot-04-desktop.png) |
+| ![Sessions](docs/images/readme-screenshot-03-mobile.png) | ![Sessions](docs/images/readme-screenshot-03-desktop.png) |
+| ![Create a room](docs/images/readme-screenshot-05-mobile.png) | ![Create a room](docs/images/readme-screenshot-05-desktop.png) |
+| ![Chat](docs/images/readme-screenshot-06-mobile.png) | ![Chat](docs/images/readme-screenshot-06-desktop.png) |
