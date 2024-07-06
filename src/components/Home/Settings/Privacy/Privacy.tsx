@@ -72,7 +72,7 @@ export function Privacy() {
           data={data}
           setData={setData}
         />
-        <div className="flex flex-row-reverse justify-between items-end">
+        <div className="flex grow flex-row-reverse justify-between items-end">
           <Button
             title="Update profile"
             size="md"
@@ -111,7 +111,7 @@ export function Privacy() {
 function Wrapper({ children }: { children: ReactNode }) {
   return (
     <div className="w-full h-full flex items-center justify-center border-t-2 border-slate-100 md:border-0">
-      <div className="w-full md:w-[500px] h-full md:h-fit">{children}</div>
+      <div className="w-full h-full md:h-[520px] md:w-[500px]">{children}</div>
     </div>
   );
 }
@@ -119,7 +119,16 @@ function Wrapper({ children }: { children: ReactNode }) {
 function Loader() {
   return (
     <Wrapper>
-      <div className="w-full h-full p-4 md:rounded-xl animate-pulse bg-slate-50" />
+      <div className="w-full h-full p-4 flex flex-col md:shadow-md md:rounded-xl bg-slate-50">
+        <div className="w-48 h-8 mb-2 rounded-lg bg-slate-200 animate-pulse" />
+        <div className="w-24 h-6 mb-1 rounded-lg bg-slate-200 animate-pulse" />
+        <div className="w-full h-14 mb-2 rounded-lg bg-slate-200 animate-pulse" />
+        <div className="w-full h-14 mb-2 rounded-lg bg-slate-200 animate-pulse" />
+        <div className="w-full h-14 mb-2 rounded-lg bg-slate-200 animate-pulse" />
+        <div className="w-full h-14 mb-2 rounded-lg bg-slate-200 animate-pulse" />
+        <div className="w-full h-14 mb-2 rounded-lg bg-slate-200 animate-pulse" />
+        <div className="w-full h-14 mb-2 rounded-lg bg-slate-200 animate-pulse" />
+      </div>
     </Wrapper>
   );
 }

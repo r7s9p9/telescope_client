@@ -34,7 +34,7 @@ export function Sessions() {
   if (!isLoaded) {
     return (
       <Wrapper isFromAnotherPage={isFromAnotherPage} returnBack={returnBack}>
-        <div className="h-full p-4 rounded-xl animate-pulse bg-slate-200" />
+        <div className="h-1/2 p-4 rounded-xl animate-pulse bg-slate-200" />
       </Wrapper>
     );
   }

@@ -1,12 +1,37 @@
 export const langError = {
   REQUEST_COMMON_MESSAGE:
-    "Error on the client side. Reload the page if the problem persists." as const,
+    "Error on the client side. Reload the page if the problem persists" as const,
   RESPONSE_COMMON_MESSAGE:
-    "This functionality is temporarily unavailable. Please try again later." as const,
-  UNKNOWN_MESSAGE: "Something went wrong. Please try again later." as const,
+    "This functionality is temporarily unavailable. Please try again later" as const,
+  UNKNOWN_MESSAGE: "Something went wrong. Please try again later" as const,
 };
 
 export const langAuth = {
+  EMAIL_LABEL: "Email" as const,
+  PASSWORD_LABEL: "Password" as const,
+  USERNAME_LABEL: "Username" as const,
+  CODE_LABEL: "Code" as const,
+
+  SIGNIN_TITLE: "Login to account" as const,
+  SIGNUP_TITLE: "Create an account" as const,
+  CODE_TITLE: "Almost done" as const,
+  CODE_MESSAGE:
+    "Please enter the verification code sent to your telescope account " as const,
+
+  GO_TO_SIGN_UP_TITLE: "Need an account?" as const,
+  GO_TO_SIGN_UP_TEXT: "Sign-up" as const,
+  GO_TO_SIGN_IN_TITLE: "Need to log in?" as const,
+  GO_TO_SIGN_IN_TEXT: "Sign-in" as const,
+
+  BACK_FROM_CODE_TITLE: "Not your account?" as const,
+  BACK_FROM_CODE_TEXT: "Return to login" as const,
+
+  SIGN_IN_ACTION: "Sign-in" as const,
+  SIGN_UP_ACTION: "Sign-up" as const,
+  CODE_ACTION: "Proceed" as const,
+};
+
+export const langAuthNotification = {
   INCORRECT_CREDENTIALS:
     "You entered an incorrect username or password" as const,
   BAD_CODE: "You entered an incorrect code" as const,
@@ -16,7 +41,7 @@ export const langAuth = {
   REGISTER_SUCCESS: "You have successfully registered! Please sign in" as const,
   LOGGED_OUT: "You are logged out of your account" as const,
   SESSION_BLOCKED:
-    "This session has been blocked - either from another device, or you have not visited your account from this device for a long time. Please login." as const,
+    "This session has been blocked - either from another device, or you have not visited your account from this device for a long time. Please login" as const,
 };
 
 export const langProfile = {

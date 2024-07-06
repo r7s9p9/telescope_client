@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { NotifyStack } from "../../shared/features/Notification/Notification";
 import { IconKey, IconMail, IconSend2, IconUser } from "@tabler/icons-react";
 import { Spinner } from "../../shared/ui/Spinner/Spinner";
@@ -7,18 +6,21 @@ import { Paper } from "../../shared/ui/Paper/Paper";
 import { InputField } from "../../shared/ui/InputField/InputField";
 import { Button } from "../../shared/ui/Button/Button";
 import { useCode, useLogin, useMain, useRegister } from "./useAuth";
+import { langAuth } from "../../locales/en";
 
-export default function Auth({ type }: { type: "login" | "register" }) {
+const inputIconProps = {
+  size: 28,
+  className: "text-slate-500",
+  strokeWidth: "1",
+};
+
+export function Auth({ type }: { type: "login" | "register" }) {
   return (
-    <Background>
+    <div className="w-screen h-screen bg-slate-300">
       <NotifyStack />
       <AuthContainer type={type} />
-    </Background>
+    </div>
   );
-}
-
-function Background({ children }: { children: ReactNode }) {
-  return <div className="w-screen h-screen bg-slate-300">{children}</div>;
 }
 
 function AuthContainer({ type }: { type: "login" | "register" }) {
@@ -69,23 +71,21 @@ function LoginForm({
     >
       <div className="flex justify-between items-center">
         <Text size="xl" font="light" letterSpacing>
-          Login to account
+          {langAuth.SIGNIN_TITLE}
         </Text>
         {isLoading && <Spinner size={32} />}
       </div>
       <InputField
-        label="Email"
+        label={langAuth.EMAIL_LABEL}
         size="md"
         disabled={!isShow || isLoading}
         value={form.email.value}
         setValue={setEmail}
         error={form.email.error}
-        rightSection={
-          <IconMail size={28} className="text-slate-500" strokeWidth="1" />
-        }
+        rightSection={<IconMail {...inputIconProps} />}
       />
       <InputField
-        label="Password"
+        label={langAuth.PASSWORD_LABEL}
         sensitive
         size="md"
         disabled={!isShow || isLoading}
@@ -96,7 +96,7 @@ function LoginForm({
       <div className="pt-2 flex justify-between items-center">
         <div className="flex flex-col">
           <Text size="sm" font="light">
-            Need an account?
+            {langAuth.GO_TO_SIGN_UP_TITLE}
           </Text>
           <Text
             size="sm"
@@ -107,18 +107,18 @@ function LoginForm({
             underline
             className="cursor-pointer"
           >
-            Sign-up
+            {langAuth.GO_TO_SIGN_UP_TEXT}
           </Text>
         </div>
         <Button
-          title="Sign-in"
+          title={langAuth.SIGN_IN_ACTION}
           size="md"
           onClick={run}
           disabled={!isShow || isLoading}
         >
           <IconKey className="text-slate-500" strokeWidth="1.5" size={24} />
           <Text size="md" font="light">
-            Sign-in
+            {langAuth.SIGN_IN_ACTION}
           </Text>
         </Button>
       </div>
@@ -152,16 +152,16 @@ function CodeForm({
     >
       <div className="flex justify-between items-center">
         <Text size="xl" font="light" letterSpacing>
-          Almost done
+          {langAuth.CODE_TITLE}
         </Text>
         {isLoading && <Spinner size={32} />}
       </div>
       <Text size="sm" font="light" className="text-justify">
-        Please enter the verification code sent to your telescope account{" "}
-        <b className="text-green-600">{email}</b> on another device:
+        {langAuth.CODE_MESSAGE}
+        <b className="text-green-600">{email}</b>
       </Text>
       <InputField
-        label="Code"
+        label={langAuth.CODE_LABEL}
         sensitive
         size="md"
         disabled={!isShow || isLoading}
@@ -172,7 +172,7 @@ function CodeForm({
       <div className="pt-2 flex justify-between items-center">
         <div className="flex flex-col items-start">
           <Text size="sm" font="light">
-            Not your account?
+            {langAuth.BACK_FROM_CODE_TITLE}
           </Text>
           <Text
             size="sm"
@@ -183,18 +183,18 @@ function CodeForm({
             underline
             className="cursor-pointer"
           >
-            Return to login
+            {langAuth.BACK_FROM_CODE_TEXT}
           </Text>
         </div>
         <Button
-          title="Send code"
+          title={langAuth.CODE_ACTION}
           size="md"
           onClick={run}
           disabled={!isShow || isLoading}
         >
           <IconSend2 className="text-slate-500" strokeWidth="1.5" size={24} />
           <Text size="md" font="light">
-            Proceed
+            {langAuth.CODE_ACTION}
           </Text>
         </Button>
       </div>
@@ -227,34 +227,30 @@ function RegisterForm({
     >
       <div className="flex justify-between items-center">
         <Text size="xl" font="light" letterSpacing>
-          Create an account
+          {langAuth.SIGNUP_TITLE}
         </Text>
         {isLoading && <Spinner size={32} />}
       </div>
       <InputField
-        label="Email"
+        label={langAuth.EMAIL_LABEL}
         size="md"
         disabled={!isShow || isLoading}
         value={form.email.value}
         setValue={setEmail}
         error={form.email.error}
-        rightSection={
-          <IconMail size={28} className="text-slate-500" strokeWidth="1" />
-        }
+        rightSection={<IconMail {...inputIconProps} />}
       />
       <InputField
-        label="Username"
+        label={langAuth.USERNAME_LABEL}
         size="md"
         disabled={!isShow || isLoading}
         value={form.username.value}
         setValue={setUsername}
         error={form.username.error}
-        rightSection={
-          <IconUser size={28} className="text-slate-500" strokeWidth="1" />
-        }
+        rightSection={<IconUser {...inputIconProps} />}
       />
       <InputField
-        label="Password"
+        label={langAuth.PASSWORD_LABEL}
         sensitive
         size="md"
         disabled={!isShow || isLoading}
@@ -265,7 +261,7 @@ function RegisterForm({
       <div className="pt-2 flex justify-between items-center">
         <div className="flex flex-col items-start">
           <Text size="sm" font="light">
-            Need to log in?
+            {langAuth.GO_TO_SIGN_IN_TITLE}
           </Text>
           <Text
             size="sm"
@@ -276,18 +272,18 @@ function RegisterForm({
             underline
             className="cursor-pointer"
           >
-            Sign-in
+            {langAuth.GO_TO_SIGN_IN_TEXT}
           </Text>
         </div>
         <Button
-          title="Sign-up"
+          title={langAuth.SIGN_UP_ACTION}
           size="md"
           onClick={run}
           disabled={!isShow || isLoading}
         >
           <IconKey className="text-slate-500" strokeWidth="1.5" size={24} />
           <Text size="md" font="light">
-            Sign-up
+            {langAuth.SIGN_UP_ACTION}
           </Text>
         </Button>
       </div>

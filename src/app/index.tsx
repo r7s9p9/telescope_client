@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { Home } from "../components/Home/Home.tsx";
 import "./index.css";
-import Auth from "../components/Auth/Auth.tsx";
+import { Auth } from "../components/Auth/Auth.tsx";
 import { routes } from "../constants.ts";
 import { NotifyProvider } from "../shared/features/Notification/Notification.tsx";
 import { Chat } from "../components/Home/Chat/Chat.tsx";
