@@ -14,6 +14,12 @@ const inputIconProps = {
   strokeWidth: "1",
 };
 
+const buttonIconProps = {
+  size: 24,
+  className: "text-slate-500",
+  strokeWidth: "1.5",
+};
+
 export function Auth({ type }: { type: "login" | "register" }) {
   return (
     <div className="w-screen h-screen bg-slate-300">
@@ -116,7 +122,7 @@ function LoginForm({
           onClick={run}
           disabled={!isShow || isLoading}
         >
-          <IconKey className="text-slate-500" strokeWidth="1.5" size={24} />
+          <IconKey {...buttonIconProps} />
           <Text size="md" font="light">
             {langAuth.SIGN_IN_ACTION}
           </Text>
@@ -192,7 +198,7 @@ function CodeForm({
           onClick={run}
           disabled={!isShow || isLoading}
         >
-          <IconSend2 className="text-slate-500" strokeWidth="1.5" size={24} />
+          <IconSend2 {...buttonIconProps} />
           <Text size="md" font="light">
             {langAuth.CODE_ACTION}
           </Text>
@@ -281,7 +287,7 @@ function RegisterForm({
           onClick={run}
           disabled={!isShow || isLoading}
         >
-          <IconKey className="text-slate-500" strokeWidth="1.5" size={24} />
+          <IconKey {...buttonIconProps} />
           <Text size="md" font="light">
             {langAuth.SIGN_UP_ACTION}
           </Text>

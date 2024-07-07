@@ -44,7 +44,31 @@ export const langAuthNotification = {
     "This session has been blocked - either from another device, or you have not visited your account from this device for a long time. Please login" as const,
 };
 
+export const langPanel = {
+  PROFILE_LABEL: "Profile" as const,
+  ROOMS_LABEL: "Rooms" as const,
+  FRIENDS_LABEL: "Friends" as const,
+  SETTINGS_LABEL: "Settings" as const,
+};
+
 export const langProfile = {
+  TITLE_SELF: "Your profile" as const,
+  TITLE_USER: (username: string) => `@${username} profile`,
+  TITLE_NOT_FOUND: "Not found" as const,
+
+  DETAILS_NOT_FOUND: "This profile does not exist or has been deleted" as const,
+
+  USERNAME_LABEL: "Username" as const,
+  NAME_LABEL: "Name" as const,
+  BIO_LABEL: "Bio" as const,
+
+  INFO_HIDDEN: "Hidden by user privacy settings" as const,
+
+  UPDATE_ACTION: "Update" as const,
+  GO_BACK_ACTION: "Go back" as const,
+};
+
+export const langProfileNotification = {
   SUCCESS: "Profile information updated successfully" as const,
   INCORRECT_USERID:
     "Such a profile cannot exist. You probably followed the wrong link" as const,

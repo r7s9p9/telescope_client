@@ -125,7 +125,7 @@ export function Message({
         inList
         rounded="xl"
         padding={2}
-        className="flex flex-col mt-4 mb-24 md:max-w-[75%] self-center bg-slate-50 ring-2 ring-slate-200 select-none"
+        className="flex flex-col mt-4 md:max-w-[75%] self-center bg-slate-50 ring-2 ring-slate-200 select-none"
       >
         <Text size="sm" font="default" className="text-center break-all">
           {content.text}

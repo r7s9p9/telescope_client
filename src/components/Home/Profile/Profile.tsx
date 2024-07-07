@@ -1,6 +1,9 @@
 import {
+  IconAbc,
+  IconAt,
   IconCircleArrowLeft,
   IconFileUpload,
+  IconUser,
   IconUserCancel,
 } from "@tabler/icons-react";
 import { Button } from "../../../shared/ui/Button/Button";
@@ -11,6 +14,7 @@ import { TextAreaField } from "../../../shared/ui/TextAreaField/TextAreaField";
 import { Spinner } from "../../../shared/ui/Spinner/Spinner";
 import { useProfile } from "./useProfile";
 import { ReactNode } from "react";
+import { langProfile } from "../../../locales/en";
 
 export function Profile() {
   const {
@@ -22,29 +26,31 @@ export function Profile() {
     isLoaded,
     isUploading,
     handleUpdate,
-    isExist,
-    isYourProfile,
     isFromAnotherPage,
     returnBack,
   } = useProfile();
 
-  if (!isLoaded) {
-    return <Loader />;
-  }
+  if (!isLoaded) return <Loader />;
 
-  let title = " ";
-  if (isYourProfile) {
-    title = "Your profile";
-  } else if (isExist) {
-    title = `@${data.username} profile`;
+  let title = "";
+  if (data.isYourProfile) {
+    title = langProfile.TITLE_SELF;
+  } else if (data.isExist) {
+    title = langProfile.TITLE_USER(data.username);
   } else {
-    title = "This profile does not exist or this account has been deleted...";
+    title = langProfile.TITLE_NOT_FOUND;
   }
 
-  const iconProps = {
-    className: "text-slate-600",
+  const inputIconProps = {
+    className: "text-slate-500",
     strokeWidth: "1",
+    size: 28,
+  };
+
+  const buttonIconProps = {
     size: 24,
+    className: "text-slate-500",
+    strokeWidth: "1.5",
   };
 
   return (
@@ -59,81 +65,85 @@ export function Profile() {
           </Text>
           {isUploading && <Spinner size={32} />}
         </div>
-        {isExist && (
+        {data.isExist && (
           <div className="flex flex-col justify-center">
-            {isYourProfile && (
+            {data.isYourProfile && (
               <InputField
-                label="Username"
+                label={langProfile.USERNAME_LABEL}
                 size="md"
                 value={data.username}
                 error={error.username}
                 setValue={setUsername}
                 disabled={isUploading}
                 className={`${isUploading ? "animate-pulse" : ""}`}
+                rightSection={<IconAt {...inputIconProps} />}
               />
             )}
             <InputField
-              label="Name"
+              label={langProfile.NAME_LABEL}
               size="md"
-              value={data.name || "Hidden by user privacy settings"}
+              value={data.name}
               error={error.name}
               setValue={setName}
-              disabled={isUploading || !isYourProfile}
-              unstyled={!isYourProfile}
+              disabled={isUploading || !data.isYourProfile}
+              unstyled={!data.isYourProfile}
               className={`${isUploading ? "animate-pulse" : ""}`}
+              rightSection={<IconUser {...inputIconProps} />}
             />
             <TextAreaField
               maxRows={6}
-              label="Bio"
+              label={langProfile.BIO_LABEL}
               size="md"
-              value={data.bio || "Hidden by user privacy settings"}
+              value={data.bio}
               error={error.bio}
               setValue={setBio}
-              disabled={isUploading || !isYourProfile}
-              unstyled={!isYourProfile}
+              disabled={isUploading || !data.isYourProfile}
+              unstyled={!data.isYourProfile}
               className={`${isUploading ? "animate-pulse" : ""}`}
+              rightSection={<IconAbc {...inputIconProps} />}
             />
           </div>
         )}
-        {!isExist && (
-          <IconUserCancel
-            className="text-red-400 self-center m-14"
-            strokeWidth="1"
-            size={128}
-          />
+        {!data.isExist && (
+          <>
+            <IconUserCancel
+              className="text-red-400 self-center m-auto"
+              strokeWidth="1"
+              size={128}
+            />
+            <Text size="md" font="light" className="text-center mt-4">
+              {langProfile.DETAILS_NOT_FOUND}
+            </Text>
+          </>
         )}
-
-        <div className="mt-4 flex flex-row-reverse justify-between items-end grow">
-          {isExist && isYourProfile && (
+        <div className="mt-auto md:mt-4" />
+        <div className="flex flex-col md:flex-row-reverse justify-between items-end gap-4">
+          {data.isYourProfile && (
             <Button
-              title="Update profile"
+              title={langProfile.UPDATE_ACTION}
               size="md"
               onClick={handleUpdate}
               disabled={isUploading}
-              className="w-36 self-end justify-center"
+              className="w-full md:w-36 justify-center"
             >
-              <>
-                <IconFileUpload {...iconProps} />
-                <Text size="md" font="light">
-                  Update
-                </Text>
-              </>
+              <IconFileUpload {...buttonIconProps} />
+              <Text size="md" font="light">
+                {langProfile.UPDATE_ACTION}
+              </Text>
             </Button>
           )}
           {isFromAnotherPage && (
             <Button
-              title="Go back"
+              title={langProfile.GO_BACK_ACTION}
               size="md"
               onClick={returnBack}
               disabled={!isFromAnotherPage}
-              className="w-36 justify-center"
+              className="w-full md:w-36 justify-center"
             >
-              <>
-                <IconCircleArrowLeft {...iconProps} />
-                <Text size="md" font="light">
-                  Go back
-                </Text>
-              </>
+              <IconCircleArrowLeft {...buttonIconProps} />
+              <Text size="md" font="light">
+                {langProfile.GO_BACK_ACTION}
+              </Text>
             </Button>
           )}
         </div>

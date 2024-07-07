@@ -4,7 +4,11 @@ import {
   useQueryUpdateAccount,
 } from "../../../shared/api/api.model";
 import { useNotify } from "../../../shared/features/Notification/Notification";
-import { langError, langProfile } from "../../../locales/en";
+import {
+  langError,
+  langProfile,
+  langProfileNotification,
+} from "../../../locales/en";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { checkUserId } from "../../../shared/lib/uuid";
 
@@ -16,13 +20,13 @@ export function useProfile() {
   const queryRead = useQueryAccount();
   const queryUpdate = useQueryUpdateAccount();
 
-  const [isLoaded, setIsLoaded] = useState(false);
-
   const [data, setData] = useState({
     username: "",
     name: "",
     bio: "",
+    isLoaded: false,
     isExist: false,
+    isYourProfile: false,
   });
 
   const [error, setError] = useState({
@@ -32,10 +36,9 @@ export function useProfile() {
   });
 
   const read = async () => {
-    // Checking the validity of the request
     if (userId !== "self" && !checkUserId(userId)) {
-      notify.show.error(langProfile.INCORRECT_USERID);
-      setIsLoaded(true);
+      notify.show.error(langProfileNotification.INCORRECT_USERID);
+      setData((prevData) => ({ ...prevData, isLoaded: true }));
       return;
     }
 
@@ -46,18 +49,25 @@ export function useProfile() {
 
     if (requestError || responseError) {
       notify.show.error(
-        requestError || responseError || langProfile.INCORRECT_USERID,
+        requestError ||
+          responseError ||
+          langProfileNotification.INCORRECT_USERID,
       );
       return;
     }
 
     if (response?.general?.username) {
-      setData(response?.general as typeof data);
-      setData((prevData) => ({ ...prevData, isExist: true }));
+      setData({
+        username: response.general.username,
+        name: response.general?.name || langProfile.INFO_HIDDEN,
+        bio: response.general?.bio || langProfile.INFO_HIDDEN,
+        isLoaded: true,
+        isExist: true,
+        isYourProfile: response.targetUserId === "self",
+      });
     } else {
-      setData((prevData) => ({ ...prevData, isExist: false }));
+      setData((prevData) => ({ ...prevData, isLoaded: true, isExist: false }));
     }
-    setIsLoaded(true);
   };
 
   const setUsername = (username: string) => {
@@ -76,26 +86,22 @@ export function useProfile() {
         toUpdate: { general: data },
       });
 
-    if (!success && requestError) {
-      setError({
-        username: requestError.username || "",
-        name: requestError.name || "",
-        bio: requestError.bio || "",
-      });
-      return;
-    }
-    if (!success && responseError) {
-      notify.show.error(responseError);
-      return;
-    }
-
     if (!success) {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
+      if (requestError) {
+        setError({
+          username: requestError.username || "",
+          name: requestError.name || "",
+          bio: requestError.bio || "",
+        });
+        return;
+      }
+
+      notify.show.error(responseError || langError.UNKNOWN_MESSAGE);
       return;
     }
 
     if (response?.general?.success) {
-      notify.show.info(langProfile.SUCCESS);
+      notify.show.info(langProfileNotification.SUCCESS);
       read();
     } else {
       notify.show.error(langError.RESPONSE_COMMON_MESSAGE);
@@ -119,11 +125,9 @@ export function useProfile() {
     setUsername,
     setBio,
     handleUpdate,
-    isExist: data.isExist,
-    isYourProfile: userId === "self",
     isFromAnotherPage: !!location.state?.prevPath,
     returnBack,
-    isLoaded,
+    isLoaded: data.isLoaded,
     isUploading: queryUpdate.isLoading,
   };
 }
