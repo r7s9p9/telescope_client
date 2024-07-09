@@ -6,6 +6,37 @@ export const langError = {
   UNKNOWN_MESSAGE: "Something went wrong. Please try again later" as const,
 };
 
+export const langSchema = {
+  email: {
+    NOT_EMAIL: "Invalid email",
+    TOO_LONG: (count: number) => `Email must be less than ${count} characters`,
+  },
+  username: {
+    TOO_SHORT: (count: number) =>
+      `Username must be longer than ${count} characters`,
+    TOO_LONG: (count: number) =>
+      `Username must be less than ${count} characters`,
+  },
+  name: {
+    TOO_SHORT: (count: number) =>
+      `Name must be longer than ${count} characters`,
+    TOO_LONG: (count: number) => `Name must be less than ${count} characters`,
+  },
+  bio: {
+    TOO_LONG: (count: number) => `Bio must be less than ${count} characters`,
+  },
+  password: {
+    TOO_SHORT: (count: number) =>
+      `Password must be longer than ${count} characters`,
+    TOO_LONG: (count: number) =>
+      `Password must be less than ${count} characters`,
+  },
+  code: {
+    WRONG_LENGTH: (count: number) =>
+      `The verification code must be exactly ${count} characters long`,
+  },
+};
+
 export const langAuth = {
   EMAIL_LABEL: "Email" as const,
   PASSWORD_LABEL: "Password" as const,

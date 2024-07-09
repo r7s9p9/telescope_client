@@ -2,6 +2,7 @@ import { z } from "zod";
 import { privacyRule } from "./api.constants";
 import { env } from "../lib/env";
 import { UUID } from "crypto";
+import { langSchema } from "../../locales/en";
 
 const userIdSchema = z
   .string()
@@ -26,24 +27,40 @@ const serviceIdSchema = z.literal("service");
 
 export const emailSchema = z
   .string()
-  .email()
-  .max(
-    env.emailLengthMax,
-    `Email must not be greater than ${env.emailLengthMax} characters`,
-  );
+  .email(langSchema.email.NOT_EMAIL)
+  .max(env.emailLengthMax, langSchema.email.TOO_LONG(env.emailLengthMax));
 
 export const usernameSchema = z
   .string()
-  .min(env.usernameRange.min)
-  .max(env.usernameRange.max);
+  .min(
+    env.usernameRange.min,
+    langSchema.username.TOO_SHORT(env.usernameRange.min),
+  )
+  .max(
+    env.usernameRange.max,
+    langSchema.username.TOO_LONG(env.usernameRange.max),
+  );
 export const passwordSchema = z
   .string()
-  .min(env.passwordRange.min)
-  .max(env.passwordRange.max);
-export const codeSchema = z.string().length(env.codeLength);
+  .min(
+    env.passwordRange.min,
+    langSchema.password.TOO_SHORT(env.passwordRange.min),
+  )
+  .max(
+    env.passwordRange.max,
+    langSchema.password.TOO_LONG(env.passwordRange.max),
+  );
+export const codeSchema = z
+  .string()
+  .length(env.codeLength, langSchema.code.WRONG_LENGTH(env.codeLength));
 
-export const nameSchema = z.string().min(2).max(env.nameLengthMax);
-export const bioSchema = z.string().max(env.bioLengthMax);
+export const nameSchema = z
+  .string()
+  .min(2, langSchema.name.TOO_SHORT(2))
+  .max(env.nameLengthMax, langSchema.name.TOO_LONG(env.nameLengthMax));
+export const bioSchema = z
+  .string()
+  .max(env.bioLengthMax, langSchema.bio.TOO_LONG(env.bioLengthMax));
 export const lastSeenSchema = z.string();
 
 const privacyRuleSchema = z.union([
