@@ -11,10 +11,11 @@ import {
   MessagesSkeleton,
 } from "./Messages/Messages";
 import { BottomBarWrapper } from "./BottomBar/BottomBar";
+import { langMessages } from "../../../locales/en";
 
 const noMessagesElement = (
   <li className="flex flex-col h-fit p-2 mt-4 self-center bg-slate-50 rounded-xl ring-2 ring-slate-200 select-none">
-    <p className="text-sm text-justify">There are no messages here yet...</p>
+    <p className="text-sm text-justify">{langMessages.NO_MESSAGES_TEXT}</p>
   </li>
 );
 

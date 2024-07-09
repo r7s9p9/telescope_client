@@ -5,6 +5,7 @@ import { Text } from "../../../../shared/ui/Text/Text";
 import { usePrivacy } from "./usePrivacy.ts";
 import { ReactNode } from "react";
 import { Select } from "../../../../shared/ui/Select/Select.tsx";
+import { langPrivacy } from "../../../../locales/en.ts";
 
 export function Privacy() {
   const {
@@ -34,72 +35,78 @@ export function Privacy() {
       >
         <div className="flex justify-between items-center">
           <Text size="xl" font="light" className="select-none text-center">
-            Privacy settings
+            {langPrivacy.TITLE_HEAD}
           </Text>
         </div>
         <Text size="md" font="light" className="select-none">
-          Who can...
+          {langPrivacy.TITLE_TAIL}
         </Text>
-        <Item label="See my name" type="name" data={data} setData={setData} />
-        <Item label="See my bio" type="bio" data={data} setData={setData} />
         <Item
-          label="See when I was online"
+          label={langPrivacy.ITEM_NAME}
+          type="name"
+          data={data}
+          setData={setData}
+        />
+        <Item
+          label={langPrivacy.ITEM_BIO}
+          type="bio"
+          data={data}
+          setData={setData}
+        />
+        <Item
+          label={langPrivacy.ITEM_LAST_SEEN}
           type="lastSeen"
           data={data}
           setData={setData}
         />
         <Item
-          label="See my profile photos"
+          label={langPrivacy.ITEM_PROFILE_PHOTOS}
           type="seeProfilePhotos"
           data={data}
           setData={setData}
         />
         <Item
-          label="See my friends"
+          label={langPrivacy.ITEM_FRIENDS}
           type="seeFriends"
           data={data}
           setData={setData}
         />
         {/* <Item
-          label="canBeFriend"
+          label={langPrivacy.ITEM_CAN_BE_FRIEND}
           type="canBeFriend"
           data={data}
           setData={setData}
         /> */}
         <Item
-          label="Invite me to the room"
+          label={langPrivacy.ITEM_INVITE}
           type="inviteToRoom"
           data={data}
           setData={setData}
         />
         <div className="flex grow flex-row-reverse justify-between items-end">
           <Button
-            title="Update profile"
+            title={langPrivacy.BUTTON_UPDATE_LABEL}
             size="md"
             onClick={handleUpdate}
             className="w-36 self-end justify-center"
           >
-            <>
-              <IconFileUpload {...iconProps} />
-              <Text size="md" font="light">
-                Update
-              </Text>
-            </>
+            <IconFileUpload {...iconProps} />
+            <Text size="md" font="light">
+              {langPrivacy.BUTTON_UPDATE_LABEL}
+            </Text>
           </Button>
           {isFromAnotherPage && (
             <Button
-              title="Go back"
+              title={langPrivacy.BUTTON_GO_BACK_LABEL}
               size="md"
               onClick={returnBack}
               disabled={!isFromAnotherPage}
               className="w-36 justify-center"
             >
-              <>
-                <IconCircleArrowLeft {...iconProps} />
-                <Text size="md" font="light">
-                  Go back
-                </Text>
-              </>
+              <IconCircleArrowLeft {...iconProps} />
+              <Text size="md" font="light">
+                {langPrivacy.BUTTON_GO_BACK_LABEL}
+              </Text>
             </Button>
           )}
         </div>

@@ -13,6 +13,7 @@ import { InputField } from "../../../shared/ui/InputField/InputField";
 import { useCreateRoom } from "./useCreateRoom";
 import { TextAreaField } from "../../../shared/ui/TextAreaField/TextAreaField";
 import { Popup } from "../../../shared/ui/Popup/Popup";
+import { langCreateRoom } from "../../../locales/en";
 
 const iconProps = {
   className: "text-slate-600",
@@ -34,14 +35,14 @@ export function CreateRoom() {
 
   return (
     <Popup
-      titleText="Create a room"
+      titleText={langCreateRoom.POPUP_TITLE}
       contentRef={contentRef}
       overlayRef={overlayRef}
       onClose={onClose}
     >
       <InputField
         size="md"
-        label={"Name"}
+        label={langCreateRoom.NAME_LABEL}
         value={form.name.value}
         setValue={setName}
         error={form.name.error}
@@ -50,7 +51,7 @@ export function CreateRoom() {
         }
       />
       <SegmentedButton
-        label="Type"
+        label={langCreateRoom.TYPE_LABEL}
         size="md"
         type="horizontal"
         defaultValue={form.type}
@@ -63,7 +64,7 @@ export function CreateRoom() {
               <>
                 <IconUsersGroup {...iconProps} />
                 <Text size="md" font="light">
-                  Public
+                  {langCreateRoom.TYPE_PUBLIC_ITEM}
                 </Text>
               </>
             ),
@@ -74,7 +75,7 @@ export function CreateRoom() {
               <>
                 <IconUsers {...iconProps} />
                 <Text size="md" font="light">
-                  Private
+                  {langCreateRoom.TYPE_PRIVATE_ITEM}
                 </Text>
               </>
             ),
@@ -85,7 +86,7 @@ export function CreateRoom() {
               <>
                 <IconUser {...iconProps} />
                 <Text size="md" font="light">
-                  Single
+                  {langCreateRoom.TYPE_SINGLE_ITEM}
                 </Text>
               </>
             ),
@@ -105,7 +106,7 @@ export function CreateRoom() {
       />
       <div className="grow" />
       <Button
-        title="Create room"
+        title={langCreateRoom.CREATE_ACTION}
         size="md"
         onClick={run}
         className="mt-4 md:w-36 w-full md:self-end justify-center"
@@ -113,7 +114,7 @@ export function CreateRoom() {
         <>
           <IconCirclePlus {...iconProps} />
           <Text size="md" font="light">
-            Create
+            {langCreateRoom.CREATE_ACTION}
           </Text>
         </>
       </Button>

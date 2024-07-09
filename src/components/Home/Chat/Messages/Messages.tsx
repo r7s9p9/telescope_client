@@ -16,6 +16,7 @@ import { Text } from "../../../../shared/ui/Text/Text";
 import { Paper } from "../../../../shared/ui/Paper/Paper";
 import { RoomId } from "../../../../shared/api/api.schema";
 import { Button } from "../../../../shared/ui/Button/Button";
+import { langMessages } from "../../../../locales/en";
 
 // eslint-disable-next-line react/display-name
 export const MessagesSkeleton = memo(() => {
@@ -157,7 +158,9 @@ export function Message({
     >
       <div className="flex justify-between gap-2">
         <Text size="sm" font="default" className="text-green-600">
-          {content.type === "self" ? "You" : content.username}
+          {content.type === "self"
+            ? langMessages.SELF_MESSAGE_TEXT
+            : content.username}
         </Text>
         <Text size="sm" font="thin">
           {content.date}
@@ -180,7 +183,7 @@ function MessageContextMenu({
   return (
     <Paper rounded="lg" className="flex flex-col m-2 shadow-md">
       <Button
-        title="Reply"
+        title={langMessages.CONTEXT_MENU_REPLY_ACTION}
         size="md"
         unstyled
         padding={24}
@@ -194,13 +197,13 @@ function MessageContextMenu({
             size={18}
           />
           <Text size="md" font="default" className="text-slate-600">
-            Reply
+            {langMessages.CONTEXT_MENU_REPLY_ACTION}
           </Text>
         </>
       </Button>
       {isYourMessage && (
         <Button
-          title="Edit"
+          title={langMessages.CONTEXT_MENU_EDIT_ACTION}
           size="md"
           unstyled
           padding={24}
@@ -210,13 +213,13 @@ function MessageContextMenu({
           <>
             <IconEdit className="text-slate-600" strokeWidth="1.5" size={18} />
             <Text size="md" font="default" className="text-slate-600">
-              Edit
+              {langMessages.CONTEXT_MENU_EDIT_ACTION}
             </Text>
           </>
         </Button>
       )}
       <Button
-        title="Copy"
+        title={langMessages.CONTEXT_MENU_COPY_ACTION}
         size="md"
         unstyled
         padding={24}
@@ -226,13 +229,13 @@ function MessageContextMenu({
         <>
           <IconCopy className="text-slate-600" strokeWidth="1.5" size={18} />
           <Text size="md" font="default" className="text-slate-600">
-            Copy
+            {langMessages.CONTEXT_MENU_COPY_ACTION}
           </Text>
         </>
       </Button>
       {isYourMessage && (
         <Button
-          title="Delete"
+          title={langMessages.CONTEXT_MENU_DELETE_ACTION}
           size="md"
           unstyled
           padding={24}
@@ -242,7 +245,7 @@ function MessageContextMenu({
           <>
             <IconTrash className="text-red-600" strokeWidth="1.5" size={18} />
             <Text size="md" font="default" className="text-red-600">
-              Delete
+              {langMessages.CONTEXT_MENU_DELETE_ACTION}
             </Text>
           </>
         </Button>

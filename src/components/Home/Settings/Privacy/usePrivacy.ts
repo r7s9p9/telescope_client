@@ -4,7 +4,7 @@ import {
   useQueryUpdateAccount,
 } from "../../../../shared/api/api.model";
 import { useNotify } from "../../../../shared/features/Notification/Notification";
-import { langError, langProfile } from "../../../../locales/en";
+import { langError, langPrivacyNotification } from "../../../../locales/en";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ReadAccountResponseType } from "../../../../shared/api/api.schema";
 
@@ -61,7 +61,7 @@ export function usePrivacy() {
     }
 
     if (response?.privacy?.success) {
-      notify.show.info(langProfile.SUCCESS);
+      notify.show.info(langPrivacyNotification.SUCCESS);
       read();
     } else {
       notify.show.error(langError.RESPONSE_COMMON_MESSAGE);

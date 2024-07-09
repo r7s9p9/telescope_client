@@ -10,7 +10,7 @@ import {
 import { RoomId } from "../../../../shared/api/api.schema";
 import { MessageType } from "../../../../shared/api/api.schema";
 import { useNotify } from "../../../../shared/features/Notification/Notification";
-import { langError, langRoom } from "../../../../locales/en";
+import { langError, langBottomBarNotification } from "../../../../locales/en";
 
 export function useSend(roomId: RoomId) {
   const loadNewerMessages = useLoadNewerMessages();
@@ -27,12 +27,6 @@ export function useSend(roomId: RoomId) {
   const [formData, setFormData] = useState({ text: "" });
   const resetFormData = () => setFormData({ text: "" });
 
-  useEffect(() => {
-    if (editable?.isExist && editable.message.content.text) {
-      setFormData({ text: editable.message.content.text });
-    }
-  }, [editable]);
-
   const onSubmit = async () => {
     if (
       formData.text &&
@@ -40,8 +34,8 @@ export function useSend(roomId: RoomId) {
       !queryUpdate.isLoading &&
       storedMessages
     ) {
-      // If message edited
       if (editable?.isExist) {
+        // If the message is being edited
         const { success, response, requestError, responseError } =
           await queryUpdate.run({
             roomId,
@@ -56,12 +50,12 @@ export function useSend(roomId: RoomId) {
         }
 
         if (!response.access) {
-          notify.show.error(langRoom.UPDATE_MESSAGE_NO_RIGHT);
+          notify.show.error(langBottomBarNotification.UPDATE_MESSAGE_NO_RIGHT);
           return;
         }
 
         if (!response.success) {
-          notify.show.error(langRoom.UPDATE_MESSAGE_FAIL);
+          notify.show.error(langBottomBarNotification.UPDATE_MESSAGE_FAIL);
           return;
         }
 
@@ -89,8 +83,6 @@ export function useSend(roomId: RoomId) {
             message: { content: { text: formData.text } },
           });
 
-        // TODO make request error showing in UI
-
         if (!success) {
           notify.show.error(
             requestError?.text || responseError || langError.UNKNOWN_MESSAGE,
@@ -98,11 +90,11 @@ export function useSend(roomId: RoomId) {
           return;
         }
         if (!response.access) {
-          notify.show.error(langRoom.SEND_MESSAGE_NO_RIGHT);
+          notify.show.error(langBottomBarNotification.SEND_MESSAGE_NO_RIGHT);
           return;
         }
         if (!response.success) {
-          notify.show.error(langRoom.SEND_MESSAGE_FAIL);
+          notify.show.error(langBottomBarNotification.SEND_MESSAGE_FAIL);
         }
 
         loadNewerMessages.run();
@@ -110,6 +102,14 @@ export function useSend(roomId: RoomId) {
       resetFormData();
     }
   };
+
+  // If the message is marked as editable,
+  // we copy its text into the input value
+  useEffect(() => {
+    if (editable?.isExist && editable.message.content.text) {
+      setFormData({ text: editable.message.content.text });
+    }
+  }, [editable]);
 
   return {
     formData,

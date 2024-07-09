@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import { RoomSearchUsersToInviteResponseType } from "../../../../../shared/api/api.schema";
 import { useMenuContext } from "../../../../../shared/features/ContextMenu/ContextMenu";
 import { routes } from "../../../../../constants";
-import { langError, langRoom } from "../../../../../locales/en";
+import { langError, langInviteNotification } from "../../../../../locales/en";
 import { useOnClickOutside } from "../../../../../shared/hooks/useOnClickOutside";
 
 export function useInvite() {
@@ -52,7 +52,7 @@ export function useInvite() {
     }
 
     if (!response.access) {
-      notify.show.error(langRoom.SEARCH_TO_INVITE_NO_RIGHT);
+      notify.show.error(langInviteNotification.SEARCH_TO_INVITE_NO_RIGHT);
       return;
     }
     if (!response.success) {
@@ -77,23 +77,23 @@ export function useInvite() {
       // TODO Add check if user is already member
 
       if (!response.access) {
-        notify.show.error(langRoom.INVITE_NO_RIGHT);
+        notify.show.error(langInviteNotification.INVITE_NO_RIGHT);
         closeMenu();
         return;
       }
 
       if (!response.success) {
-        notify.show.error(langRoom.INVITE_FAIL(username));
+        notify.show.error(langInviteNotification.INVITE_FAIL(username));
         closeMenu();
         return;
       }
-      notify.show.info(langRoom.INVITE_SUCCESS(username));
+      notify.show.info(langInviteNotification.INVITE_SUCCESS(username));
       closeMenu();
     };
 
     const copy = (username: string) => {
       navigator.clipboard.writeText(username);
-      notify.show.info(langRoom.COPY_USERNAME);
+      notify.show.info(langInviteNotification.COPY_SUCCESS);
       closeMenu();
     };
 

@@ -16,6 +16,7 @@ import {
 } from "@tabler/icons-react";
 import { Paper } from "../../../../shared/ui/Paper/Paper";
 import { Button } from "../../../../shared/ui/Button/Button";
+import { langMembers } from "../../../../locales/en";
 
 export function Members() {
   const {
@@ -67,7 +68,7 @@ export function Members() {
     <>
       <div className="flex items-center gap-2 p-4 border-t-2 border-slate-100">
         <Text size="xl" font="thin" uppercase letterSpacing className="grow">
-          Members
+          {langMembers.TITLE}
         </Text>
         <IconButton title="Refresh members" onClick={() => getMembers()}>
           <IconRefresh {...iconProps} />
@@ -112,7 +113,7 @@ function MembersListWrapper({
 function NoMembers() {
   return (
     <Text size="md" font="light" className="text-center select-none">
-      There are no members in this room yet
+      {langMembers.NO_MEMBERS}
     </Text>
   );
 }
@@ -133,16 +134,16 @@ function Member({
   let lastSeenStr;
   let memberState: "online" | "offline" | "invisible" | "you";
   if (data.targetUserId === "self") {
-    memberState = "you";
+    memberState = langMembers.STATUS_YOU;
   } else if (!data.general?.lastSeen) {
-    memberState = "invisible";
+    memberState = langMembers.STATUS_INVISIBLE;
   } else {
     const { result, range } = formatDate().member(data.general.lastSeen);
     if (range === "seconds") {
-      memberState = "online";
+      memberState = langMembers.STATUS_ONLINE;
     } else {
-      memberState = "offline";
-      lastSeenStr = `Last seen: ${result}`;
+      memberState = langMembers.STATUS_OFFLINE;
+      lastSeenStr = langMembers.LAST_SEEN_TEXT(result as string);
     }
   }
 
@@ -176,7 +177,7 @@ function Member({
           </Text>
         ) : (
           <Text size="sm" font="light" className="text-slate-600 truncate">
-            Name hidden
+            {langMembers.NAME_HIDDEN}
           </Text>
         )}
       </div>
@@ -217,43 +218,35 @@ function MemberContextMenu({
   return (
     <Paper rounded="lg" className="flex flex-col m-2 w-56 shadow-md">
       <Button
-        title="Go to profile"
+        title={langMembers.CONTEXT_MENU_PROFILE_ACTION}
         size="md"
         unstyled
         padding={24}
         className="hover:bg-slate-200 rounded-t-lg gap-4"
         onClick={() => onClick().profile(data.targetUserId)}
       >
-        <>
-          <IconUserScan
-            className="text-slate-600"
-            strokeWidth="1.5"
-            size={24}
-          />
-          <Text size="md" font="default" className="text-slate-600">
-            Go to profile
-          </Text>
-        </>
+        <IconUserScan className="text-slate-600" strokeWidth="1.5" size={24} />
+        <Text size="md" font="default" className="text-slate-600">
+          {langMembers.CONTEXT_MENU_PROFILE_ACTION}
+        </Text>
       </Button>
       <Button
-        title="Copy username"
+        title={langMembers.CONTEXT_MENU_COPY_ACTION}
         size="md"
         unstyled
         padding={24}
         className={`hover:bg-slate-200 ${!isAdmin || isYou ? "rounded-b-lg" : ""} gap-4`}
         onClick={() => onClick().copy(data.general?.username as string)}
       >
-        <>
-          <IconCopy className="text-slate-600" strokeWidth="1.5" size={24} />
-          <Text size="md" font="default" className="text-slate-600">
-            Copy username
-          </Text>
-        </>
+        <IconCopy className="text-slate-600" strokeWidth="1.5" size={24} />
+        <Text size="md" font="default" className="text-slate-600">
+          {langMembers.CONTEXT_MENU_COPY_ACTION}
+        </Text>
       </Button>
       {isAdmin && !isYou && (
         <>
           <Button
-            title="Kick"
+            title={langMembers.CONTEXT_MENU_KICK_ACTION}
             size="md"
             unstyled
             padding={24}
@@ -265,20 +258,13 @@ function MemberContextMenu({
               )
             }
           >
-            <>
-              <IconKarate
-                className="text-red-600"
-                strokeWidth="1.5"
-                size={24}
-              />
-              <Text size="md" font="default" className="text-red-600">
-                Kick
-              </Text>
-            </>
+            <IconKarate className="text-red-600" strokeWidth="1.5" size={24} />
+            <Text size="md" font="default" className="text-red-600">
+              {langMembers.CONTEXT_MENU_KICK_ACTION}
+            </Text>
           </Button>
-
           <Button
-            title="Ban"
+            title={langMembers.CONTEXT_MENU_BAN_ACTION}
             size="md"
             unstyled
             padding={24}
@@ -287,12 +273,10 @@ function MemberContextMenu({
               onClick().ban(data.targetUserId, data.general?.username as string)
             }
           >
-            <>
-              <IconBan className="text-red-600" strokeWidth="1.5" size={24} />
-              <Text size="md" font="default" className="text-red-600">
-                Ban
-              </Text>
-            </>
+            <IconBan className="text-red-600" strokeWidth="1.5" size={24} />
+            <Text size="md" font="default" className="text-red-600">
+              {langMembers.CONTEXT_MENU_BAN_ACTION}
+            </Text>
           </Button>
         </>
       )}

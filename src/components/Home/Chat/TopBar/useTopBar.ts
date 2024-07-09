@@ -1,24 +1,25 @@
 import { useInfo } from "../useChat";
 import { useLocation, useNavigate } from "react-router-dom";
 import { routes } from "../../../../constants";
+import { langTopBar } from "../../../../locales/en";
 
 export function useTopBar(data: ReturnType<typeof useInfo>) {
   let userCountStr = "";
   if (data.info.userCount === 0) {
-    userCountStr = "no members";
+    userCountStr = langTopBar.NO_MEMBERS_TEXT;
   }
   if (data.info.userCount === 1) {
-    userCountStr = "1 member";
+    userCountStr = langTopBar.ONE_MEMBER_TEXT;
   }
   if (data.info.userCount && data.info.userCount > 1) {
-    userCountStr = `${data.info.userCount} members`;
+    userCountStr = `${data.info.userCount} ${langTopBar.MEMBERS_TEXT}`;
   }
 
   const content = {
     isInitialLoading: data.info.isInitialLoading,
     isMember: data.info.isMember,
     name: data.info.name,
-    description: `${data.info?.type} room, ${userCountStr}`,
+    description: `${data.info?.type} ${langTopBar.ROOM_TEXT}, ${userCountStr}`,
   };
 
   const navigate = useNavigate();

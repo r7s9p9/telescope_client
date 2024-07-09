@@ -15,6 +15,7 @@ import { IconButton } from "../../../shared/ui/IconButton/IconButton";
 import { Input } from "../../../shared/ui/Input/Input";
 import { Text } from "../../../shared/ui/Text/Text";
 import { Paper } from "../../../shared/ui/Paper/Paper";
+import { langRooms } from "../../../locales/en";
 
 const itemHeightStyle = { height: ITEM_HEIGHT + "px" };
 
@@ -129,7 +130,7 @@ function Wrapper({
           <Input
             value={searchValue}
             setValue={setSearchValue}
-            placeholder="Search..."
+            placeholder={langRooms.SEARCH_PLACEHOLDER}
             size="md"
             rightSection={
               <>
@@ -170,9 +171,13 @@ function Title() {
   return (
     <div className="h-16 w-full flex justify-between items-center">
       <Text size="xl" font="thin" uppercase letterSpacing>
-        Rooms
+        {langRooms.TITLE}
       </Text>
-      <IconButton title={"Create new room"} noHover onClick={onCreate}>
+      <IconButton
+        title={langRooms.BUTTON_CREATE_LABEL}
+        noHover
+        onClick={onCreate}
+      >
         <IconCirclePlus strokeWidth="1" className="text-slate-600" size={32} />
       </IconButton>
     </div>
@@ -203,7 +208,7 @@ function FoundRooms({
   }
 
   if (data?.isEmpty) {
-    return <Text {...textProps}>No rooms found</Text>;
+    return <Text {...textProps}>{langRooms.NO_ROOMS_FOUND}</Text>;
   }
 
   if (data) {
@@ -226,9 +231,10 @@ function FoundItem({
   data: { name: string; userCount: number; roomId: RoomId };
 }) {
   let membersStr = "";
-  if (data.userCount === 0) membersStr = "No members";
-  if (data.userCount === 1) membersStr = "1 member";
-  if (data.userCount > 1) membersStr = `${data.userCount} members`;
+  if (data.userCount === 0) membersStr = langRooms.FOUND_ITEM_NO_MEMBERS;
+  if (data.userCount === 1) membersStr = langRooms.FOUND_ITEM_ONE_MEMBER;
+  if (data.userCount > 1)
+    membersStr = langRooms.FOUND_ITEM_MEMBERS(data.userCount);
 
   const textProps = {
     size: "sm" as const,
@@ -283,10 +289,8 @@ function ListEmpty() {
       rounded="md"
       className="mt-1 mx-4 ring-2 ring-slate-200 bg-slate-100"
     >
-      <Text {...textProps}>You don&apos;t have any rooms yet</Text>
-      <Text {...textProps}>
-        Create your own room or find a public room and join it
-      </Text>
+      <Text {...textProps}>{langRooms.NO_ROOMS_HEAD}</Text>
+      <Text {...textProps}>{langRooms.NO_ROOMS_TAIL}</Text>
     </Paper>
   );
 }
@@ -298,7 +302,7 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
 
   const lastMessage = data.lastMessage
     ? data.lastMessage.content.text
-    : "There is no messages";
+    : langRooms.NO_LAST_MESSAGE;
 
   let username: JSX.Element = <></>;
 
@@ -310,7 +314,7 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
   if (data?.lastMessage?.authorId === "self") {
     username = (
       <Text {...textProps} className="text-green-600">
-        You:
+        {langRooms.LAST_MESSAGE_AUTHOR_YOU}
       </Text>
     );
   } else if (data?.lastMessage?.username) {
@@ -322,7 +326,7 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
   } else if (data?.lastMessage?.authorId === "service") {
     username = (
       <Text {...textProps} className="text-blue-600">
-        Service:
+        {langRooms.LAST_MESSAGE_AUTHOR_SERVICE}
       </Text>
     );
   }

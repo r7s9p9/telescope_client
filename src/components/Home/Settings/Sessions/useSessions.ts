@@ -4,7 +4,7 @@ import {
   useQueryReadSessions,
 } from "../../../../shared/api/api.model";
 import { useNotify } from "../../../../shared/features/Notification/Notification";
-import { langError, langSession } from "../../../../locales/en";
+import { langError, langSessionsNotification } from "../../../../locales/en";
 import { SessionReadResponseType } from "../../../../shared/api/api.schema";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -58,9 +58,9 @@ export function useSessions() {
       return;
     }
     if (!response.success) {
-      notify.show.error(langSession.SESSION_DELETE_FAIL);
+      notify.show.error(langSessionsNotification.SESSION_DELETE_FAIL);
     }
-    notify.show.info(langSession.SESSION_DELETE_SUCCESS);
+    notify.show.info(langSessionsNotification.SESSION_DELETE_SUCCESS);
     read();
   };
 

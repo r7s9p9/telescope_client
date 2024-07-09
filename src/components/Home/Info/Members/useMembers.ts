@@ -12,7 +12,7 @@ import { routes } from "../../../../constants";
 import { RoomId, UserId } from "../../../../shared/api/api.schema";
 import { useMenuContext } from "../../../../shared/features/ContextMenu/ContextMenu";
 import { useNotify } from "../../../../shared/features/Notification/Notification";
-import { langError, langRoom } from "../../../../locales/en";
+import { langError, langMembersNotification } from "../../../../locales/en";
 
 const DEBOUNCE_SCROLL_INTERVAL = 200;
 
@@ -127,7 +127,7 @@ export function useMember({
 
     const copy = (username: string) => {
       navigator.clipboard.writeText(username as string);
-      notify.show.info(langRoom.COPY_USERNAME);
+      notify.show.info(langMembersNotification.COPY_SUCCESS);
       closeMenu();
     };
 
@@ -148,17 +148,17 @@ export function useMember({
         }
 
         if (!response.access) {
-          notify.show.error(langRoom.KICK_NO_RIGHT);
+          notify.show.error(langMembersNotification.KICK_NO_RIGHT);
           closeMenu();
           return;
         }
         if (!response.success) {
-          notify.show.error(langRoom.KICK_FAIL(username));
+          notify.show.error(langMembersNotification.KICK_FAIL(username));
           closeMenu();
           return;
         }
         if (response.success) {
-          notify.show.info(langRoom.KICK_SUCCESS(username));
+          notify.show.info(langMembersNotification.KICK_SUCCESS(username));
           getMembers();
           closeMenu();
           return;
@@ -182,16 +182,16 @@ export function useMember({
           return;
         }
         if (!response.access) {
-          notify.show.error(langRoom.BAN_NO_RIGHT);
+          notify.show.error(langMembersNotification.BAN_NO_RIGHT);
           closeMenu();
           return;
         }
         if (!response.success) {
-          notify.show.error(langRoom.BAN_FAIL(username));
+          notify.show.error(langMembersNotification.BAN_FAIL(username));
           closeMenu();
           return;
         }
-        notify.show.info(langRoom.BAN_SUCCESS(username));
+        notify.show.info(langMembersNotification.BAN_SUCCESS(username));
         getMembers();
         closeMenu();
         return;

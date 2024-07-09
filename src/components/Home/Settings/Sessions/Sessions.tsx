@@ -20,6 +20,7 @@ import { formatDate } from "../../../../shared/lib/date";
 import { IconButton } from "../../../../shared/ui/IconButton/IconButton";
 import { useConfirmPopup } from "../../../../shared/features/ConfirmPopup/ConfirmPopup";
 import { Button } from "../../../../shared/ui/Button/Button";
+import { langSessions } from "../../../../locales/en";
 
 export function Sessions() {
   const {
@@ -101,49 +102,49 @@ function Session({
       <div className="pl-4 flex flex-col md:flex-row md:grow">
         <div className="md:grow flex flex-col md:justify-between">
           <Text size="sm" font="light" capitalize>
-            Device: {parsedUserAgent.device}
+            {langSessions.DEVICE_ITEM}: {parsedUserAgent.device}
           </Text>
           <Text size="sm" font="light" capitalize>
-            Browser: {parsedUserAgent.browser}
+            {langSessions.BROWSER_ITEM}: {parsedUserAgent.browser}
           </Text>
           <Text size="sm" font="light">
             IP: {data.ip}
           </Text>
           {!data.isCurrent && !isOnline && (
             <Text size="sm" font="light">
-              {`Last seen: ${lastSeen.result}`}
+              {langSessions.LAST_SEEN_TEXT(lastSeen.result as string)}
             </Text>
           )}
         </div>
         <div className="pr-2 flex flex-col grow md:items-end justify-end md:justify-between">
           {data.isCurrent && (
             <Text size="sm" font="light" className="text-green-600">
-              This device
+              {langSessions.STATUS_THIS_DEVICE}
             </Text>
           )}
           {data.isFrozen && (
             <Text size="sm" font="light" className="text-red-600">
-              Blocked
+              {langSessions.STATUS_BLOCKED}
             </Text>
           )}
           {!data.isCurrent && isOnline && (
             <Text size="sm" font="light" className="text-green-600">
-              Online
+              {langSessions.STATUS_ONLINE}
             </Text>
           )}
         </div>
         {!data.isCurrent && (
           <IconButton
-            title="Delete session"
+            title={langSessions.BUTTON_DELETE_LABEL}
             className="hover:bg-slate-400 absolute bottom-1 right-1"
             onClick={() =>
               confirmPopup.show({
                 onAgree: () => remove(data.sessionId),
                 onClose: confirmPopup.hide,
                 text: {
-                  question: "Are you sure you want to delete this session?",
-                  confirm: "Delete",
-                  cancel: "Cancel",
+                  question: langSessions.DELETE_POPUP_QUESTION,
+                  confirm: langSessions.DELETE_POPUP_CONFIRM,
+                  cancel: langSessions.DELETE_POPUP_CANCEL,
                 },
               })
             }
@@ -231,27 +232,25 @@ function Wrapper({
         className="w-full h-full md:w-3/4 md:h-[400px] md:min-w-[350px] md:max-w-[650px] md:rounded-xl flex flex-col shadow-md bg-slate-50"
       >
         <Text size="xl" font="light" className="select-none mb-4">
-          Sessions
+          {langSessions.TITLE}
         </Text>
         <div className="h-full overflow-y-auto">{children}</div>
         {isFromAnotherPage && (
           <Button
-            title="Go back"
+            title={langSessions.BUTTON_GO_BACK_LABEL}
             size="md"
             onClick={returnBack}
             disabled={!isFromAnotherPage}
             className="w-36 justify-center mt-4 shrink-0"
           >
-            <>
-              <IconCircleArrowLeft
-                className="text-slate-600"
-                strokeWidth="1"
-                size={24}
-              />
-              <Text size="md" font="light">
-                Go back
-              </Text>
-            </>
+            <IconCircleArrowLeft
+              className="text-slate-600"
+              strokeWidth="1"
+              size={24}
+            />
+            <Text size="md" font="light">
+              {langSessions.BUTTON_GO_BACK_LABEL}
+            </Text>
           </Button>
         )}
       </Paper>

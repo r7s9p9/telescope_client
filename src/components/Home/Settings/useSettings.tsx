@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { routes } from "../../../constants";
 import { useQueryDeleteSession } from "../../../shared/api/api.model";
 import { useNotify } from "../../../shared/features/Notification/Notification";
-import { langError, langSession } from "../../../locales/en";
+import { langError } from "../../../locales/en";
 
 export function useSettings() {
   const { pathname } = useLocation();
@@ -38,12 +38,7 @@ export function useSettings() {
       }
 
       if (!response.success) {
-        if (!response.isExist) {
-          // This is of course impossible case, but it is worth considering
-          navigate(routes.login.path, { state: { loggedOut: true } });
-          return;
-        }
-        notify.show.error(langSession.SESSION_DELETE_FAIL);
+        notify.show.error(langError.RESPONSE_COMMON_MESSAGE);
         return;
       }
 

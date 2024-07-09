@@ -8,46 +8,47 @@ import {
 import { usePanel } from "./usePanel";
 import { langPanel } from "../../../locales/en";
 
+const iconButtonProps = {
+  noHover: true,
+  className: "md:pt-2",
+};
+
+const iconProps = {
+  strokeWidth: "1",
+  size: 32,
+  className: "md:text-white text-slate-600",
+};
+
 export function Panel() {
   const { onClickHandler } = usePanel();
-
-  const iconProps = {
-    strokeWidth: "1",
-    size: 32,
-    className: "md:text-white text-slate-600",
-  };
 
   return (
     <div className="shrink-0 w-full md:w-fit h-14 md:h-full bg-slate-50 md:bg-slate-600 px-4 md:px-2 py-2 flex md:flex-col items-center gap-4">
       <IconButton
+        {...iconButtonProps}
         title={langPanel.PROFILE_LABEL}
-        noHover
-        className="md:pt-2"
         onClick={onClickHandler().profile}
       >
         <IconUserCircle {...iconProps} />
       </IconButton>
       <IconButton
+        {...iconButtonProps}
         title={langPanel.ROOMS_LABEL}
-        noHover
-        className="md:pt-2"
         onClick={onClickHandler().rooms}
       >
         <IconMessageCircle {...iconProps} />
       </IconButton>
       <IconButton
+        {...iconButtonProps}
         title={langPanel.FRIENDS_LABEL}
-        noHover
-        className="md:pt-2"
         onClick={onClickHandler().friends}
       >
         <IconUsersGroup {...iconProps} />
       </IconButton>
       <div className="grow" />
       <IconButton
+        {...iconButtonProps}
         title={langPanel.SETTINGS_LABEL}
-        noHover
-        className="md:pb-2"
         onClick={onClickHandler().settings}
       >
         <IconSettings {...iconProps} />

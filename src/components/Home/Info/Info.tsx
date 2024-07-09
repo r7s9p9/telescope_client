@@ -7,6 +7,7 @@ import { Properties } from "./Properties/Properties";
 import { Members } from "./Members/Members";
 import { Actions } from "./Actions/Actions";
 import { Outlet } from "react-router-dom";
+import { langInfo } from "../../../locales/en";
 
 export function ChatInfo() {
   return (
@@ -31,9 +32,12 @@ function Title() {
       className="h-14 md:h-16 w-full bg-slate-50 flex items-center justify-between"
     >
       <Text size="xl" font="thin" uppercase letterSpacing>
-        Info
+        {langInfo.TITLE}
       </Text>
-      <IconButton title="Close info" onClick={handleCloseClick}>
+      <IconButton
+        title={langInfo.BUTTON_CLOSE_LABEL}
+        onClick={handleCloseClick}
+      >
         <IconX className="text-slate-600" strokeWidth="1" size={32} />
       </IconButton>
     </Paper>

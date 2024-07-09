@@ -10,7 +10,7 @@ import { useLocation } from "react-router-dom";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLoadInfo } from "../../Chat/useChat";
 import { routes } from "../../../../constants";
-import { langError, langRoom } from "../../../../locales/en";
+import { langError, langActionsNotification } from "../../../../locales/en";
 
 export function useActions() {
   const { roomId } = useParams();
@@ -41,7 +41,7 @@ export function useActions() {
     if (response.success) {
       await loadRooms.run();
       await loadInfo.run();
-      notify.show.info(langRoom.LEAVE_SUCCESS);
+      notify.show.info(langActionsNotification.LEAVE_SUCCESS);
       navigate({ pathname: routes.rooms.path });
     } else {
       notify.show.error(langError.UNKNOWN_MESSAGE);
@@ -61,7 +61,7 @@ export function useActions() {
     if (response.success) {
       await loadRooms.run();
       await loadInfo.run();
-      notify.show.info(langRoom.DELETE_SUCCESS);
+      notify.show.info(langActionsNotification.DELETE_SUCCESS);
       navigate({ pathname: routes.rooms.path });
     } else {
       notify.show.error(langError.UNKNOWN_MESSAGE);

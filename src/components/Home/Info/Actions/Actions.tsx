@@ -8,6 +8,7 @@ import { useActions } from "./useActions";
 import { Button } from "../../../../shared/ui/Button/Button";
 import { Text } from "../../../../shared/ui/Text/Text";
 import { useConfirmPopup } from "../../../../shared/features/ConfirmPopup/ConfirmPopup";
+import { langActions } from "../../../../locales/en";
 
 export function Actions() {
   const {
@@ -37,7 +38,7 @@ export function Actions() {
     <>
       <div className="w-full flex flex-col shrink-0 border-t-2 border-slate-100">
         <Button
-          title="Show actions"
+          title={langActions.SHOW_LABEL}
           size="sm"
           unstyled
           onClick={switchIsShow}
@@ -53,18 +54,18 @@ export function Actions() {
         {isShow && (
           <>
             <Button
-              title="Copy link"
+              title={langActions.ITEM_COPY_ACTION}
               size="md"
               unstyled
               onClick={handleCopy}
               className="hover:bg-slate-200 border-t-2 border-slate-100  gap-4"
             >
               <IconCopy {...iconProps} />
-              <Text {...textProps}>Copy link</Text>
+              <Text {...textProps}>{langActions.ITEM_COPY_ACTION}</Text>
             </Button>
             {isMember && (
               <Button
-                title="Leave room"
+                title={langActions.ITEM_LEAVE_ROOM_ACTION}
                 size="md"
                 unstyled
                 onClick={() => {
@@ -72,21 +73,21 @@ export function Actions() {
                     onAgree: handleLeave,
                     onClose: confirmPopup.hide,
                     text: {
-                      question: "Are you sure you want to leave the room?",
-                      confirm: "Leave",
-                      cancel: "Cancel",
+                      question: langActions.LEAVE_POPUP_QUESTION,
+                      confirm: langActions.LEAVE_POPUP_CONFIRM,
+                      cancel: langActions.LEAVE_POPUP_CANCEL,
                     },
                   });
                 }}
                 className="hover:bg-slate-200 gap-4"
               >
                 <IconDoorExit {...iconProps} />
-                <Text {...textProps}>Leave room</Text>
+                <Text {...textProps}>{langActions.ITEM_LEAVE_ROOM_ACTION}</Text>
               </Button>
             )}
             {isMember && isAdmin && (
               <Button
-                title="Delete room"
+                title={langActions.ITEM_DELETE_ROOM_ACTION}
                 size="md"
                 unstyled
                 onClick={() => {
@@ -94,9 +95,9 @@ export function Actions() {
                     onAgree: handleDelete,
                     onClose: confirmPopup.hide,
                     text: {
-                      question: "Are you sure you want to delete this room?",
-                      confirm: "Delete",
-                      cancel: "Cancel",
+                      question: langActions.DELETE_POPUP_QUESTION,
+                      confirm: langActions.DELETE_POPUP_CONFIRM,
+                      cancel: langActions.DELETE_POPUP_CANCEL,
                     },
                   });
                 }}
@@ -108,7 +109,7 @@ export function Actions() {
                   size={24}
                 />
                 <Text size="md" font="light" uppercase className="text-red-600">
-                  Delete room
+                  {langActions.ITEM_DELETE_ROOM_ACTION}
                 </Text>
               </Button>
             )}

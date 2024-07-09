@@ -6,7 +6,7 @@ import { useQueryDeleteMessage } from "../../../../shared/api/api.model";
 import { MessageType } from "../../../../shared/api/api.schema";
 import { formatDate } from "../../../../shared/lib/date";
 import { useNotify } from "../../../../shared/features/Notification/Notification";
-import { langError, langRoom } from "../../../../locales/en";
+import { langError, langMessagesNotification } from "../../../../locales/en";
 
 function useDelete(roomId: RoomId) {
   const storeAction = useStore().chat(roomId);
@@ -29,12 +29,12 @@ function useDelete(roomId: RoomId) {
     }
 
     if (!response.access) {
-      notify.show.error(langRoom.DELETE_MESSAGE_NO_RIGHT);
+      notify.show.error(langMessagesNotification.DELETE_NO_RIGHT);
       return;
     }
 
     if (!response.success) {
-      notify.show.error(langRoom.DELETE_MESSAGE_FAIL);
+      notify.show.error(langMessagesNotification.DELETE_FAIL);
       return;
     }
 

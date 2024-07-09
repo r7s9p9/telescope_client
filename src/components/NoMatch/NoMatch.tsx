@@ -2,6 +2,7 @@ import { Text } from "../../shared/ui/Text/Text";
 import { Paper } from "../../shared/ui/Paper/Paper";
 import { Link } from "react-router-dom";
 import { routes } from "../../constants";
+import { langNoMatch } from "../../locales/en";
 
 export function NoMatch() {
   return (
@@ -18,15 +19,15 @@ export function NoMatch() {
           letterSpacing
           className="select-none"
         >
-          Error 404
+          {langNoMatch.TITLE}
         </Text>
         <div className="w-full my-2 border-2 border-slate-100" />
         <Text size="md" font="light">
-          Apparently this page does not exist
+          {langNoMatch.SUBTITLE}
         </Text>
         <div className="flex">
           <Text size="md" font="light">
-            However, you can always go&nbsp;
+            {langNoMatch.MESSAGE_HEAD}&nbsp;
           </Text>
           <Link to={routes.home.path}>
             <Text
@@ -34,7 +35,7 @@ export function NoMatch() {
               font="light"
               className="underline cursor-pointer text-blue-600"
             >
-              home
+              {langNoMatch.MESSAGE_TAIL}
             </Text>
           </Link>
         </div>

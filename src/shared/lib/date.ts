@@ -1,3 +1,4 @@
+import { langMessages } from "../../locales/en";
 import { getNumber, isNumeric } from "./number";
 
 function isDate(value: unknown) {
@@ -144,7 +145,7 @@ export const formatDate = () => {
       return "Unknown";
     }
 
-    return "edited " + timeFormatter(modified.date);
+    return `${langMessages.MESSAGE_EDITED_TEXT} ${timeFormatter(modified.date)}`;
   }
 
   function bubble(value: number | string) {

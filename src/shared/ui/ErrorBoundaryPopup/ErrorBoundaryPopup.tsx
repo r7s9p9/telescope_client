@@ -3,6 +3,7 @@ import { Text } from "../../../shared/ui/Text/Text";
 import { useOnClickOutside } from "../../hooks/useOnClickOutside";
 import { Popup } from "../Popup/Popup";
 import { routes } from "../../../constants";
+import { langErrorBoundary } from "../../../locales/en";
 
 export function ErrorBoundaryPopup({
   disableClickOutside,
@@ -28,7 +29,7 @@ export function ErrorBoundaryPopup({
 
   return (
     <Popup
-      titleText="Something went wrong"
+      titleText={langErrorBoundary.TITLE}
       contentRef={contentRef}
       overlayRef={overlayRef}
       onClose={onClose}
@@ -39,8 +40,8 @@ export function ErrorBoundaryPopup({
         font="light"
         className="m-auto text-justify md:text-center"
       >
-        Refresh the page, and if this does not help and the problem persists,
-        write to us by email <b className="text-green-600">void@email.com</b>
+        {langErrorBoundary.MESSAGE}&nbsp;
+        <b className="text-green-600">void@email.com</b>
       </Text>
     </Popup>
   );

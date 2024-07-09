@@ -12,6 +12,7 @@ import {
 import { useSettings } from "./useSettings";
 import { useConfirmPopup } from "../../../shared/features/ConfirmPopup/ConfirmPopup";
 import { useNotify } from "../../../shared/features/Notification/Notification";
+import { langSettings } from "../../../locales/en";
 
 export function Settings() {
   const { onClickHandler } = useSettings();
@@ -27,7 +28,7 @@ export function Settings() {
   return (
     <Wrapper>
       <Button
-        title="My Profile"
+        title={langSettings.ITEM_PROFILE}
         size="xl"
         unstyled
         onClick={onClickHandler().profile}
@@ -41,7 +42,7 @@ export function Settings() {
           letterSpacing
           className="select-none"
         >
-          My profile
+          {langSettings.ITEM_PROFILE}
         </Text>
       </Button>
       <Button
@@ -59,11 +60,11 @@ export function Settings() {
           letterSpacing
           className="select-none"
         >
-          Privacy
+          {langSettings.ITEM_PRIVACY}
         </Text>
       </Button>
       <Button
-        title="Sessions"
+        title={langSettings.ITEM_SESSIONS}
         size="xl"
         unstyled
         onClick={onClickHandler().sessions}
@@ -77,11 +78,11 @@ export function Settings() {
           letterSpacing
           className="select-none"
         >
-          Sessions
+          {langSettings.ITEM_SESSIONS}
         </Text>
       </Button>
       <Button
-        title="Language"
+        title={langSettings.ITEM_LANG}
         size="xl"
         unstyled
         onClick={() => {
@@ -97,11 +98,11 @@ export function Settings() {
           letterSpacing
           className="select-none"
         >
-          Language
+          {langSettings.ITEM_LANG}
         </Text>
       </Button>
       <Button
-        title="Logout"
+        title={langSettings.ITEM_LOGOUT}
         size="xl"
         unstyled
         onClick={() => {
@@ -109,9 +110,9 @@ export function Settings() {
             onAgree: onClickHandler().logout,
             onClose: confirmPopup.hide,
             text: {
-              question: "Are you sure you want to log out?",
-              confirm: "Logout",
-              cancel: "Cancel",
+              question: langSettings.LOGOUT_POPUP_QUESTION,
+              confirm: langSettings.LOGOUT_POPUP_CONFIRM,
+              cancel: langSettings.LOGOUT_POPUP_CANCEL,
             },
           });
         }}
@@ -125,7 +126,7 @@ export function Settings() {
           letterSpacing
           className="select-none text-red-600"
         >
-          Logout
+          {langSettings.ITEM_LOGOUT}
         </Text>
       </Button>
     </Wrapper>

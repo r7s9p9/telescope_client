@@ -7,6 +7,7 @@ import { TextArea } from "../../../../shared/ui/TextArea/TextArea";
 import { useEdit, useInfo } from "../useChat";
 import { useJoin, useSend } from "./useBottomBar";
 import { Button } from "../../../../shared/ui/Button/Button";
+import { langBottomBar } from "../../../../locales/en";
 
 export function BottomBarWrapper({
   data,
@@ -34,13 +35,13 @@ function BottomBarNoMember({ roomId }: { roomId: RoomId }) {
       {!join.isLoading && (
         <div className="shrink-0 relative h-16 md:h-24 md:p-4 flex items-center justify-center md:border-x-2 border-slate-100 bg-slate-50">
           <Button
-            title="Join room"
+            title={langBottomBar.JOIN_ACTION}
             size="md"
             unstyled
             onClick={() => join.run()}
           >
             <Text size="xl" font="light" uppercase>
-              Join
+              {langBottomBar.JOIN_ACTION}
             </Text>
           </Button>
         </div>
@@ -65,7 +66,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           />
           <div className="grow w-0 pl-4 h-12 flex flex-col justify-center text-sm">
             <Text size="sm" font="light">
-              Edit message
+              {langBottomBar.TITLE_EDIT}
             </Text>
             <Text size="sm" font="default" className="truncate">
               {editAction.editable.message.content.text}
@@ -73,7 +74,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           </div>
           <IconButton
             onClick={() => editAction.closeEdit()}
-            title="Close editing"
+            title={langBottomBar.LABEL_CLOSE_EDIT}
           >
             <IconX className="text-slate-600" strokeWidth="1" size={24} />
           </IconButton>
@@ -92,7 +93,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           className="ring-0 md:ring-2 ring-slate-200"
           rightSection={
             <IconButton
-              title={"Send message"}
+              title={langBottomBar.LABEL_SEND}
               loading={isLoading}
               loaderType={"outside"}
               loaderSize={42}

@@ -15,6 +15,7 @@ import { Button } from "../../../../../shared/ui/Button/Button";
 import { useInvite } from "./useInvite";
 import { Input } from "../../../../../shared/ui/Input/Input";
 import { Popup } from "../../../../../shared/ui/Popup/Popup";
+import { langInvite } from "../../../../../locales/en";
 
 export function InviteUsers() {
   const {
@@ -60,7 +61,7 @@ export function InviteUsers() {
 
   return (
     <Popup
-      titleText="Invite users"
+      titleText={langInvite.POPUP_TITLE}
       overlayRef={overlayRef}
       contentRef={contentRef}
       onClose={onClose}
@@ -69,7 +70,7 @@ export function InviteUsers() {
         size="md"
         value={inputValue}
         setValue={setInputValue}
-        placeholder="Enter user nickname..."
+        placeholder={langInvite.SEARCH_PLACEHOLDER}
         className="mt-4"
         rightSection={
           <IconSearch className="text-slate-400" strokeWidth="1" size={24} />
@@ -104,7 +105,7 @@ function ListWrapper({
 function NoUsers() {
   return (
     <Text size="md" font="light" className="text-center select-none">
-      There are no users for this request
+      {langInvite.NO_USERS}
     </Text>
   );
 }
@@ -120,17 +121,16 @@ function User({
 }) {
   let lastSeenStr;
   let memberState: "online" | "offline" | "invisible" | "you";
-  if (data.targetUserId === "self") {
-    memberState = "you";
-  } else if (!data.general?.lastSeen) {
-    memberState = "invisible";
+
+  if (!data.general?.lastSeen) {
+    memberState = langInvite.STATUS_INVISIBLE;
   } else {
     const { result, range } = formatDate().member(data.general.lastSeen);
     if (range === "seconds") {
-      memberState = "online";
+      memberState = langInvite.STATUS_ONLINE;
     } else {
-      memberState = "offline";
-      lastSeenStr = `Last seen: ${result}`;
+      memberState = langInvite.STATUS_OFFLINE;
+      lastSeenStr = langInvite.LAST_SEEN_TEXT(result as string);
     }
   }
 
@@ -160,7 +160,7 @@ function User({
         )}
         {!data.general?.name && (
           <Text size="sm" font="light" className="text-slate-600">
-            Name hidden
+            {langInvite.NAME_HIDDEN}
           </Text>
         )}
       </div>
@@ -170,7 +170,7 @@ function User({
           font="light"
           capitalize
           className={
-            memberState === "online" || memberState === "you"
+            memberState === "online"
               ? "text-green-600 select-none"
               : "text-slate-600 select-none"
           }
@@ -194,10 +194,16 @@ function UserContextMenu({
   data: ReadAccountResponseType;
   onClickMenuHandler: ReturnType<typeof useInvite>["onClickMenuHandler"];
 }) {
+  const iconProps = {
+    size: 24,
+    strokeWidth: "1.5",
+    className: "text-slate-600",
+  };
+
   return (
     <Paper rounded="lg" className="flex flex-col m-2 w-56 shadow-md">
       <Button
-        title="Go to profile"
+        title={langInvite.CONTEXT_MENU_PROFILE_ACTION}
         size="md"
         unstyled
         padding={24}
@@ -206,19 +212,13 @@ function UserContextMenu({
           onClickMenuHandler().profile(data.targetUserId as UserId)
         }
       >
-        <>
-          <IconUserScan
-            className="text-slate-600"
-            strokeWidth="1.5"
-            size={24}
-          />
-          <Text size="md" font="default" className="text-slate-600">
-            Go to profile
-          </Text>
-        </>
+        <IconUserScan {...iconProps} />
+        <Text size="md" font="default" className="text-slate-600">
+          {langInvite.CONTEXT_MENU_PROFILE_ACTION}
+        </Text>
       </Button>
       <Button
-        title="Copy username"
+        title={langInvite.CONTEXT_MENU_COPY_ACTION}
         size="md"
         unstyled
         padding={24}
@@ -227,15 +227,13 @@ function UserContextMenu({
           onClickMenuHandler().copy(data.general?.username as string)
         }
       >
-        <>
-          <IconCopy className="text-slate-600" strokeWidth="1.5" size={24} />
-          <Text size="md" font="default" className="text-slate-600">
-            Copy username
-          </Text>
-        </>
+        <IconCopy {...iconProps} />
+        <Text size="md" font="default" className="text-slate-600">
+          {langInvite.CONTEXT_MENU_COPY_ACTION}
+        </Text>
       </Button>
       <Button
-        title="Invite"
+        title={langInvite.CONTEXT_MENU_INVITE_ACTION}
         size="md"
         unstyled
         padding={24}
@@ -247,16 +245,10 @@ function UserContextMenu({
           )
         }
       >
-        <>
-          <IconUserPlus
-            className="text-green-600"
-            strokeWidth="1.5"
-            size={24}
-          />
-          <Text size="md" font="default" className="text-green-600">
-            Invite
-          </Text>
-        </>
+        <IconUserPlus {...iconProps} className="text-green-600" />
+        <Text size="md" font="default" className="text-green-600">
+          {langInvite.CONTEXT_MENU_INVITE_ACTION}
+        </Text>
       </Button>
     </Paper>
   );

@@ -9,7 +9,7 @@ import { useNotify } from "../../../../../shared/features/Notification/Notificat
 import { GetRoomBlockedUsersResponseType } from "../../../../../shared/api/api.schema";
 import { routes } from "../../../../../constants";
 import { useMenuContext } from "../../../../../shared/features/ContextMenu/ContextMenu";
-import { langError, langRoom } from "../../../../../locales/en";
+import { langError, langBlockedNotification } from "../../../../../locales/en";
 import { useOnClickOutside } from "../../../../../shared/hooks/useOnClickOutside";
 
 export function useBlocked() {
@@ -60,16 +60,16 @@ export function useBlocked() {
         return;
       }
       if (!response.access) {
-        notify.show.error(langRoom.UNBAN_NO_RIGHT);
+        notify.show.error(langBlockedNotification.UNBAN_NO_RIGHT);
         closeMenu();
         return;
       }
       if (!response.success) {
-        notify.show.error(langRoom.UNBAN_FAIL(username));
+        notify.show.error(langBlockedNotification.UNBAN_FAIL(username));
         closeMenu();
         return;
       }
-      notify.show.info(langRoom.UNBAN_SUCCESS(username));
+      notify.show.info(langBlockedNotification.UNBAN_SUCCESS(username));
       read();
       closeMenu();
       return;
@@ -77,7 +77,7 @@ export function useBlocked() {
 
     const copy = (username: string) => {
       navigator.clipboard.writeText(username);
-      notify.show.info(langRoom.COPY_USERNAME);
+      notify.show.info(langBlockedNotification.COPY_SUCCESS);
       closeMenu();
     };
 
