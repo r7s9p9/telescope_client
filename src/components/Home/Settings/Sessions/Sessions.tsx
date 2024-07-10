@@ -263,7 +263,7 @@ function Wrapper({
             size="md"
             onClick={returnBack}
             disabled={!isFromAnotherPage}
-            className="w-36 justify-center mt-4 shrink-0"
+            className="w-full md:w-36 justify-center mt-4 shrink-0"
           >
             <IconCircleArrowLeft
               className="text-slate-600"
