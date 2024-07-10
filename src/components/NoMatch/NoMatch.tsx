@@ -2,9 +2,11 @@ import { Text } from "../../shared/ui/Text/Text";
 import { Paper } from "../../shared/ui/Paper/Paper";
 import { Link } from "react-router-dom";
 import { routes } from "../../constants";
-import { langNoMatch } from "../../locales/en";
+import { useLang } from "../../shared/features/LangProvider/LangProvider";
 
 export function NoMatch() {
+  const { lang } = useLang();
+
   return (
     <div className="w-screen h-screen flex justify-center items-center bg-slate-200">
       <Paper
@@ -19,26 +21,21 @@ export function NoMatch() {
           letterSpacing
           className="select-none"
         >
-          {langNoMatch.TITLE}
+          {lang.noMatch.TITLE}
         </Text>
         <div className="w-full my-2 border-2 border-slate-100" />
         <Text size="md" font="light">
-          {langNoMatch.SUBTITLE}
+          {lang.noMatch.SUBTITLE}
         </Text>
-        <div className="flex">
-          <Text size="md" font="light">
-            {langNoMatch.MESSAGE_HEAD}&nbsp;
-          </Text>
-          <Link to={routes.home.path}>
-            <Text
-              size="md"
-              font="light"
-              className="underline cursor-pointer text-blue-600"
-            >
-              {langNoMatch.MESSAGE_TAIL}
-            </Text>
+        <Text size="md" font="light">
+          {lang.noMatch.MESSAGE_HEAD}&nbsp;
+          <Link
+            to={routes.home.path}
+            className="underline cursor-pointer text-blue-600"
+          >
+            {lang.noMatch.MESSAGE_TAIL}
           </Link>
-        </div>
+        </Text>
       </Paper>
     </div>
   );

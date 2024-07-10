@@ -15,7 +15,7 @@ import { ReadAccountResponseType } from "../../../../../shared/api/api.schema";
 import { formatDate } from "../../../../../shared/lib/date";
 import { Button } from "../../../../../shared/ui/Button/Button";
 import { Popup } from "../../../../../shared/ui/Popup/Popup";
-import { langBlocked } from "../../../../../locales/en";
+import { useLang } from "../../../../../shared/features/LangProvider/LangProvider";
 
 const iconProps = {
   className: "text-slate-600",
@@ -34,6 +34,7 @@ export function BlockedUsers() {
     onClose,
     contentRef,
     overlayRef,
+    lang,
   } = useBlocked();
 
   let blockedUsersContent: JSX.Element = <></>;
@@ -47,7 +48,7 @@ export function BlockedUsers() {
   } else if (isEmpty) {
     blockedUsersContent = (
       <ListWrapper>
-        <NoBlockedUsers />
+        <NoBlockedUsers lang={lang} />
       </ListWrapper>
     );
   } else if (blockedUsers) {
@@ -59,6 +60,7 @@ export function BlockedUsers() {
             data={user}
             openMenu={openMenu}
             onClickMenuHandler={onClickMenuHandler}
+            lang={lang}
           />
         ))}
       </ListWrapper>
@@ -67,12 +69,12 @@ export function BlockedUsers() {
 
   return (
     <Popup
-      titleText={langBlocked.POPUP_TITLE}
+      titleText={lang.blocked.POPUP_TITLE}
       contentRef={contentRef}
       overlayRef={overlayRef}
       onClose={onClose}
       rightSection={
-        <IconButton title={langBlocked.BUTTON_REFRESH_LABEL} onClick={reload}>
+        <IconButton title={lang.blocked.BUTTON_REFRESH_LABEL} onClick={reload}>
           <IconRefresh {...iconProps} />
         </IconButton>
       }
@@ -103,10 +105,14 @@ function ListWrapper({
   );
 }
 
-function NoBlockedUsers() {
+function NoBlockedUsers({
+  lang,
+}: {
+  lang: ReturnType<typeof useLang>["lang"];
+}) {
   return (
     <Text size="md" font="light" className="text-center select-none">
-      {langBlocked.NO_BLOCKED}
+      {lang.blocked.NO_BLOCKED}
     </Text>
   );
 }
@@ -115,29 +121,35 @@ function BlockedUser({
   data,
   openMenu,
   onClickMenuHandler,
+  lang,
 }: {
   data: ReadAccountResponseType;
   openMenu: ReturnType<typeof useBlocked>["openMenu"];
   onClickMenuHandler: ReturnType<typeof useBlocked>["onClickMenuHandler"];
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
   let lastSeenStr;
-  let memberState: "online" | "offline" | "invisible" | "you";
+  let memberState = "";
   if (!data.general?.lastSeen) {
-    memberState = langBlocked.STATUS_INVISIBLE;
+    memberState = lang.blocked.STATUS_INVISIBLE;
   } else {
     const { result, range } = formatDate().member(data.general.lastSeen);
     if (range === "seconds") {
-      memberState = langBlocked.STATUS_ONLINE;
+      memberState = lang.blocked.STATUS_ONLINE;
     } else {
-      memberState = langBlocked.STATUS_OFFLINE;
-      lastSeenStr = langBlocked.LAST_SEEN_TEXT(result as string);
+      memberState = lang.blocked.STATUS_OFFLINE;
+      lastSeenStr = lang.blocked.LAST_SEEN_TEXT(result as string);
     }
   }
 
   function onContextHandler(e: MouseEvent<HTMLElement>) {
     openMenu(
       e,
-      <UserContextMenu data={data} onClickMenuHandler={onClickMenuHandler} />,
+      <UserContextMenu
+        data={data}
+        onClickMenuHandler={onClickMenuHandler}
+        lang={lang}
+      />,
     );
   }
 
@@ -162,11 +174,7 @@ function BlockedUser({
           size="sm"
           font="light"
           capitalize
-          className={
-            memberState === "online"
-              ? "text-green-600 select-none"
-              : "text-slate-600 select-none"
-          }
+          className="text-slate-600 select-none"
         >
           {memberState}
         </Text>
@@ -183,20 +191,28 @@ function BlockedUser({
 function UserContextMenu({
   data,
   onClickMenuHandler,
+  lang,
 }: {
   data: ReadAccountResponseType;
   onClickMenuHandler: ReturnType<typeof useBlocked>["onClickMenuHandler"];
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
   const iconProps = {
-    size: 24,
+    size: 18,
     strokeWidth: "1.5",
     className: "text-slate-600",
   };
 
+  const textProps = {
+    size: "md" as const,
+    font: "default" as const,
+    className: "text-slate-600",
+  };
+
   return (
-    <Paper rounded="lg" className="flex flex-col m-2 w-56 shadow-md">
+    <Paper rounded="lg" className="w-fit flex flex-col m-2 shadow-md">
       <Button
-        title={langBlocked.CONTEXT_MENU_PROFILE_ACTION}
+        title={lang.blocked.CONTEXT_MENU_PROFILE_ACTION}
         size="md"
         unstyled
         padding={24}
@@ -206,12 +222,10 @@ function UserContextMenu({
         }
       >
         <IconUserScan {...iconProps} />
-        <Text size="md" font="default" className="text-slate-600">
-          {langBlocked.CONTEXT_MENU_PROFILE_ACTION}
-        </Text>
+        <Text {...textProps}>{lang.blocked.CONTEXT_MENU_PROFILE_ACTION}</Text>
       </Button>
       <Button
-        title={langBlocked.CONTEXT_MENU_COPY_ACTION}
+        title={lang.blocked.CONTEXT_MENU_COPY_ACTION}
         size="md"
         unstyled
         padding={24}
@@ -221,12 +235,10 @@ function UserContextMenu({
         }
       >
         <IconCopy {...iconProps} />
-        <Text size="md" font="default" className="text-slate-600">
-          {langBlocked.CONTEXT_MENU_COPY_ACTION}
-        </Text>
+        <Text {...textProps}>{lang.blocked.CONTEXT_MENU_COPY_ACTION}</Text>
       </Button>
       <Button
-        title={langBlocked.CONTEXT_MENU_UNBAN_ACTION}
+        title={lang.blocked.CONTEXT_MENU_UNBAN_ACTION}
         size="md"
         unstyled
         padding={24}
@@ -239,8 +251,8 @@ function UserContextMenu({
         }
       >
         <IconLockOpen {...iconProps} className="text-green-600" />
-        <Text size="md" font="default" className="text-green-600">
-          {langBlocked.CONTEXT_MENU_UNBAN_ACTION}
+        <Text {...textProps} className="text-green-600">
+          {lang.blocked.CONTEXT_MENU_UNBAN_ACTION}
         </Text>
       </Button>
     </Paper>

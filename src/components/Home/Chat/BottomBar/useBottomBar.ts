@@ -10,9 +10,10 @@ import {
 import { RoomId } from "../../../../shared/api/api.schema";
 import { MessageType } from "../../../../shared/api/api.schema";
 import { useNotify } from "../../../../shared/features/Notification/Notification";
-import { langError, langBottomBarNotification } from "../../../../locales/en";
+import { useLang } from "../../../../shared/features/LangProvider/LangProvider";
 
 export function useSend(roomId: RoomId) {
+  const { lang } = useLang();
   const loadNewerMessages = useLoadNewerMessages();
 
   const storeAction = useStore().chat(roomId);
@@ -44,18 +45,18 @@ export function useSend(roomId: RoomId) {
 
         if (!success) {
           notify.show.error(
-            requestError?.text || responseError || langError.UNKNOWN_MESSAGE,
+            requestError?.text || responseError || lang.error.UNKNOWN_MESSAGE,
           );
           return;
         }
 
         if (!response.access) {
-          notify.show.error(langBottomBarNotification.UPDATE_MESSAGE_NO_RIGHT);
+          notify.show.error(lang.bottomBarNotification.UPDATE_MESSAGE_NO_RIGHT);
           return;
         }
 
         if (!response.success) {
-          notify.show.error(langBottomBarNotification.UPDATE_MESSAGE_FAIL);
+          notify.show.error(lang.bottomBarNotification.UPDATE_MESSAGE_FAIL);
           return;
         }
 
@@ -85,16 +86,16 @@ export function useSend(roomId: RoomId) {
 
         if (!success) {
           notify.show.error(
-            requestError?.text || responseError || langError.UNKNOWN_MESSAGE,
+            requestError?.text || responseError || lang.error.UNKNOWN_MESSAGE,
           );
           return;
         }
         if (!response.access) {
-          notify.show.error(langBottomBarNotification.SEND_MESSAGE_NO_RIGHT);
+          notify.show.error(lang.bottomBarNotification.SEND_MESSAGE_NO_RIGHT);
           return;
         }
         if (!response.success) {
-          notify.show.error(langBottomBarNotification.SEND_MESSAGE_FAIL);
+          notify.show.error(lang.bottomBarNotification.SEND_MESSAGE_FAIL);
         }
 
         loadNewerMessages.run();
@@ -120,6 +121,7 @@ export function useSend(roomId: RoomId) {
 }
 
 export function useJoin(roomId: RoomId) {
+  const { lang } = useLang();
   const query = useQueryJoinRoom();
   const loadInfo = useLoadInfo();
   const loadRooms = useLoadRooms();
@@ -131,7 +133,7 @@ export function useJoin(roomId: RoomId) {
     });
     if (!success) {
       notify.show.error(
-        requestError || responseError || langError.UNKNOWN_MESSAGE,
+        requestError || responseError || lang.error.UNKNOWN_MESSAGE,
       );
       return;
     }
@@ -142,7 +144,7 @@ export function useJoin(roomId: RoomId) {
       await loadRooms.run();
       await loadInfo.run();
     } else {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
+      notify.show.error(lang.error.UNKNOWN_MESSAGE);
     }
   };
   return { run, isLoading: query.isLoading };

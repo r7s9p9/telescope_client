@@ -2,9 +2,11 @@ import { IconRefresh } from "@tabler/icons-react";
 import { Text } from "../../../shared/ui/Text/Text";
 import { IconButton } from "../IconButton/IconButton";
 import { Paper } from "../Paper/Paper";
-import { langErrorBoundary } from "../../../locales/en";
+import { useLang } from "../../features/LangProvider/LangProvider";
 
 export function ErrorBoundary({ className }: { className?: string }) {
+  const { lang } = useLang();
+
   const iconProps = {
     className: "text-slate-600",
     strokeWidth: "1",
@@ -25,7 +27,7 @@ export function ErrorBoundary({ className }: { className?: string }) {
           letterSpacing
           className="select-none grow"
         >
-          {langErrorBoundary.TITLE}
+          {lang.errorBoundary.TITLE}
         </Text>
         <IconButton title="Refresh" onClick={() => window.location.reload()}>
           <IconRefresh {...iconProps} />
@@ -33,7 +35,7 @@ export function ErrorBoundary({ className }: { className?: string }) {
       </div>
       <div className="w-full my-2 border-2 border-slate-100" />
       <Text size="md" font="light">
-        {langErrorBoundary.MESSAGE}&nbsp;
+        {lang.errorBoundary.MESSAGE}&nbsp;
         <b className="text-green-600">void@email.com</b>
       </Text>
     </Paper>

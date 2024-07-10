@@ -9,10 +9,11 @@ import { useNotify } from "../../../../../shared/features/Notification/Notificat
 import { GetRoomBlockedUsersResponseType } from "../../../../../shared/api/api.schema";
 import { routes } from "../../../../../constants";
 import { useMenuContext } from "../../../../../shared/features/ContextMenu/ContextMenu";
-import { langError, langBlockedNotification } from "../../../../../locales/en";
 import { useOnClickOutside } from "../../../../../shared/hooks/useOnClickOutside";
+import { useLang } from "../../../../../shared/features/LangProvider/LangProvider";
 
 export function useBlocked() {
+  const { lang } = useLang();
   const { roomId } = useParams();
   const queryRead = useQueryGetBlockedUsersInRoom();
   const queryUnban = useQueryUnbanUserInRoom();
@@ -41,7 +42,7 @@ export function useBlocked() {
       await queryRead.run({ roomId: roomId as RoomId });
     if (!success) {
       notify.show.error(
-        requestError || responseError || langError.UNKNOWN_MESSAGE,
+        requestError || responseError || lang.error.UNKNOWN_MESSAGE,
       );
       return;
     }
@@ -54,22 +55,22 @@ export function useBlocked() {
         await queryUnban.run({ roomId: roomId as RoomId, userIds: [userId] });
       if (!success) {
         notify.show.error(
-          requestError || responseError || langError.UNKNOWN_MESSAGE,
+          requestError || responseError || lang.error.UNKNOWN_MESSAGE,
         );
         closeMenu();
         return;
       }
       if (!response.access) {
-        notify.show.error(langBlockedNotification.UNBAN_NO_RIGHT);
+        notify.show.error(lang.blockedNotification.UNBAN_NO_RIGHT);
         closeMenu();
         return;
       }
       if (!response.success) {
-        notify.show.error(langBlockedNotification.UNBAN_FAIL(username));
+        notify.show.error(lang.blockedNotification.UNBAN_FAIL(username));
         closeMenu();
         return;
       }
-      notify.show.info(langBlockedNotification.UNBAN_SUCCESS(username));
+      notify.show.info(lang.blockedNotification.UNBAN_SUCCESS(username));
       read();
       closeMenu();
       return;
@@ -77,7 +78,7 @@ export function useBlocked() {
 
     const copy = (username: string) => {
       navigator.clipboard.writeText(username);
-      notify.show.info(langBlockedNotification.COPY_SUCCESS);
+      notify.show.info(lang.blockedNotification.COPY_SUCCESS);
       closeMenu();
     };
 
@@ -106,5 +107,6 @@ export function useBlocked() {
     onClose,
     contentRef,
     overlayRef,
+    lang,
   };
 }

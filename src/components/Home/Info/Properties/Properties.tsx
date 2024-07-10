@@ -9,7 +9,7 @@ import { IconButton } from "../../../../shared/ui/IconButton/IconButton";
 import { IconCheck, IconEdit, IconX } from "@tabler/icons-react";
 import { formatDate } from "../../../../shared/lib/date";
 import { Spinner } from "../../../../shared/ui/Spinner/Spinner";
-import { langProperties } from "../../../../locales/en";
+import { useLang } from "../../../../shared/features/LangProvider/LangProvider";
 
 function InfoLine({
   label,
@@ -22,7 +22,7 @@ function InfoLine({
 }) {
   return (
     <div className="h-8 w-full flex items-center">
-      <Text size="sm" font="default" className="min-w-14 select-none">
+      <Text size="sm" font="default" className="min-w-20 select-none">
         {label}:
       </Text>
       {isLoading && (
@@ -42,6 +42,7 @@ export function Properties() {
     creatorUsername,
     isInitialLoading,
     isAdmin,
+    lang,
   } = useProperties();
 
   return (
@@ -49,10 +50,10 @@ export function Properties() {
       padding={4}
       className="relative bg-slate-50 border-t-2 border-slate-100"
     >
-      <div className="flex flex-col gap-2 items-start w-full pr-[100px]">
+      <div className="flex flex-col gap-2 items-start w-full pr-[120px]">
         <InfoLine
           isLoading={isInitialLoading}
-          label={langProperties.NAME_LABEL}
+          label={lang.properties.NAME_LABEL}
         >
           <Input
             value={editable.name}
@@ -65,7 +66,7 @@ export function Properties() {
         </InfoLine>
         <InfoLine
           isLoading={isInitialLoading}
-          label={langProperties.ABOUT_LABEL}
+          label={lang.properties.ABOUT_LABEL}
         >
           <TextArea
             size="sm"
@@ -80,7 +81,7 @@ export function Properties() {
         </InfoLine>
         <InfoLine
           isLoading={isInitialLoading}
-          label={langProperties.TYPE_LABEL}
+          label={lang.properties.TYPE_LABEL}
         >
           <Select
             value={editable.type}
@@ -92,16 +93,16 @@ export function Properties() {
             size="sm"
             className="bg-slate-50"
           >
-            <option value="public">{langProperties.TYPE_PUBLIC_OPTION}</option>
+            <option value="public">{lang.properties.TYPE_PUBLIC_OPTION}</option>
             <option value="private">
-              {langProperties.TYPE_PRIVATE_OPTION}
+              {lang.properties.TYPE_PRIVATE_OPTION}
             </option>
-            <option value="single">{langProperties.TYPE_SINGLE_OPTION}</option>
+            <option value="single">{lang.properties.TYPE_SINGLE_OPTION}</option>
           </Select>
         </InfoLine>
         <InfoLine
           isLoading={isInitialLoading}
-          label={langProperties.CREATOR_LABEL}
+          label={lang.properties.CREATOR_LABEL}
         >
           {creatorUsername && (
             <Text size="sm" font="light" className="ml-2">
@@ -112,7 +113,7 @@ export function Properties() {
         </InfoLine>
         <InfoLine
           isLoading={isInitialLoading}
-          label={langProperties.CREATED_LABEL}
+          label={lang.properties.CREATED_LABEL}
         >
           <Text size="sm" font="light" className="ml-2">
             {storedInfo?.created &&
@@ -120,7 +121,9 @@ export function Properties() {
           </Text>
         </InfoLine>
       </div>
-      {isAdmin && <EditGroup handleClick={handleEditClick} isEdit={isEdit} />}
+      {isAdmin && (
+        <EditGroup handleClick={handleEditClick} isEdit={isEdit} lang={lang} />
+      )}
     </Paper>
   );
 }
@@ -128,10 +131,12 @@ export function Properties() {
 function EditGroup({
   handleClick,
   isEdit,
+  lang,
 }: {
   // eslint-disable-next-line no-unused-vars
   handleClick: (str: "edit" | "cancel" | "send") => void;
   isEdit: boolean;
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
   const iconProps = {
     strokeWidth: "1",
@@ -142,7 +147,7 @@ function EditGroup({
   return (
     <div className="absolute right-4 top-4">
       <IconButton
-        title={langProperties.BUTTON_EDIT_LABEL}
+        title={lang.properties.BUTTON_EDIT_LABEL}
         onClick={() => handleClick("edit")}
         style={{
           position: "absolute",
@@ -154,7 +159,7 @@ function EditGroup({
         <IconEdit {...iconProps} />
       </IconButton>
       <IconButton
-        title={langProperties.BUTTON_CANCEL_LABEL}
+        title={lang.properties.BUTTON_CANCEL_LABEL}
         onClick={() => handleClick("cancel")}
         style={{
           opacity: !isEdit ? "0" : "1",
@@ -165,7 +170,7 @@ function EditGroup({
         <IconX {...iconProps} />
       </IconButton>
       <IconButton
-        title={langProperties.BUTTON_UPDATE_LABEL}
+        title={lang.properties.BUTTON_UPDATE_LABEL}
         onClick={() => handleClick("send")}
         style={{
           opacity: !isEdit ? "0" : "1",

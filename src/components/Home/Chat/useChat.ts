@@ -12,7 +12,7 @@ import { debounce } from "../../../shared/lib/debounce";
 import { useParams } from "react-router-dom";
 import { getRandomArray, getRandomBoolean } from "../../../shared/lib/random";
 import { useNotify } from "../../../shared/features/Notification/Notification";
-import { langError } from "../../../locales/en";
+import { useLang } from "../../../shared/features/LangProvider/LangProvider";
 
 const INFO_UPDATE_INTERVAL = 10000 as const;
 
@@ -138,6 +138,7 @@ const compareUpdater = (
 };
 
 export function useLoadNewerMessages() {
+  const { lang } = useLang();
   const queryRead = useQueryReadMessages();
   const { roomId } = useParams();
   const storeAction = useStore().chat(roomId as RoomId);
@@ -158,7 +159,7 @@ export function useLoadNewerMessages() {
 
       if (!success) {
         notify.show.error(
-          requestError || responseError || langError.UNKNOWN_MESSAGE,
+          requestError || responseError || lang.error.UNKNOWN_MESSAGE,
         );
         return;
       }
@@ -179,6 +180,7 @@ export function useLoadNewerMessages() {
 }
 
 function useLoadOlderMessages() {
+  const { lang } = useLang();
   const queryRead = useQueryReadMessages();
   const { roomId } = useParams();
   const storeAction = useStore().chat(roomId as RoomId);
@@ -196,7 +198,7 @@ function useLoadOlderMessages() {
 
       if (!success) {
         notify.show.error(
-          requestError || responseError || langError.UNKNOWN_MESSAGE,
+          requestError || responseError || lang.error.UNKNOWN_MESSAGE,
         );
         return;
       }
@@ -216,6 +218,7 @@ function useLoadOlderMessages() {
 }
 
 function useCompareMessages() {
+  const { lang } = useLang();
   const queryCompare = useQueryCompareMessages();
   const { roomId } = useParams();
   const storeAction = useStore().chat(roomId as RoomId);
@@ -233,7 +236,7 @@ function useCompareMessages() {
 
       if (!success) {
         notify.show.error(
-          requestError || responseError || langError.UNKNOWN_MESSAGE,
+          requestError || responseError || lang.error.UNKNOWN_MESSAGE,
         );
         return;
       }
@@ -409,6 +412,7 @@ export function useChat() {
 }
 
 export function useLoadInfo() {
+  const { lang } = useLang();
   const queryInfo = useQueryRoomInfo();
   const { roomId } = useParams();
   const storeAction = useStore().chat(roomId as RoomId);
@@ -422,7 +426,7 @@ export function useLoadInfo() {
       if (requestError) notify.show.error(requestError);
       if (responseError) notify.show.error(responseError);
       if (!requestError && !responseError)
-        notify.show.error(langError.UNKNOWN_MESSAGE);
+        notify.show.error(lang.error.UNKNOWN_MESSAGE);
     }
 
     if (success) {

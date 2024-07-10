@@ -32,7 +32,7 @@ export function Popup({
     <Overlay contentRef={contentRef} overlayRef={overlayRef}>
       <Paper
         padding={4}
-        className={`h-full w-full rounded-t-xl md:rounded-xl flex flex-col shadow-md bg-slate-50 ${className || ""}`}
+        className={`min-h-[400px] w-screen md:w-[600px] rounded-t-xl md:rounded-xl flex flex-col shadow-md bg-slate-50 ${className || ""}`}
       >
         <div className="pb-2 shrink-0 flex items-center gap-2">
           <Text

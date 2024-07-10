@@ -20,7 +20,7 @@ import { formatDate } from "../../../../shared/lib/date";
 import { IconButton } from "../../../../shared/ui/IconButton/IconButton";
 import { useConfirmPopup } from "../../../../shared/features/ConfirmPopup/ConfirmPopup";
 import { Button } from "../../../../shared/ui/Button/Button";
-import { langSessions } from "../../../../locales/en";
+import { useLang } from "../../../../shared/features/LangProvider/LangProvider";
 
 export function Sessions() {
   const {
@@ -30,11 +30,16 @@ export function Sessions() {
     remove,
     isFromAnotherPage,
     returnBack,
+    lang,
   } = useSessions();
 
   if (!isLoaded) {
     return (
-      <Wrapper isFromAnotherPage={isFromAnotherPage} returnBack={returnBack}>
+      <Wrapper
+        isFromAnotherPage={isFromAnotherPage}
+        returnBack={returnBack}
+        lang={lang}
+      >
         <div className="h-1/2 p-4 rounded-xl animate-pulse bg-slate-200" />
       </Wrapper>
     );
@@ -42,10 +47,13 @@ export function Sessions() {
 
   if (!currentSession) {
     return (
-      <Wrapper isFromAnotherPage={isFromAnotherPage} returnBack={returnBack}>
+      <Wrapper
+        isFromAnotherPage={isFromAnotherPage}
+        returnBack={returnBack}
+        lang={lang}
+      >
         <Text size="md" font="light" className="text-center">
-          Sorry, but this functionality is currently unavailable. Please try
-          again later.
+          {lang.sessions.NO_CURRENT_SESSION}
         </Text>
       </Wrapper>
     );
@@ -53,22 +61,31 @@ export function Sessions() {
 
   if (!otherSessions) {
     return (
-      <Wrapper isFromAnotherPage={isFromAnotherPage} returnBack={returnBack}>
-        <Session data={currentSession} remove={remove} />
+      <Wrapper
+        isFromAnotherPage={isFromAnotherPage}
+        returnBack={returnBack}
+        lang={lang}
+      >
+        <Session data={currentSession} remove={remove} lang={lang} />
       </Wrapper>
     );
   }
 
   const items = otherSessions.map((data) => (
-    <Session data={data} remove={remove} key={data.sessionId} />
+    <Session data={data} remove={remove} key={data.sessionId} lang={lang} />
   ));
 
   return (
-    <Wrapper isFromAnotherPage={isFromAnotherPage} returnBack={returnBack}>
+    <Wrapper
+      isFromAnotherPage={isFromAnotherPage}
+      returnBack={returnBack}
+      lang={lang}
+    >
       <Session
         data={currentSession}
         remove={remove}
         key={currentSession.sessionId}
+        lang={lang}
       />
       {items}
     </Wrapper>
@@ -78,6 +95,7 @@ export function Sessions() {
 function Session({
   data,
   remove,
+  lang,
 }: {
   data: {
     userAgent: string;
@@ -89,6 +107,7 @@ function Session({
     deviceName?: string;
   };
   remove: ReturnType<typeof useSessions>["remove"];
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
   const parsedUserAgent = parseUserAgent(data.userAgent);
   const lastSeen = formatDate().session(data.lastSeen);
@@ -102,49 +121,50 @@ function Session({
       <div className="pl-4 flex flex-col md:flex-row md:grow">
         <div className="md:grow flex flex-col md:justify-between">
           <Text size="sm" font="light" capitalize>
-            {langSessions.DEVICE_ITEM}: {parsedUserAgent.device}
+            {lang.sessions.DEVICE_ITEM}: {parsedUserAgent.device}
           </Text>
           <Text size="sm" font="light" capitalize>
-            {langSessions.BROWSER_ITEM}: {parsedUserAgent.browser}
+            {lang.sessions.BROWSER_ITEM}: {parsedUserAgent.browser}
           </Text>
           <Text size="sm" font="light">
             IP: {data.ip}
           </Text>
           {!data.isCurrent && !isOnline && (
             <Text size="sm" font="light">
-              {langSessions.LAST_SEEN_TEXT(lastSeen.result as string)}
+              {lang.sessions.LAST_SEEN_TEXT(lastSeen.result as string)}
             </Text>
           )}
         </div>
         <div className="pr-2 flex flex-col grow md:items-end justify-end md:justify-between">
           {data.isCurrent && (
             <Text size="sm" font="light" className="text-green-600">
-              {langSessions.STATUS_THIS_DEVICE}
+              {lang.sessions.STATUS_THIS_DEVICE}
             </Text>
           )}
           {data.isFrozen && (
             <Text size="sm" font="light" className="text-red-600">
-              {langSessions.STATUS_BLOCKED}
+              {lang.sessions.STATUS_BLOCKED}
             </Text>
           )}
           {!data.isCurrent && isOnline && (
             <Text size="sm" font="light" className="text-green-600">
-              {langSessions.STATUS_ONLINE}
+              {lang.sessions.STATUS_ONLINE}
             </Text>
           )}
         </div>
         {!data.isCurrent && (
           <IconButton
-            title={langSessions.BUTTON_DELETE_LABEL}
+            title={lang.sessions.BUTTON_DELETE_LABEL}
             className="hover:bg-slate-400 absolute bottom-1 right-1"
             onClick={() =>
               confirmPopup.show({
                 onAgree: () => remove(data.sessionId),
                 onClose: confirmPopup.hide,
                 text: {
-                  question: langSessions.DELETE_POPUP_QUESTION,
-                  confirm: langSessions.DELETE_POPUP_CONFIRM,
-                  cancel: langSessions.DELETE_POPUP_CANCEL,
+                  title: lang.sessions.DELETE_POPUP_TITLE,
+                  question: lang.sessions.DELETE_POPUP_QUESTION,
+                  confirm: lang.sessions.DELETE_POPUP_CONFIRM,
+                  cancel: lang.sessions.DELETE_POPUP_CANCEL,
                 },
               })
             }
@@ -220,10 +240,12 @@ function Wrapper({
   children,
   isFromAnotherPage,
   returnBack,
+  lang,
 }: {
   children: ReactNode;
   isFromAnotherPage: boolean;
   returnBack: ReturnType<typeof useSessions>["returnBack"];
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
   return (
     <div className="w-full h-full flex items-center justify-center border-t-2 border-slate-100 md:border-0">
@@ -232,12 +254,12 @@ function Wrapper({
         className="w-full h-full md:w-3/4 md:h-[400px] md:min-w-[350px] md:max-w-[650px] md:rounded-xl flex flex-col shadow-md bg-slate-50"
       >
         <Text size="xl" font="light" className="select-none mb-4">
-          {langSessions.TITLE}
+          {lang.sessions.TITLE}
         </Text>
         <div className="h-full overflow-y-auto">{children}</div>
         {isFromAnotherPage && (
           <Button
-            title={langSessions.BUTTON_GO_BACK_LABEL}
+            title={lang.sessions.BUTTON_GO_BACK_LABEL}
             size="md"
             onClick={returnBack}
             disabled={!isFromAnotherPage}
@@ -249,7 +271,7 @@ function Wrapper({
               size={24}
             />
             <Text size="md" font="light">
-              {langSessions.BUTTON_GO_BACK_LABEL}
+              {lang.sessions.BUTTON_GO_BACK_LABEL}
             </Text>
           </Button>
         )}

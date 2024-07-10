@@ -4,15 +4,12 @@ import {
   useQueryUpdateAccount,
 } from "../../../shared/api/api.model";
 import { useNotify } from "../../../shared/features/Notification/Notification";
-import {
-  langError,
-  langProfile,
-  langProfileNotification,
-} from "../../../locales/en";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { checkUserId } from "../../../shared/lib/uuid";
+import { useLang } from "../../../shared/features/LangProvider/LangProvider";
 
 export function useProfile() {
+  const { lang } = useLang();
   const { userId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -37,7 +34,7 @@ export function useProfile() {
 
   const read = async () => {
     if (userId !== "self" && !checkUserId(userId)) {
-      notify.show.error(langProfileNotification.INCORRECT_USERID);
+      notify.show.error(lang.profileNotification.INCORRECT_USERID);
       setData((prevData) => ({ ...prevData, isLoaded: true }));
       return;
     }
@@ -51,7 +48,7 @@ export function useProfile() {
       notify.show.error(
         requestError ||
           responseError ||
-          langProfileNotification.INCORRECT_USERID,
+          lang.profileNotification.INCORRECT_USERID,
       );
       return;
     }
@@ -59,8 +56,8 @@ export function useProfile() {
     if (response?.general?.username) {
       setData({
         username: response.general.username,
-        name: response.general?.name || langProfile.INFO_HIDDEN,
-        bio: response.general?.bio || langProfile.INFO_HIDDEN,
+        name: response.general?.name || lang.profile.INFO_HIDDEN,
+        bio: response.general?.bio || lang.profile.INFO_HIDDEN,
         isLoaded: true,
         isExist: true,
         isYourProfile: response.targetUserId === "self",
@@ -96,15 +93,15 @@ export function useProfile() {
         return;
       }
 
-      notify.show.error(responseError || langError.UNKNOWN_MESSAGE);
+      notify.show.error(responseError || lang.error.UNKNOWN_MESSAGE);
       return;
     }
 
     if (response?.general?.success) {
-      notify.show.info(langProfileNotification.SUCCESS);
+      notify.show.info(lang.profileNotification.SUCCESS);
       read();
     } else {
-      notify.show.error(langError.RESPONSE_COMMON_MESSAGE);
+      notify.show.error(lang.error.RESPONSE_COMMON_MESSAGE);
     }
   };
 
@@ -129,5 +126,6 @@ export function useProfile() {
     returnBack,
     isLoaded: data.isLoaded,
     isUploading: queryUpdate.isLoading,
+    lang,
   };
 }

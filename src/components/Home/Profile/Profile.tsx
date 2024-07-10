@@ -14,7 +14,6 @@ import { TextAreaField } from "../../../shared/ui/TextAreaField/TextAreaField";
 import { Spinner } from "../../../shared/ui/Spinner/Spinner";
 import { useProfile } from "./useProfile";
 import { ReactNode } from "react";
-import { langProfile } from "../../../locales/en";
 
 export function Profile() {
   const {
@@ -28,17 +27,18 @@ export function Profile() {
     handleUpdate,
     isFromAnotherPage,
     returnBack,
+    lang,
   } = useProfile();
 
   if (!isLoaded) return <Loader />;
 
   let title = "";
   if (data.isYourProfile) {
-    title = langProfile.TITLE_SELF;
+    title = lang.profile.TITLE_SELF;
   } else if (data.isExist) {
-    title = langProfile.TITLE_USER(data.username);
+    title = lang.profile.TITLE_USER(data.username);
   } else {
-    title = langProfile.TITLE_NOT_FOUND;
+    title = lang.profile.TITLE_NOT_FOUND;
   }
 
   const inputIconProps = {
@@ -69,7 +69,7 @@ export function Profile() {
           <div className="flex flex-col justify-center">
             {data.isYourProfile && (
               <InputField
-                label={langProfile.USERNAME_LABEL}
+                label={lang.profile.USERNAME_LABEL}
                 size="md"
                 value={data.username}
                 error={error.username}
@@ -80,7 +80,7 @@ export function Profile() {
               />
             )}
             <InputField
-              label={langProfile.NAME_LABEL}
+              label={lang.profile.NAME_LABEL}
               size="md"
               value={data.name}
               error={error.name}
@@ -92,7 +92,7 @@ export function Profile() {
             />
             <TextAreaField
               maxRows={6}
-              label={langProfile.BIO_LABEL}
+              label={lang.profile.BIO_LABEL}
               size="md"
               value={data.bio}
               error={error.bio}
@@ -112,7 +112,7 @@ export function Profile() {
               size={128}
             />
             <Text size="md" font="light" className="text-center mt-4">
-              {langProfile.DETAILS_NOT_FOUND}
+              {lang.profile.DETAILS_NOT_FOUND}
             </Text>
           </>
         )}
@@ -120,7 +120,7 @@ export function Profile() {
         <div className="flex flex-col md:flex-row-reverse justify-between items-end gap-4">
           {data.isYourProfile && (
             <Button
-              title={langProfile.UPDATE_ACTION}
+              title={lang.profile.UPDATE_ACTION}
               size="md"
               onClick={handleUpdate}
               disabled={isUploading}
@@ -128,13 +128,13 @@ export function Profile() {
             >
               <IconFileUpload {...buttonIconProps} />
               <Text size="md" font="light">
-                {langProfile.UPDATE_ACTION}
+                {lang.profile.UPDATE_ACTION}
               </Text>
             </Button>
           )}
           {isFromAnotherPage && (
             <Button
-              title={langProfile.GO_BACK_ACTION}
+              title={lang.profile.GO_BACK_ACTION}
               size="md"
               onClick={returnBack}
               disabled={!isFromAnotherPage}
@@ -142,7 +142,7 @@ export function Profile() {
             >
               <IconCircleArrowLeft {...buttonIconProps} />
               <Text size="md" font="light">
-                {langProfile.GO_BACK_ACTION}
+                {lang.profile.GO_BACK_ACTION}
               </Text>
             </Button>
           )}

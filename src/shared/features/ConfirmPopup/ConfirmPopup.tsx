@@ -6,6 +6,7 @@ import { Button } from "../../ui/Button/Button";
 
 const defaultData = {
   text: {
+    title: "",
     question: "",
     confirm: "",
     cancel: "",
@@ -57,7 +58,7 @@ export const PopupStack = () => {
   return (
     data.isShow && (
       <Popup
-        titleText="Confirmation"
+        titleText={data.options.text.title}
         overlayRef={overlayRef}
         contentRef={contentRef}
         onClose={data.options.onClose}
@@ -90,7 +91,7 @@ function ConfirmPopupContent({
       <Text
         size={"xl"}
         font="light"
-        className="m-auto text-center overflow-y-auto"
+        className="my-4 md:m-auto text-center overflow-y-auto"
       >
         {text.question}
       </Text>

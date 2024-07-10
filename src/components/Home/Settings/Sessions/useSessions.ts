@@ -4,11 +4,12 @@ import {
   useQueryReadSessions,
 } from "../../../../shared/api/api.model";
 import { useNotify } from "../../../../shared/features/Notification/Notification";
-import { langError, langSessionsNotification } from "../../../../locales/en";
 import { SessionReadResponseType } from "../../../../shared/api/api.schema";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useLang } from "../../../../shared/features/LangProvider/LangProvider";
 
 export function useSessions() {
+  const { lang } = useLang();
   const notify = useNotify();
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,7 +28,7 @@ export function useSessions() {
       await queryRead.run({});
     if (!success) {
       notify.show.error(
-        requestError || responseError || langError.UNKNOWN_MESSAGE,
+        requestError || responseError || lang.error.UNKNOWN_MESSAGE,
       );
       return;
     }
@@ -53,14 +54,14 @@ export function useSessions() {
       await queryDelete.run({ sessionId });
     if (!success) {
       notify.show.error(
-        requestError || responseError || langError.UNKNOWN_MESSAGE,
+        requestError || responseError || lang.error.UNKNOWN_MESSAGE,
       );
       return;
     }
     if (!response.success) {
-      notify.show.error(langSessionsNotification.SESSION_DELETE_FAIL);
+      notify.show.error(lang.sessionsNotification.SESSION_DELETE_FAIL);
     }
-    notify.show.info(langSessionsNotification.SESSION_DELETE_SUCCESS);
+    notify.show.info(lang.sessionsNotification.SESSION_DELETE_SUCCESS);
     read();
   };
 
@@ -81,5 +82,6 @@ export function useSessions() {
     remove,
     isFromAnotherPage: !!location.state?.prevPath,
     returnBack,
+    lang,
   };
 }

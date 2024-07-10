@@ -3,13 +3,14 @@ import { Text } from "../../../shared/ui/Text/Text";
 import { useOnClickOutside } from "../../hooks/useOnClickOutside";
 import { Popup } from "../Popup/Popup";
 import { routes } from "../../../constants";
-import { langErrorBoundary } from "../../../locales/en";
+import { useLang } from "../../features/LangProvider/LangProvider";
 
 export function ErrorBoundaryPopup({
   disableClickOutside,
 }: {
   disableClickOutside?: boolean;
 }) {
+  const { lang } = useLang();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -29,7 +30,7 @@ export function ErrorBoundaryPopup({
 
   return (
     <Popup
-      titleText={langErrorBoundary.TITLE}
+      titleText={lang.errorBoundary.TITLE}
       contentRef={contentRef}
       overlayRef={overlayRef}
       onClose={onClose}
@@ -40,7 +41,7 @@ export function ErrorBoundaryPopup({
         font="light"
         className="m-auto text-justify md:text-center"
       >
-        {langErrorBoundary.MESSAGE}&nbsp;
+        {lang.errorBoundary.MESSAGE}&nbsp;
         <b className="text-green-600">void@email.com</b>
       </Text>
     </Popup>

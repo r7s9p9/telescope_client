@@ -38,6 +38,9 @@ import { Privacy } from "../components/Home/Settings/Privacy/Privacy.tsx";
 import { ErrorSettings } from "../components/Home/Settings/ErrorSettings.tsx";
 import { ErrorSessions } from "../components/Home/Settings/Sessions/ErrorSessions.tsx";
 import { ErrorPrivacy } from "../components/Home/Settings/Privacy/ErrorPrivacy.tsx";
+import { LangProvider } from "../shared/features/LangProvider/LangProvider.tsx";
+import { Language } from "../components/Home/Settings/Language/Language.tsx";
+import { ErrorLanguage } from "../components/Home/Settings/Language/ErrorLanguage.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -127,16 +130,22 @@ const router = createBrowserRouter(
           errorElement={<ErrorSettings />}
         />
         <Route
+          path={routes.privacy.path}
+          id={routes.privacy.id}
+          element={<Privacy />}
+          errorElement={<ErrorPrivacy />}
+        />
+        <Route
           path={routes.sessions.path}
           id={routes.sessions.id}
           element={<Sessions />}
           errorElement={<ErrorSessions />}
         />
         <Route
-          path={routes.privacy.path}
-          id={routes.privacy.id}
-          element={<Privacy />}
-          errorElement={<ErrorPrivacy />}
+          path={routes.language.path}
+          id={routes.language.id}
+          element={<Language />}
+          errorElement={<ErrorLanguage />}
         />
       </Route>
     </>,
@@ -145,16 +154,18 @@ const router = createBrowserRouter(
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <StoreProvider>
-      <WatchdogProvider>
-        <NotifyProvider>
-          <ConfirmPopupProvider>
-            <ContextMenuProvider>
-              <RouterProvider router={router} />
-            </ContextMenuProvider>
-          </ConfirmPopupProvider>
-        </NotifyProvider>
-      </WatchdogProvider>
-    </StoreProvider>
+    <LangProvider>
+      <StoreProvider>
+        <WatchdogProvider>
+          <NotifyProvider>
+            <ConfirmPopupProvider>
+              <ContextMenuProvider>
+                <RouterProvider router={router} />
+              </ContextMenuProvider>
+            </ConfirmPopupProvider>
+          </NotifyProvider>
+        </WatchdogProvider>
+      </StoreProvider>
+    </LangProvider>
   </React.StrictMode>,
 );

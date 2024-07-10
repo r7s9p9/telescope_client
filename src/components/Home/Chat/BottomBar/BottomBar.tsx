@@ -7,16 +7,19 @@ import { TextArea } from "../../../../shared/ui/TextArea/TextArea";
 import { useEdit, useInfo } from "../useChat";
 import { useJoin, useSend } from "./useBottomBar";
 import { Button } from "../../../../shared/ui/Button/Button";
-import { langBottomBar } from "../../../../locales/en";
+import { useLang } from "../../../../shared/features/LangProvider/LangProvider";
 
 export function BottomBarWrapper({
   data,
 }: {
   data: ReturnType<typeof useInfo>;
 }) {
+  const { lang } = useLang();
+
   if (data.info?.isInitialLoading) return <BottomBarSpinner />;
-  if (data.info?.isMember) return <BottomBar roomId={data.roomId} />;
-  return <BottomBarNoMember roomId={data.roomId} />;
+  if (data.info?.isMember)
+    return <BottomBar roomId={data.roomId} lang={lang} />;
+  return <BottomBarNoMember roomId={data.roomId} lang={lang} />;
 }
 
 function BottomBarSpinner() {
@@ -27,7 +30,13 @@ function BottomBarSpinner() {
   );
 }
 
-function BottomBarNoMember({ roomId }: { roomId: RoomId }) {
+function BottomBarNoMember({
+  roomId,
+  lang,
+}: {
+  roomId: RoomId;
+  lang: ReturnType<typeof useLang>["lang"];
+}) {
   const join = useJoin(roomId);
 
   return (
@@ -35,13 +44,13 @@ function BottomBarNoMember({ roomId }: { roomId: RoomId }) {
       {!join.isLoading && (
         <div className="shrink-0 relative h-16 md:h-24 md:p-4 flex items-center justify-center md:border-x-2 border-slate-100 bg-slate-50">
           <Button
-            title={langBottomBar.JOIN_ACTION}
+            title={lang.bottomBar.JOIN_ACTION}
             size="md"
             unstyled
             onClick={() => join.run()}
           >
             <Text size="xl" font="light" uppercase>
-              {langBottomBar.JOIN_ACTION}
+              {lang.bottomBar.JOIN_ACTION}
             </Text>
           </Button>
         </div>
@@ -51,7 +60,13 @@ function BottomBarNoMember({ roomId }: { roomId: RoomId }) {
   );
 }
 
-function BottomBar({ roomId }: { roomId: RoomId }) {
+function BottomBar({
+  roomId,
+  lang,
+}: {
+  roomId: RoomId;
+  lang: ReturnType<typeof useLang>["lang"];
+}) {
   const editAction = useEdit();
   const { formData, setFormData, isLoading, onSubmit } = useSend(roomId);
 
@@ -66,7 +81,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           />
           <div className="grow w-0 pl-4 h-12 flex flex-col justify-center text-sm">
             <Text size="sm" font="light">
-              {langBottomBar.TITLE_EDIT}
+              {lang.bottomBar.TITLE_EDIT}
             </Text>
             <Text size="sm" font="default" className="truncate">
               {editAction.editable.message.content.text}
@@ -74,7 +89,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           </div>
           <IconButton
             onClick={() => editAction.closeEdit()}
-            title={langBottomBar.LABEL_CLOSE_EDIT}
+            title={lang.bottomBar.LABEL_CLOSE_EDIT}
           >
             <IconX className="text-slate-600" strokeWidth="1" size={24} />
           </IconButton>
@@ -93,7 +108,7 @@ function BottomBar({ roomId }: { roomId: RoomId }) {
           className="ring-0 md:ring-2 ring-slate-200"
           rightSection={
             <IconButton
-              title={langBottomBar.LABEL_SEND}
+              title={lang.bottomBar.LABEL_SEND}
               loading={isLoading}
               loaderType={"outside"}
               loaderSize={42}

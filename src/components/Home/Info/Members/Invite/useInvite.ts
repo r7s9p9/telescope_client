@@ -9,10 +9,11 @@ import { useCallback, useEffect, useState } from "react";
 import { RoomSearchUsersToInviteResponseType } from "../../../../../shared/api/api.schema";
 import { useMenuContext } from "../../../../../shared/features/ContextMenu/ContextMenu";
 import { routes } from "../../../../../constants";
-import { langError, langInviteNotification } from "../../../../../locales/en";
 import { useOnClickOutside } from "../../../../../shared/hooks/useOnClickOutside";
+import { useLang } from "../../../../../shared/features/LangProvider/LangProvider";
 
 export function useInvite() {
+  const { lang } = useLang();
   const { roomId } = useParams();
   const querySearch = useQuerySearchUsersToInvite();
   const queryInvite = useQueryInviteUser();
@@ -46,21 +47,21 @@ export function useInvite() {
       });
     if (!success) {
       notify.show.error(
-        requestError?.q || responseError || langError.UNKNOWN_MESSAGE,
+        requestError?.q || responseError || lang.error.UNKNOWN_MESSAGE,
       );
       return;
     }
 
     if (!response.access) {
-      notify.show.error(langInviteNotification.SEARCH_TO_INVITE_NO_RIGHT);
+      notify.show.error(lang.inviteNotification.SEARCH_TO_INVITE_NO_RIGHT);
       return;
     }
     if (!response.success) {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
+      notify.show.error(lang.error.UNKNOWN_MESSAGE);
       return;
     }
     setData(response);
-  }, [inputValue, notify.show, querySearch, roomId]);
+  }, [inputValue, lang, notify.show, querySearch, roomId]);
 
   const onClickMenuHandler = () => {
     const invite = async (userId: UserId, username: string) => {
@@ -68,7 +69,7 @@ export function useInvite() {
         await queryInvite.run({ roomId: roomId as RoomId, userIds: [userId] });
       if (!success) {
         notify.show.error(
-          requestError || responseError || langError.UNKNOWN_MESSAGE,
+          requestError || responseError || lang.error.UNKNOWN_MESSAGE,
         );
         closeMenu();
         return;
@@ -77,23 +78,23 @@ export function useInvite() {
       // TODO Add check if user is already member
 
       if (!response.access) {
-        notify.show.error(langInviteNotification.INVITE_NO_RIGHT);
+        notify.show.error(lang.inviteNotification.INVITE_NO_RIGHT);
         closeMenu();
         return;
       }
 
       if (!response.success) {
-        notify.show.error(langInviteNotification.INVITE_FAIL(username));
+        notify.show.error(lang.inviteNotification.INVITE_FAIL(username));
         closeMenu();
         return;
       }
-      notify.show.info(langInviteNotification.INVITE_SUCCESS(username));
+      notify.show.info(lang.inviteNotification.INVITE_SUCCESS(username));
       closeMenu();
     };
 
     const copy = (username: string) => {
       navigator.clipboard.writeText(username);
-      notify.show.info(langInviteNotification.COPY_SUCCESS);
+      notify.show.info(lang.inviteNotification.COPY_SUCCESS);
       closeMenu();
     };
 
@@ -122,5 +123,6 @@ export function useInvite() {
     openMenu,
     onClickMenuHandler,
     onClose,
+    lang,
   };
 }

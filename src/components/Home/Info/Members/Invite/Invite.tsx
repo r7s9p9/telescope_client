@@ -15,7 +15,7 @@ import { Button } from "../../../../../shared/ui/Button/Button";
 import { useInvite } from "./useInvite";
 import { Input } from "../../../../../shared/ui/Input/Input";
 import { Popup } from "../../../../../shared/ui/Popup/Popup";
-import { langInvite } from "../../../../../locales/en";
+import { useLang } from "../../../../../shared/features/LangProvider/LangProvider";
 
 export function InviteUsers() {
   const {
@@ -28,6 +28,7 @@ export function InviteUsers() {
     isLoading,
     openMenu,
     onClickMenuHandler,
+    lang,
   } = useInvite();
 
   let usersContent: JSX.Element = <></>;
@@ -41,7 +42,7 @@ export function InviteUsers() {
   } else if (!users) {
     usersContent = (
       <ListWrapper>
-        <NoUsers />
+        <NoUsers lang={lang} />
       </ListWrapper>
     );
   } else {
@@ -53,6 +54,7 @@ export function InviteUsers() {
             data={user}
             openMenu={openMenu}
             onClickMenuHandler={onClickMenuHandler}
+            lang={lang}
           />
         ))}
       </ListWrapper>
@@ -61,7 +63,7 @@ export function InviteUsers() {
 
   return (
     <Popup
-      titleText={langInvite.POPUP_TITLE}
+      titleText={lang.invite.POPUP_TITLE}
       overlayRef={overlayRef}
       contentRef={contentRef}
       onClose={onClose}
@@ -70,7 +72,7 @@ export function InviteUsers() {
         size="md"
         value={inputValue}
         setValue={setInputValue}
-        placeholder={langInvite.SEARCH_PLACEHOLDER}
+        placeholder={lang.invite.SEARCH_PLACEHOLDER}
         className="mt-4"
         rightSection={
           <IconSearch className="text-slate-400" strokeWidth="1" size={24} />
@@ -102,10 +104,10 @@ function ListWrapper({
   );
 }
 
-function NoUsers() {
+function NoUsers({ lang }: { lang: ReturnType<typeof useLang>["lang"] }) {
   return (
     <Text size="md" font="light" className="text-center select-none">
-      {langInvite.NO_USERS}
+      {lang.invite.NO_USERS}
     </Text>
   );
 }
@@ -114,30 +116,36 @@ function User({
   data,
   openMenu,
   onClickMenuHandler,
+  lang,
 }: {
   data: ReadAccountResponseType;
   openMenu: ReturnType<typeof useInvite>["openMenu"];
   onClickMenuHandler: ReturnType<typeof useInvite>["onClickMenuHandler"];
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
   let lastSeenStr;
-  let memberState: "online" | "offline" | "invisible" | "you";
+  let memberState = "";
 
   if (!data.general?.lastSeen) {
-    memberState = langInvite.STATUS_INVISIBLE;
+    memberState = lang.invite.STATUS_INVISIBLE;
   } else {
     const { result, range } = formatDate().member(data.general.lastSeen);
     if (range === "seconds") {
-      memberState = langInvite.STATUS_ONLINE;
+      memberState = lang.invite.STATUS_ONLINE;
     } else {
-      memberState = langInvite.STATUS_OFFLINE;
-      lastSeenStr = langInvite.LAST_SEEN_TEXT(result as string);
+      memberState = lang.invite.STATUS_OFFLINE;
+      lastSeenStr = lang.invite.LAST_SEEN_TEXT(result as string);
     }
   }
 
   function onContextHandler(e: MouseEvent<HTMLElement>) {
     openMenu(
       e,
-      <UserContextMenu data={data} onClickMenuHandler={onClickMenuHandler} />,
+      <UserContextMenu
+        data={data}
+        onClickMenuHandler={onClickMenuHandler}
+        lang={lang}
+      />,
     );
   }
 
@@ -160,7 +168,7 @@ function User({
         )}
         {!data.general?.name && (
           <Text size="sm" font="light" className="text-slate-600">
-            {langInvite.NAME_HIDDEN}
+            {lang.invite.NAME_HIDDEN}
           </Text>
         )}
       </div>
@@ -169,11 +177,7 @@ function User({
           size="sm"
           font="light"
           capitalize
-          className={
-            memberState === "online"
-              ? "text-green-600 select-none"
-              : "text-slate-600 select-none"
-          }
+          className="text-slate-600 select-none"
         >
           {memberState}
         </Text>
@@ -190,20 +194,28 @@ function User({
 function UserContextMenu({
   data,
   onClickMenuHandler,
+  lang,
 }: {
   data: ReadAccountResponseType;
   onClickMenuHandler: ReturnType<typeof useInvite>["onClickMenuHandler"];
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
   const iconProps = {
-    size: 24,
+    size: 18,
     strokeWidth: "1.5",
     className: "text-slate-600",
   };
 
+  const textProps = {
+    size: "md" as const,
+    font: "default" as const,
+    className: "text-slate-600",
+  };
+
   return (
-    <Paper rounded="lg" className="flex flex-col m-2 w-56 shadow-md">
+    <Paper rounded="lg" className="w-fit flex flex-col m-2 shadow-md">
       <Button
-        title={langInvite.CONTEXT_MENU_PROFILE_ACTION}
+        title={lang.invite.CONTEXT_MENU_PROFILE_ACTION}
         size="md"
         unstyled
         padding={24}
@@ -213,12 +225,10 @@ function UserContextMenu({
         }
       >
         <IconUserScan {...iconProps} />
-        <Text size="md" font="default" className="text-slate-600">
-          {langInvite.CONTEXT_MENU_PROFILE_ACTION}
-        </Text>
+        <Text {...textProps}>{lang.invite.CONTEXT_MENU_PROFILE_ACTION}</Text>
       </Button>
       <Button
-        title={langInvite.CONTEXT_MENU_COPY_ACTION}
+        title={lang.invite.CONTEXT_MENU_COPY_ACTION}
         size="md"
         unstyled
         padding={24}
@@ -228,12 +238,10 @@ function UserContextMenu({
         }
       >
         <IconCopy {...iconProps} />
-        <Text size="md" font="default" className="text-slate-600">
-          {langInvite.CONTEXT_MENU_COPY_ACTION}
-        </Text>
+        <Text {...textProps}>{lang.invite.CONTEXT_MENU_COPY_ACTION}</Text>
       </Button>
       <Button
-        title={langInvite.CONTEXT_MENU_INVITE_ACTION}
+        title={lang.invite.CONTEXT_MENU_INVITE_ACTION}
         size="md"
         unstyled
         padding={24}
@@ -246,8 +254,8 @@ function UserContextMenu({
         }
       >
         <IconUserPlus {...iconProps} className="text-green-600" />
-        <Text size="md" font="default" className="text-green-600">
-          {langInvite.CONTEXT_MENU_INVITE_ACTION}
+        <Text {...textProps} className="text-green-600">
+          {lang.invite.CONTEXT_MENU_INVITE_ACTION}
         </Text>
       </Button>
     </Paper>

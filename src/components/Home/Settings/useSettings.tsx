@@ -2,9 +2,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { routes } from "../../../constants";
 import { useQueryDeleteSession } from "../../../shared/api/api.model";
 import { useNotify } from "../../../shared/features/Notification/Notification";
-import { langError } from "../../../locales/en";
+import { useLang } from "../../../shared/features/LangProvider/LangProvider";
 
 export function useSettings() {
+  const { lang } = useLang();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const notify = useNotify();
@@ -27,26 +28,31 @@ export function useSettings() {
         state: { prevPath: pathname },
       });
     };
+    const language = () => {
+      navigate(`${pathname}/language`, {
+        state: { prevPath: pathname },
+      });
+    };
     const logout = async () => {
       const { success, response, requestError, responseError } =
         await queryLogout.run({ sessionId: "self" });
       if (!success) {
         notify.show.error(
-          requestError || responseError || langError.UNKNOWN_MESSAGE,
+          requestError || responseError || lang.error.UNKNOWN_MESSAGE,
         );
         return;
       }
 
       if (!response.success) {
-        notify.show.error(langError.RESPONSE_COMMON_MESSAGE);
+        notify.show.error(lang.error.RESPONSE_COMMON_MESSAGE);
         return;
       }
 
       navigate(routes.login.path, { state: { loggedOut: true } });
     };
 
-    return { profile, privacy, sessions, logout };
+    return { profile, privacy, sessions, language, logout };
   }
 
-  return { onClickHandler };
+  return { onClickHandler, lang };
 }

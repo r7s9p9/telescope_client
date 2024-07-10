@@ -6,9 +6,10 @@ import { useQueryDeleteMessage } from "../../../../shared/api/api.model";
 import { MessageType } from "../../../../shared/api/api.schema";
 import { formatDate } from "../../../../shared/lib/date";
 import { useNotify } from "../../../../shared/features/Notification/Notification";
-import { langError, langMessagesNotification } from "../../../../locales/en";
+import { useLang } from "../../../../shared/features/LangProvider/LangProvider";
 
 function useDelete(roomId: RoomId) {
+  const { lang } = useLang();
   const storeAction = useStore().chat(roomId);
   const storedMessages = storeAction.read()?.messages;
 
@@ -23,18 +24,18 @@ function useDelete(roomId: RoomId) {
 
     if (!success) {
       notify.show.error(
-        requestError || responseError || langError.UNKNOWN_MESSAGE,
+        requestError || responseError || lang.error.UNKNOWN_MESSAGE,
       );
       return;
     }
 
     if (!response.access) {
-      notify.show.error(langMessagesNotification.DELETE_NO_RIGHT);
+      notify.show.error(lang.messagesNotification.DELETE_NO_RIGHT);
       return;
     }
 
     if (!response.success) {
-      notify.show.error(langMessagesNotification.DELETE_FAIL);
+      notify.show.error(lang.messagesNotification.DELETE_FAIL);
       return;
     }
 
@@ -57,6 +58,7 @@ export function useMessage({
   roomId: RoomId;
   message: MessageType;
 }) {
+  const { lang } = useLang();
   const editAction = useEdit();
   const deleteAction = useDelete(roomId);
   const { openMenu, closeMenu } = useMenuContext();
@@ -74,7 +76,7 @@ export function useMessage({
     type,
     username: message.username,
     text: message.content.text,
-    date: formatDate().message(message.created, message.modified),
+    date: formatDate().message(lang, message.created, message.modified),
   };
 
   async function onClickMenuHandler(
@@ -96,5 +98,5 @@ export function useMessage({
     }
   }
 
-  return { content, onClickMenuHandler, openMenu };
+  return { content, onClickMenuHandler, openMenu, lang };
 }

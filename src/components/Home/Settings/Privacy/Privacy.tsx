@@ -5,7 +5,7 @@ import { Text } from "../../../../shared/ui/Text/Text";
 import { usePrivacy } from "./usePrivacy.ts";
 import { ReactNode } from "react";
 import { Select } from "../../../../shared/ui/Select/Select.tsx";
-import { langPrivacy } from "../../../../locales/en.ts";
+import { useLang } from "../../../../shared/features/LangProvider/LangProvider.tsx";
 
 export function Privacy() {
   const {
@@ -15,6 +15,7 @@ export function Privacy() {
     handleUpdate,
     isFromAnotherPage,
     returnBack,
+    lang,
   } = usePrivacy();
 
   if (!isLoaded) {
@@ -35,69 +36,76 @@ export function Privacy() {
       >
         <div className="flex justify-between items-center">
           <Text size="xl" font="light" className="select-none text-center">
-            {langPrivacy.TITLE_HEAD}
+            {lang.privacy.TITLE_HEAD}
           </Text>
         </div>
         <Text size="md" font="light" className="select-none">
-          {langPrivacy.TITLE_TAIL}
+          {lang.privacy.TITLE_TAIL}
         </Text>
         <Item
-          label={langPrivacy.ITEM_NAME}
+          label={lang.privacy.ITEM_NAME}
           type="name"
           data={data}
           setData={setData}
+          lang={lang}
         />
         <Item
-          label={langPrivacy.ITEM_BIO}
+          label={lang.privacy.ITEM_BIO}
           type="bio"
           data={data}
           setData={setData}
+          lang={lang}
         />
         <Item
-          label={langPrivacy.ITEM_LAST_SEEN}
+          label={lang.privacy.ITEM_LAST_SEEN}
           type="lastSeen"
           data={data}
           setData={setData}
+          lang={lang}
         />
         <Item
-          label={langPrivacy.ITEM_PROFILE_PHOTOS}
+          label={lang.privacy.ITEM_PROFILE_PHOTOS}
           type="seeProfilePhotos"
           data={data}
           setData={setData}
+          lang={lang}
         />
         <Item
-          label={langPrivacy.ITEM_FRIENDS}
+          label={lang.privacy.ITEM_FRIENDS}
           type="seeFriends"
           data={data}
           setData={setData}
+          lang={lang}
         />
         {/* <Item
-          label={langPrivacy.ITEM_CAN_BE_FRIEND}
+          label={lang.privacy.ITEM_CAN_BE_FRIEND}
           type="canBeFriend"
           data={data}
           setData={setData}
+          lang={lang}
         /> */}
         <Item
-          label={langPrivacy.ITEM_INVITE}
+          label={lang.privacy.ITEM_INVITE}
           type="inviteToRoom"
           data={data}
           setData={setData}
+          lang={lang}
         />
         <div className="flex grow flex-row-reverse justify-between items-end">
           <Button
-            title={langPrivacy.BUTTON_UPDATE_LABEL}
+            title={lang.privacy.BUTTON_UPDATE_LABEL}
             size="md"
             onClick={handleUpdate}
             className="w-36 self-end justify-center"
           >
             <IconFileUpload {...iconProps} />
             <Text size="md" font="light">
-              {langPrivacy.BUTTON_UPDATE_LABEL}
+              {lang.privacy.BUTTON_UPDATE_LABEL}
             </Text>
           </Button>
           {isFromAnotherPage && (
             <Button
-              title={langPrivacy.BUTTON_GO_BACK_LABEL}
+              title={lang.privacy.BUTTON_GO_BACK_LABEL}
               size="md"
               onClick={returnBack}
               disabled={!isFromAnotherPage}
@@ -105,7 +113,7 @@ export function Privacy() {
             >
               <IconCircleArrowLeft {...iconProps} />
               <Text size="md" font="light">
-                {langPrivacy.BUTTON_GO_BACK_LABEL}
+                {lang.privacy.BUTTON_GO_BACK_LABEL}
               </Text>
             </Button>
           )}
@@ -145,6 +153,7 @@ function Item({
   data,
   setData,
   type,
+  lang,
 }: {
   label: string;
   data: ReturnType<typeof usePrivacy>["data"];
@@ -157,9 +166,10 @@ function Item({
     | "seeFriends"
     | "canBeFriend"
     | "inviteToRoom";
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
   return (
-    <div className="flex items-center justify-between gap-2 mb-4">
+    <div className="flex items-center justify-between gap-4 mb-4">
       <Text size="md" font="light">
         {label}
       </Text>
@@ -171,10 +181,12 @@ function Item({
         size="md"
         className="bg-slate-100 text-center"
       >
-        <option value="everybody">Everybody</option>
-        <option value="friendOfFriends">Friends of friends</option>
-        <option value="friends">Friends</option>
-        <option value="nobody">Nobody</option>
+        <option value="everybody">{lang.privacy.ITEM_OPTION_EVERYBODY}</option>
+        <option value="friendOfFriends">
+          {lang.privacy.ITEM_OPTION_FRIENDS_OF_FRIENDS}
+        </option>
+        <option value="friends">{lang.privacy.ITEM_OPTION_FRIENDS}</option>
+        <option value="nobody">{lang.privacy.ITEM_OPTION_NOBODY}</option>
       </Select>
     </div>
   );

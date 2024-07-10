@@ -2,7 +2,7 @@ import { z } from "zod";
 import { privacyRule } from "./api.constants";
 import { env } from "../lib/env";
 import { UUID } from "crypto";
-import { langSchema } from "../../locales/en";
+import { useLang } from "../features/LangProvider/LangProvider";
 
 const userIdSchema = z
   .string()
@@ -25,42 +25,49 @@ export type RoomId = z.infer<typeof userIdSchema>;
 const selfIdSchema = z.literal("self");
 const serviceIdSchema = z.literal("service");
 
-export const emailSchema = z
-  .string()
-  .email(langSchema.email.NOT_EMAIL)
-  .max(env.emailLengthMax, langSchema.email.TOO_LONG(env.emailLengthMax));
+// These schemas use the *lang* argument to display errors in the appropriate language
+// for the Input and TextArea components. If no argument is given, a standard error
+// will be thrown, for example if these schemas are reused.
+export const emailSchema = (lang?: ReturnType<typeof useLang>["lang"]) =>
+  z
+    .string()
+    .email(lang?.schema.email.NOT_EMAIL)
+    .max(env.emailLengthMax, lang?.schema.email.TOO_LONG(env.emailLengthMax));
 
-export const usernameSchema = z
-  .string()
-  .min(
-    env.usernameRange.min,
-    langSchema.username.TOO_SHORT(env.usernameRange.min),
-  )
-  .max(
-    env.usernameRange.max,
-    langSchema.username.TOO_LONG(env.usernameRange.max),
-  );
-export const passwordSchema = z
-  .string()
-  .min(
-    env.passwordRange.min,
-    langSchema.password.TOO_SHORT(env.passwordRange.min),
-  )
-  .max(
-    env.passwordRange.max,
-    langSchema.password.TOO_LONG(env.passwordRange.max),
-  );
-export const codeSchema = z
-  .string()
-  .length(env.codeLength, langSchema.code.WRONG_LENGTH(env.codeLength));
+export const usernameSchema = (lang?: ReturnType<typeof useLang>["lang"]) =>
+  z
+    .string()
+    .min(
+      env.usernameRange.min,
+      lang?.schema.username.TOO_SHORT(env.usernameRange.min),
+    )
+    .max(
+      env.usernameRange.max,
+      lang?.schema.username.TOO_LONG(env.usernameRange.max),
+    );
+export const passwordSchema = (lang?: ReturnType<typeof useLang>["lang"]) =>
+  z
+    .string()
+    .min(
+      env.passwordRange.min,
+      lang?.schema.password.TOO_SHORT(env.passwordRange.min),
+    )
+    .max(
+      env.passwordRange.max,
+      lang?.schema.password.TOO_LONG(env.passwordRange.max),
+    );
+export const codeSchema = (lang?: ReturnType<typeof useLang>["lang"]) =>
+  z
+    .string()
+    .length(env.codeLength, lang?.schema.code.WRONG_LENGTH(env.codeLength));
 
-export const nameSchema = z
-  .string()
-  .min(2, langSchema.name.TOO_SHORT(2))
-  .max(env.nameLengthMax, langSchema.name.TOO_LONG(env.nameLengthMax));
-export const bioSchema = z
-  .string()
-  .max(env.bioLengthMax, langSchema.bio.TOO_LONG(env.bioLengthMax));
+export const nameSchema = (lang?: ReturnType<typeof useLang>["lang"]) =>
+  z
+    .string()
+    .min(2, lang?.schema.name.TOO_SHORT(2))
+    .max(env.nameLengthMax, lang?.schema.name.TOO_LONG(env.nameLengthMax));
+export const bioSchema = (lang?: ReturnType<typeof useLang>["lang"]) =>
+  z.string().max(env.bioLengthMax, lang?.schema.bio.TOO_LONG(env.bioLengthMax));
 export const lastSeenSchema = z.string();
 
 const privacyRuleSchema = z.union([
@@ -77,8 +84,8 @@ const privacyRuleLimitedSchema = z.union([
 ]);
 
 export const loginRequestSchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
+  email: emailSchema(),
+  password: passwordSchema(),
 });
 export type LoginRequestType = z.infer<typeof loginRequestSchema>;
 
@@ -89,8 +96,8 @@ export const loginResponseSchema = z.object({
 export type LoginResponseType = z.infer<typeof loginResponseSchema>;
 
 export const codeRequestSchema = z.object({
-  email: emailSchema,
-  code: codeSchema,
+  email: emailSchema(),
+  code: codeSchema(),
 });
 export type CodeRequestType = z.infer<typeof codeRequestSchema>;
 
@@ -100,9 +107,9 @@ export const codeResponseSchema = z.object({
 export type CodeResponseType = z.infer<typeof codeResponseSchema>;
 
 export const registerRequestSchema = z.object({
-  email: emailSchema,
-  username: usernameSchema,
-  password: passwordSchema,
+  email: emailSchema(),
+  username: usernameSchema(),
+  password: passwordSchema(),
 });
 
 export type RegisterRequestType = z.infer<typeof registerRequestSchema>;
@@ -155,9 +162,9 @@ export const readAccountResponseSchema = z.object({
   targetUserId: z.union([selfIdSchema, userIdSchema]),
   general: z
     .object({
-      username: usernameSchema,
-      name: nameSchema.min(2).optional(),
-      bio: bioSchema.optional(),
+      username: usernameSchema(),
+      name: nameSchema().min(2).optional(),
+      bio: bioSchema().optional(),
       lastSeen: lastSeenSchema.optional(),
     })
     .optional(),
@@ -179,9 +186,9 @@ export const updateAccountRequestSchema = z.object({
   toUpdate: z.object({
     general: z
       .object({
-        username: usernameSchema,
-        name: nameSchema,
-        bio: bioSchema.optional(),
+        username: usernameSchema(),
+        name: nameSchema(),
+        bio: bioSchema().optional(),
       })
       .optional(),
     privacy: z

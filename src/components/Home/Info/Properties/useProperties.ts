@@ -9,8 +9,10 @@ import {
   UserId,
 } from "../../../../shared/api/api.schema";
 import { checkUserId } from "../../../../shared/lib/uuid";
+import { useLang } from "../../../../shared/features/LangProvider/LangProvider";
 
 export function useProperties() {
+  const { lang } = useLang();
   const { run, roomId, storedInfo } = useLoadInfo();
   const queryAccount = useQueryAccount();
 
@@ -90,9 +92,9 @@ export function useProperties() {
       if (storedInfo && !creatorUsername) {
         setEditableInfo(storedInfo);
         if (storedInfo?.creatorId === "self") {
-          setCreatorUsername("You");
+          setCreatorUsername(lang.properties.CREATOR_VALUE_YOU);
         } else if (storedInfo?.creatorId === "service") {
-          setCreatorUsername("Service");
+          setCreatorUsername(lang.properties.CREATOR_VALUE_SERVICE);
         } else {
           const { success, response } = await queryAccount.run({
             userId: storedInfo.creatorId,
@@ -104,7 +106,7 @@ export function useProperties() {
       }
     };
     action();
-  }, [storedInfo, creatorUsername, queryAccount]);
+  }, [lang, storedInfo, creatorUsername, queryAccount]);
 
   const setName = (val: string) =>
     setEditableInfo(
@@ -143,5 +145,6 @@ export function useProperties() {
     storedInfo,
     creatorUsername,
     isAdmin: storedInfo?.creatorId === "self",
+    lang,
   };
 }

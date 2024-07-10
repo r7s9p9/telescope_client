@@ -1,4 +1,4 @@
-import { langMessages } from "../../locales/en";
+import { useLang } from "../features/LangProvider/LangProvider";
 import { getNumber, isNumeric } from "./number";
 
 function isDate(value: unknown) {
@@ -128,6 +128,7 @@ export const formatDate = () => {
   }
 
   function message(
+    lang: ReturnType<typeof useLang>["lang"],
     createdValue: number | string,
     modifiedValue?: number | string,
   ) {
@@ -145,7 +146,7 @@ export const formatDate = () => {
       return "Unknown";
     }
 
-    return `${langMessages.MESSAGE_EDITED_TEXT} ${timeFormatter(modified.date)}`;
+    return `${lang.messages.MESSAGE_EDITED_TEXT} ${timeFormatter(modified.date)}`;
   }
 
   function bubble(value: number | string) {

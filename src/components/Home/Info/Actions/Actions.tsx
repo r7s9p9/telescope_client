@@ -8,7 +8,6 @@ import { useActions } from "./useActions";
 import { Button } from "../../../../shared/ui/Button/Button";
 import { Text } from "../../../../shared/ui/Text/Text";
 import { useConfirmPopup } from "../../../../shared/features/ConfirmPopup/ConfirmPopup";
-import { langActions } from "../../../../locales/en";
 
 export function Actions() {
   const {
@@ -19,6 +18,7 @@ export function Actions() {
     handleCopy,
     isMember,
     isAdmin,
+    lang,
   } = useActions();
   const confirmPopup = useConfirmPopup();
 
@@ -38,7 +38,7 @@ export function Actions() {
     <>
       <div className="w-full flex flex-col shrink-0 border-t-2 border-slate-100">
         <Button
-          title={langActions.SHOW_LABEL}
+          title={lang.actions.SHOW_LABEL}
           size="sm"
           unstyled
           onClick={switchIsShow}
@@ -54,18 +54,18 @@ export function Actions() {
         {isShow && (
           <>
             <Button
-              title={langActions.ITEM_COPY_ACTION}
+              title={lang.actions.ITEM_COPY_ACTION}
               size="md"
               unstyled
               onClick={handleCopy}
               className="hover:bg-slate-200 border-t-2 border-slate-100  gap-4"
             >
               <IconCopy {...iconProps} />
-              <Text {...textProps}>{langActions.ITEM_COPY_ACTION}</Text>
+              <Text {...textProps}>{lang.actions.ITEM_COPY_ACTION}</Text>
             </Button>
             {isMember && (
               <Button
-                title={langActions.ITEM_LEAVE_ROOM_ACTION}
+                title={lang.actions.ITEM_LEAVE_ROOM_ACTION}
                 size="md"
                 unstyled
                 onClick={() => {
@@ -73,21 +73,24 @@ export function Actions() {
                     onAgree: handleLeave,
                     onClose: confirmPopup.hide,
                     text: {
-                      question: langActions.LEAVE_POPUP_QUESTION,
-                      confirm: langActions.LEAVE_POPUP_CONFIRM,
-                      cancel: langActions.LEAVE_POPUP_CANCEL,
+                      title: lang.actions.LEAVE_POPUP_TITLE,
+                      question: lang.actions.LEAVE_POPUP_QUESTION,
+                      confirm: lang.actions.LEAVE_POPUP_CONFIRM,
+                      cancel: lang.actions.LEAVE_POPUP_CANCEL,
                     },
                   });
                 }}
                 className="hover:bg-slate-200 gap-4"
               >
                 <IconDoorExit {...iconProps} />
-                <Text {...textProps}>{langActions.ITEM_LEAVE_ROOM_ACTION}</Text>
+                <Text {...textProps}>
+                  {lang.actions.ITEM_LEAVE_ROOM_ACTION}
+                </Text>
               </Button>
             )}
             {isMember && isAdmin && (
               <Button
-                title={langActions.ITEM_DELETE_ROOM_ACTION}
+                title={lang.actions.ITEM_DELETE_ROOM_ACTION}
                 size="md"
                 unstyled
                 onClick={() => {
@@ -95,9 +98,10 @@ export function Actions() {
                     onAgree: handleDelete,
                     onClose: confirmPopup.hide,
                     text: {
-                      question: langActions.DELETE_POPUP_QUESTION,
-                      confirm: langActions.DELETE_POPUP_CONFIRM,
-                      cancel: langActions.DELETE_POPUP_CANCEL,
+                      title: lang.actions.DELETE_POPUP_TITLE,
+                      question: lang.actions.DELETE_POPUP_QUESTION,
+                      confirm: lang.actions.DELETE_POPUP_CONFIRM,
+                      cancel: lang.actions.DELETE_POPUP_CANCEL,
                     },
                   });
                 }}
@@ -109,7 +113,7 @@ export function Actions() {
                   size={24}
                 />
                 <Text size="md" font="light" uppercase className="text-red-600">
-                  {langActions.ITEM_DELETE_ROOM_ACTION}
+                  {lang.actions.ITEM_DELETE_ROOM_ACTION}
                 </Text>
               </Button>
             )}

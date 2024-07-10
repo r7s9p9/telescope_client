@@ -16,7 +16,7 @@ import { Text } from "../../../../shared/ui/Text/Text";
 import { Paper } from "../../../../shared/ui/Paper/Paper";
 import { RoomId } from "../../../../shared/api/api.schema";
 import { Button } from "../../../../shared/ui/Button/Button";
-import { langMessages } from "../../../../locales/en";
+import { useLang } from "../../../../shared/features/LangProvider/LangProvider";
 
 // eslint-disable-next-line react/display-name
 export const MessagesSkeleton = memo(() => {
@@ -115,7 +115,7 @@ export function Message({
   roomId: RoomId;
   message: MessageType;
 }) {
-  const { content, onClickMenuHandler, openMenu } = useMessage({
+  const { content, onClickMenuHandler, openMenu, lang } = useMessage({
     roomId,
     message,
   });
@@ -144,6 +144,7 @@ export function Message({
       <MessageContextMenu
         isYourMessage={content.type === "self"}
         onClickMenuHandler={onClickMenuHandler}
+        lang={lang}
       />,
     );
   }
@@ -159,7 +160,7 @@ export function Message({
       <div className="flex justify-between gap-2">
         <Text size="sm" font="default" className="text-green-600">
           {content.type === "self"
-            ? langMessages.SELF_MESSAGE_TEXT
+            ? lang.messages.SELF_MESSAGE_TEXT
             : content.username}
         </Text>
         <Text size="sm" font="thin">
@@ -176,78 +177,74 @@ export function Message({
 function MessageContextMenu({
   isYourMessage,
   onClickMenuHandler,
+  lang,
 }: {
   isYourMessage: boolean;
   onClickMenuHandler: ReturnType<typeof useMessage>["onClickMenuHandler"];
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
+  const iconProps = {
+    size: 18,
+    strokeWidth: "1.5",
+    className: "text-slate-600",
+  };
+
+  const textProps = {
+    size: "md" as const,
+    font: "default" as const,
+    className: "text-slate-600",
+  };
+
   return (
-    <Paper rounded="lg" className="flex flex-col m-2 shadow-md">
+    <Paper rounded="lg" className="w-fit flex flex-col m-2 shadow-md">
       <Button
-        title={langMessages.CONTEXT_MENU_REPLY_ACTION}
+        title={lang.messages.CONTEXT_MENU_REPLY_ACTION}
         size="md"
         unstyled
         padding={24}
-        className="w-32 hover:bg-slate-200 rounded-t-lg"
+        className="hover:bg-slate-200 gap-4 rounded-t-lg"
         onClick={() => onClickMenuHandler("reply")}
       >
-        <>
-          <IconMessageReply
-            className="text-slate-600"
-            strokeWidth="1.5"
-            size={18}
-          />
-          <Text size="md" font="default" className="text-slate-600">
-            {langMessages.CONTEXT_MENU_REPLY_ACTION}
-          </Text>
-        </>
+        <IconMessageReply {...iconProps} />
+        <Text {...textProps}>{lang.messages.CONTEXT_MENU_REPLY_ACTION}</Text>
       </Button>
       {isYourMessage && (
         <Button
-          title={langMessages.CONTEXT_MENU_EDIT_ACTION}
+          title={lang.messages.CONTEXT_MENU_EDIT_ACTION}
           size="md"
           unstyled
           padding={24}
-          className="w-32 hover:bg-slate-200"
+          className="hover:bg-slate-200 gap-4"
           onClick={() => onClickMenuHandler("edit")}
         >
-          <>
-            <IconEdit className="text-slate-600" strokeWidth="1.5" size={18} />
-            <Text size="md" font="default" className="text-slate-600">
-              {langMessages.CONTEXT_MENU_EDIT_ACTION}
-            </Text>
-          </>
+          <IconEdit {...iconProps} />
+          <Text {...textProps}>{lang.messages.CONTEXT_MENU_EDIT_ACTION}</Text>
         </Button>
       )}
       <Button
-        title={langMessages.CONTEXT_MENU_COPY_ACTION}
+        title={lang.messages.CONTEXT_MENU_COPY_ACTION}
         size="md"
         unstyled
         padding={24}
-        className={`w-32 hover:bg-slate-200 ${isYourMessage ? "" : "rounded-b-lg"}`}
+        className={`hover:bg-slate-200 gap-4 ${isYourMessage ? "" : "rounded-b-lg"}`}
         onClick={() => onClickMenuHandler("copy")}
       >
-        <>
-          <IconCopy className="text-slate-600" strokeWidth="1.5" size={18} />
-          <Text size="md" font="default" className="text-slate-600">
-            {langMessages.CONTEXT_MENU_COPY_ACTION}
-          </Text>
-        </>
+        <IconCopy {...iconProps} />
+        <Text {...textProps}>{lang.messages.CONTEXT_MENU_COPY_ACTION}</Text>
       </Button>
       {isYourMessage && (
         <Button
-          title={langMessages.CONTEXT_MENU_DELETE_ACTION}
+          title={lang.messages.CONTEXT_MENU_DELETE_ACTION}
           size="md"
           unstyled
           padding={24}
-          className="w-32 hover:bg-slate-200 rounded-b-lg"
+          className="hover:bg-slate-200 gap-4 rounded-b-lg"
           onClick={() => onClickMenuHandler("delete")}
         >
-          <>
-            <IconTrash className="text-red-600" strokeWidth="1.5" size={18} />
-            <Text size="md" font="default" className="text-red-600">
-              {langMessages.CONTEXT_MENU_DELETE_ACTION}
-            </Text>
-          </>
+          <IconTrash {...iconProps} className="text-red-600" />
+          <Text {...textProps} className="text-red-600">
+            {lang.messages.CONTEXT_MENU_DELETE_ACTION}
+          </Text>
         </Button>
       )}
     </Paper>

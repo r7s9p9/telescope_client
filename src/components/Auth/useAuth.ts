@@ -6,8 +6,8 @@ import {
 } from "../../shared/api/api.model";
 import { useNotify } from "../../shared/features/Notification/Notification";
 import { Dispatch, useEffect, useState } from "react";
-import { langAuthNotification, langError } from "../../locales/en";
 import { routes } from "../../constants";
+import { useLang } from "../../shared/features/LangProvider/LangProvider";
 
 interface ShowItemState {
   showItem: "login" | "register" | "code";
@@ -15,6 +15,7 @@ interface ShowItemState {
 }
 
 export function useMain({ type }: { type: "login" | "register" }) {
+  const { lang } = useLang();
   const [showItem, setShowItem] = useState<ShowItemState["showItem"]>(type);
   const [email, setEmail] = useState("");
 
@@ -24,16 +25,16 @@ export function useMain({ type }: { type: "login" | "register" }) {
 
   useEffect(() => {
     if (location.state?.loggedOut) {
-      notify.show.info(langAuthNotification.LOGGED_OUT);
+      notify.show.info(lang.authNotification.LOGGED_OUT);
       // remove state from location
       navigate({ pathname: location.pathname });
     }
     if (location.state?.sessionBlocked) {
-      notify.show.info(langAuthNotification.SESSION_BLOCKED);
+      notify.show.info(lang.authNotification.SESSION_BLOCKED);
       // remove state from location
       navigate({ pathname: location.pathname });
     }
-  }, [location, navigate, notify.show]);
+  }, [lang, location, navigate, notify.show]);
 
   // */code route protection
   useEffect(() => {
@@ -61,7 +62,7 @@ export function useMain({ type }: { type: "login" | "register" }) {
     },
   };
 
-  return { showItem, switchForm, handleCodeRequired, email };
+  return { showItem, switchForm, handleCodeRequired, email, lang };
 }
 
 export function useLogin({
@@ -69,6 +70,7 @@ export function useLogin({
 }: {
   handleCodeRequired: ReturnType<typeof Function>;
 }) {
+  const { lang } = useLang();
   const query = useQueryLogin();
   const navigate = useNavigate();
   const notify = useNotify();
@@ -117,7 +119,7 @@ export function useLogin({
     }
 
     if (!success) {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
+      notify.show.error(lang.error.UNKNOWN_MESSAGE);
       return;
     }
 
@@ -128,7 +130,7 @@ export function useLogin({
         navigate({ pathname: routes.home.path });
       }
     } else {
-      notify.show.error(langAuthNotification.INCORRECT_CREDENTIALS);
+      notify.show.error(lang.authNotification.INCORRECT_CREDENTIALS);
     }
   };
 
@@ -143,6 +145,7 @@ export function useLogin({
 }
 
 export function useCode({ email }: { email: string }) {
+  const { lang } = useLang();
   const query = useQueryCode();
   const navigate = useNavigate();
   const notify = useNotify();
@@ -170,7 +173,7 @@ export function useCode({ email }: { email: string }) {
         error: requestError.code || "",
       }));
       if (requestError.email) {
-        notify.show.error(langAuthNotification.OUTDATED_EMAIL);
+        notify.show.error(lang.authNotification.OUTDATED_EMAIL);
         navigate({ pathname: routes.login.path });
         return;
       }
@@ -182,11 +185,11 @@ export function useCode({ email }: { email: string }) {
     }
 
     if (!success) {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
+      notify.show.error(lang.error.UNKNOWN_MESSAGE);
       return;
     }
 
-    if (!response.success) notify.show.error(langAuthNotification.BAD_CODE);
+    if (!response.success) notify.show.error(lang.authNotification.BAD_CODE);
     if (response.success) navigate({ pathname: routes.home.path });
   };
 
@@ -209,6 +212,7 @@ export function useRegister({
     toRegister: () => void;
   };
 }) {
+  const { lang } = useLang();
   const query = useQueryRegister();
   const navigate = useNavigate();
   const notify = useNotify();
@@ -266,24 +270,24 @@ export function useRegister({
     }
 
     if (!success) {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
+      notify.show.error(lang.error.UNKNOWN_MESSAGE);
       return;
     }
 
     if (!response.success) {
       switch (response.errorCode) {
         case "EMAIL_ALREADY_EXISTS":
-          notify.show.error(langAuthNotification.EMAIL_EXISTS);
+          notify.show.error(lang.authNotification.EMAIL_EXISTS);
           break;
         case "USERNAME_ALREADY_EXISTS":
-          notify.show.error(langAuthNotification.USERNAME_EXISTS);
+          notify.show.error(lang.authNotification.USERNAME_EXISTS);
           break;
         default:
-          notify.show.error(langError.RESPONSE_COMMON_MESSAGE);
+          notify.show.error(lang.error.RESPONSE_COMMON_MESSAGE);
           break;
       }
     } else {
-      notify.show.info(langAuthNotification.REGISTER_SUCCESS);
+      notify.show.info(lang.authNotification.REGISTER_SUCCESS);
       reset();
       navigate({ pathname: routes.login.path });
       switchForm.toLogin();

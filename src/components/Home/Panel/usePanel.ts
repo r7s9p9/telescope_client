@@ -1,7 +1,9 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { routes } from "../../../constants";
+import { useLang } from "../../../shared/features/LangProvider/LangProvider";
 
 export function usePanel() {
+  const { lang } = useLang();
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -33,5 +35,5 @@ export function usePanel() {
     return { profile, rooms, friends, settings };
   }
 
-  return { onClickHandler };
+  return { onClickHandler, lang };
 }

@@ -3,11 +3,12 @@ import { useQueryCreateRoom } from "../../../shared/api/api.model";
 import { useLoadRooms } from "../Rooms/useRooms";
 import { useState } from "react";
 import { routes } from "../../../constants";
-import { langError } from "../../../locales/en";
 import { useNotify } from "../../../shared/features/Notification/Notification";
 import { useOnClickOutside } from "../../../shared/hooks/useOnClickOutside";
+import { useLang } from "../../../shared/features/LangProvider/LangProvider";
 
 export function useCreateRoom() {
+  const { lang } = useLang();
   const query = useQueryCreateRoom();
   const loadRooms = useLoadRooms();
   const navigate = useNavigate();
@@ -62,7 +63,7 @@ export function useCreateRoom() {
     }
 
     if (!success) {
-      notify.show.error(responseError || langError.UNKNOWN_MESSAGE);
+      notify.show.error(responseError || lang.error.UNKNOWN_MESSAGE);
       return;
     }
 
@@ -70,7 +71,7 @@ export function useCreateRoom() {
       await loadRooms.run();
       navigate({ pathname: `${routes.rooms.path}/${response.roomId}` });
     } else {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
+      notify.show.error(lang.error.UNKNOWN_MESSAGE);
     }
   };
 
@@ -84,5 +85,6 @@ export function useCreateRoom() {
     isLoading: query.isLoading,
     contentRef,
     overlayRef,
+    lang,
   };
 }

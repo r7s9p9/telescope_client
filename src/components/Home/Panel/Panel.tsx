@@ -6,7 +6,6 @@ import {
   IconUsersGroup,
 } from "@tabler/icons-react";
 import { usePanel } from "./usePanel";
-import { langPanel } from "../../../locales/en";
 
 const iconButtonProps = {
   noHover: true,
@@ -20,27 +19,27 @@ const iconProps = {
 };
 
 export function Panel() {
-  const { onClickHandler } = usePanel();
+  const { onClickHandler, lang } = usePanel();
 
   return (
     <div className="shrink-0 w-full md:w-fit h-14 md:h-full bg-slate-50 md:bg-slate-600 px-4 md:px-2 py-2 flex md:flex-col items-center gap-4">
       <IconButton
         {...iconButtonProps}
-        title={langPanel.PROFILE_LABEL}
+        title={lang.panel.PROFILE_LABEL}
         onClick={onClickHandler().profile}
       >
         <IconUserCircle {...iconProps} />
       </IconButton>
       <IconButton
         {...iconButtonProps}
-        title={langPanel.ROOMS_LABEL}
+        title={lang.panel.ROOMS_LABEL}
         onClick={onClickHandler().rooms}
       >
         <IconMessageCircle {...iconProps} />
       </IconButton>
       <IconButton
         {...iconButtonProps}
-        title={langPanel.FRIENDS_LABEL}
+        title={lang.panel.FRIENDS_LABEL}
         onClick={onClickHandler().friends}
       >
         <IconUsersGroup {...iconProps} />
@@ -48,7 +47,7 @@ export function Panel() {
       <div className="grow" />
       <IconButton
         {...iconButtonProps}
-        title={langPanel.SETTINGS_LABEL}
+        title={lang.panel.SETTINGS_LABEL}
         onClick={onClickHandler().settings}
       >
         <IconSettings {...iconProps} />

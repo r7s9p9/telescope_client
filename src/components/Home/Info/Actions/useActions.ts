@@ -10,9 +10,10 @@ import { useLocation } from "react-router-dom";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLoadInfo } from "../../Chat/useChat";
 import { routes } from "../../../../constants";
-import { langError, langActionsNotification } from "../../../../locales/en";
+import { useLang } from "../../../../shared/features/LangProvider/LangProvider";
 
 export function useActions() {
+  const { lang } = useLang();
   const { roomId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,7 +34,7 @@ export function useActions() {
       await queryLeave.run({ roomId: roomId as RoomId });
     if (!success) {
       notify.show.error(
-        requestError || responseError || langError.UNKNOWN_MESSAGE,
+        requestError || responseError || lang.error.UNKNOWN_MESSAGE,
       );
       return;
     }
@@ -41,10 +42,10 @@ export function useActions() {
     if (response.success) {
       await loadRooms.run();
       await loadInfo.run();
-      notify.show.info(langActionsNotification.LEAVE_SUCCESS);
+      notify.show.info(lang.actionsNotification.LEAVE_SUCCESS);
       navigate({ pathname: routes.rooms.path });
     } else {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
+      notify.show.error(lang.error.UNKNOWN_MESSAGE);
     }
   }
 
@@ -53,7 +54,7 @@ export function useActions() {
       await queryDelete.run({ roomId: roomId as RoomId });
     if (!success) {
       notify.show.error(
-        requestError || responseError || langError.UNKNOWN_MESSAGE,
+        requestError || responseError || lang.error.UNKNOWN_MESSAGE,
       );
       return;
     }
@@ -61,17 +62,17 @@ export function useActions() {
     if (response.success) {
       await loadRooms.run();
       await loadInfo.run();
-      notify.show.info(langActionsNotification.DELETE_SUCCESS);
+      notify.show.info(lang.actionsNotification.DELETE_SUCCESS);
       navigate({ pathname: routes.rooms.path });
     } else {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
+      notify.show.error(lang.error.UNKNOWN_MESSAGE);
     }
   }
 
   function handleCopy() {
     // TODO Fix
     navigator.clipboard.writeText(location.pathname as string);
-    notify.show.info("Room link copied to clipboard");
+    notify.show.info(lang.actionsNotification.COPY_SUCCESS);
   }
 
   useEffect(() => {
@@ -89,5 +90,6 @@ export function useActions() {
     handleCopy,
     isMember: loadInfo.storedInfo?.isMember,
     isAdmin: loadInfo.storedInfo?.creatorId === "self",
+    lang,
   };
 }

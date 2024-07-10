@@ -15,7 +15,7 @@ import { IconButton } from "../../../shared/ui/IconButton/IconButton";
 import { Input } from "../../../shared/ui/Input/Input";
 import { Text } from "../../../shared/ui/Text/Text";
 import { Paper } from "../../../shared/ui/Paper/Paper";
-import { langRooms } from "../../../locales/en";
+import { useLang } from "../../../shared/features/LangProvider/LangProvider";
 
 const itemHeightStyle = { height: ITEM_HEIGHT + "px" };
 
@@ -44,6 +44,7 @@ export function Rooms() {
     setSearchValue,
     isSearch,
     isLoadingSearch,
+    lang,
   } = useRooms();
 
   if (isSearch) {
@@ -52,12 +53,14 @@ export function Rooms() {
         isSearch={isSearch}
         searchValue={search.value}
         setSearchValue={setSearchValue}
+        lang={lang}
       >
         <FoundRooms
           isLoading={isLoadingSearch}
           data={foundRooms}
           openedRoomId={roomId as RoomId}
           error={search.error}
+          lang={lang}
         />
       </Wrapper>
     );
@@ -69,8 +72,9 @@ export function Rooms() {
         isSearch={isSearch}
         searchValue={search.value}
         setSearchValue={setSearchValue}
+        lang={lang}
       >
-        <ListEmpty />
+        <ListEmpty lang={lang} />
       </Wrapper>
     );
 
@@ -80,6 +84,7 @@ export function Rooms() {
         isSearch={isSearch}
         searchValue={search.value}
         setSearchValue={setSearchValue}
+        lang={lang}
       >
         <SkeletonList />
       </Wrapper>
@@ -91,6 +96,7 @@ export function Rooms() {
       key={itemData.roomId}
       isOpened={roomId === itemData.roomId}
       data={itemData}
+      lang={lang}
     />
   ));
 
@@ -100,6 +106,7 @@ export function Rooms() {
       searchValue={search.value}
       setSearchValue={setSearchValue}
       onScroll={debouncedHandleScroll}
+      lang={lang}
     >
       {items}
       {!isAllLoaded && <SkeletonList count={allCount - storedRooms.length} />}
@@ -109,12 +116,14 @@ export function Rooms() {
 
 function Wrapper({
   children,
+  lang,
   isSearch,
   searchValue,
   setSearchValue,
   onScroll,
 }: {
   children: ReactNode;
+  lang: ReturnType<typeof useLang>["lang"];
   isSearch: boolean;
   searchValue: string;
   // eslint-disable-next-line no-unused-vars
@@ -126,11 +135,11 @@ function Wrapper({
     <>
       <div className="h-full flex flex-col md:w-1/2 md:min-w-72 md:max-w-sm bg-slate-50 border-t-2 border-slate-100 md:border-0">
         <div className="pb-4 px-4 flex flex-col items-center">
-          <Title />
+          <Title lang={lang} />
           <Input
             value={searchValue}
             setValue={setSearchValue}
-            placeholder={langRooms.SEARCH_PLACEHOLDER}
+            placeholder={lang.rooms.SEARCH_PLACEHOLDER}
             size="md"
             rightSection={
               <>
@@ -165,16 +174,16 @@ function Wrapper({
   );
 }
 
-function Title() {
+function Title({ lang }: { lang: ReturnType<typeof useLang>["lang"] }) {
   const { onCreate } = useTitle();
 
   return (
     <div className="h-16 w-full flex justify-between items-center">
       <Text size="xl" font="thin" uppercase letterSpacing>
-        {langRooms.TITLE}
+        {lang.rooms.TITLE}
       </Text>
       <IconButton
-        title={langRooms.BUTTON_CREATE_LABEL}
+        title={lang.rooms.BUTTON_CREATE_LABEL}
         noHover
         onClick={onCreate}
       >
@@ -189,11 +198,13 @@ function FoundRooms({
   openedRoomId,
   isLoading,
   error,
+  lang,
 }: {
   data: SearchRoomsResponseType | null;
   openedRoomId: RoomId;
   isLoading: boolean;
   error: string;
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
   if (isLoading) return <FoundRoomsSkeleton />;
 
@@ -208,7 +219,7 @@ function FoundRooms({
   }
 
   if (data?.isEmpty) {
-    return <Text {...textProps}>{langRooms.NO_ROOMS_FOUND}</Text>;
+    return <Text {...textProps}>{lang.rooms.NO_ROOMS_FOUND}</Text>;
   }
 
   if (data) {
@@ -217,6 +228,7 @@ function FoundRooms({
         key={item.roomId}
         isOpened={openedRoomId === item.roomId}
         data={item}
+        lang={lang}
       />
     ));
     return <>{items}</>;
@@ -226,15 +238,17 @@ function FoundRooms({
 function FoundItem({
   isOpened,
   data,
+  lang,
 }: {
   isOpened: boolean;
   data: { name: string; userCount: number; roomId: RoomId };
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
   let membersStr = "";
-  if (data.userCount === 0) membersStr = langRooms.FOUND_ITEM_NO_MEMBERS;
-  if (data.userCount === 1) membersStr = langRooms.FOUND_ITEM_ONE_MEMBER;
+  if (data.userCount === 0) membersStr = lang.rooms.FOUND_ITEM_NO_MEMBERS;
+  if (data.userCount === 1) membersStr = lang.rooms.FOUND_ITEM_ONE_MEMBER;
   if (data.userCount > 1)
-    membersStr = langRooms.FOUND_ITEM_MEMBERS(data.userCount);
+    membersStr = lang.rooms.FOUND_ITEM_MEMBERS(data.userCount);
 
   const textProps = {
     size: "sm" as const,
@@ -277,7 +291,7 @@ const FoundRoomsSkeleton = memo(() => {
     .map((_, i) => <li key={i}>{skeleton}</li>);
 });
 
-function ListEmpty() {
+function ListEmpty({ lang }: { lang: ReturnType<typeof useLang>["lang"] }) {
   const textProps = {
     size: "sm" as const,
     font: "light" as const,
@@ -289,20 +303,28 @@ function ListEmpty() {
       rounded="md"
       className="mt-1 mx-4 ring-2 ring-slate-200 bg-slate-100"
     >
-      <Text {...textProps}>{langRooms.NO_ROOMS_HEAD}</Text>
-      <Text {...textProps}>{langRooms.NO_ROOMS_TAIL}</Text>
+      <Text {...textProps}>{lang.rooms.NO_ROOMS_HEAD}</Text>
+      <Text {...textProps}>{lang.rooms.NO_ROOMS_TAIL}</Text>
     </Paper>
   );
 }
 
-function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
+function Item({
+  isOpened,
+  data,
+  lang,
+}: {
+  isOpened: boolean;
+  data: RoomType;
+  lang: ReturnType<typeof useLang>["lang"];
+}) {
   const date = data.lastMessage
     ? formatDate().roomList(data.lastMessage.created)
     : ("Never" as const);
 
   const lastMessage = data.lastMessage
     ? data.lastMessage.content.text
-    : langRooms.NO_LAST_MESSAGE;
+    : lang.rooms.NO_LAST_MESSAGE;
 
   let username: JSX.Element = <></>;
 
@@ -314,7 +336,7 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
   if (data?.lastMessage?.authorId === "self") {
     username = (
       <Text {...textProps} className="text-green-600">
-        {langRooms.LAST_MESSAGE_AUTHOR_YOU}
+        {lang.rooms.LAST_MESSAGE_AUTHOR_YOU}
       </Text>
     );
   } else if (data?.lastMessage?.username) {
@@ -326,7 +348,7 @@ function Item({ isOpened, data }: { isOpened: boolean; data: RoomType }) {
   } else if (data?.lastMessage?.authorId === "service") {
     username = (
       <Text {...textProps} className="text-blue-600">
-        {langRooms.LAST_MESSAGE_AUTHOR_SERVICE}
+        {lang.rooms.LAST_MESSAGE_AUTHOR_SERVICE}
       </Text>
     );
   }

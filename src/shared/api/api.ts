@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants";
 import { z } from "zod";
 import { useWatchdog } from "./watchdog/useWatchdog";
-import { langError } from "../../locales/en";
+import { useLang } from "../features/LangProvider/LangProvider";
 
 const FAILURE_THRESHOLD = 3;
 
@@ -67,6 +67,7 @@ export function useQuery({
   requestSchema: z.ZodTypeAny;
   disableRequestValidationLogging?: boolean;
 }) {
+  const { lang } = useLang();
   const attemptCount = useRef(1);
   const [isLoading, setIsLoading] = useState(false);
   const watchdog = useWatchdog();
@@ -81,7 +82,7 @@ export function useQuery({
     if (disabled) {
       return {
         success: false as const,
-        responseError: langError.RESPONSE_COMMON_MESSAGE,
+        responseError: lang.error.RESPONSE_COMMON_MESSAGE,
       };
     }
 
@@ -104,7 +105,7 @@ export function useQuery({
         success: false as const,
         requestError: disableRequestValidationLogging
           ? request.error
-          : langError.REQUEST_COMMON_MESSAGE,
+          : lang.error.REQUEST_COMMON_MESSAGE,
       };
     }
 
@@ -130,7 +131,7 @@ export function useQuery({
       setIsLoading(false);
       return {
         success: false as const,
-        responseError: langError.RESPONSE_COMMON_MESSAGE,
+        responseError: lang.error.RESPONSE_COMMON_MESSAGE,
       };
     }
 
@@ -170,7 +171,7 @@ export function useQuery({
       setIsLoading(false);
       return {
         success: false as const,
-        responseError: langError.RESPONSE_COMMON_MESSAGE,
+        responseError: lang.error.RESPONSE_COMMON_MESSAGE,
       };
     }
 

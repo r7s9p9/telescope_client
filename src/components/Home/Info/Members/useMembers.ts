@@ -12,7 +12,7 @@ import { routes } from "../../../../constants";
 import { RoomId, UserId } from "../../../../shared/api/api.schema";
 import { useMenuContext } from "../../../../shared/features/ContextMenu/ContextMenu";
 import { useNotify } from "../../../../shared/features/Notification/Notification";
-import { langError, langMembersNotification } from "../../../../locales/en";
+import { useLang } from "../../../../shared/features/LangProvider/LangProvider";
 
 const DEBOUNCE_SCROLL_INTERVAL = 200;
 
@@ -21,6 +21,7 @@ const DEBOUNCE_SCROLL_INTERVAL = 200;
 // TODO
 
 export function useMembers() {
+  const { lang } = useLang();
   const { roomId } = useParams();
   const query = useQueryGetMembers();
   const info = useLoadInfo();
@@ -51,7 +52,7 @@ export function useMembers() {
 
     if (!success) {
       notify.show.error(
-        requestError || responseError || langError.UNKNOWN_MESSAGE,
+        requestError || responseError || lang.error.UNKNOWN_MESSAGE,
       );
       return;
     }
@@ -100,6 +101,7 @@ export function useMembers() {
     isAdmin: info.storedInfo?.creatorId === "self",
     onClickBlocked,
     onClickInvite,
+    lang,
   };
 }
 
@@ -108,6 +110,7 @@ export function useMember({
 }: {
   getMembers: ReturnType<typeof useMembers>["getMembers"];
 }) {
+  const { lang } = useLang();
   const { openMenu, closeMenu } = useMenuContext();
   const { roomId } = useParams();
   const navigate = useNavigate();
@@ -127,7 +130,7 @@ export function useMember({
 
     const copy = (username: string) => {
       navigator.clipboard.writeText(username as string);
-      notify.show.info(langMembersNotification.COPY_SUCCESS);
+      notify.show.info(lang.membersNotification.COPY_SUCCESS);
       closeMenu();
     };
 
@@ -141,24 +144,24 @@ export function useMember({
 
         if (!success) {
           notify.show.error(
-            requestError || responseError || langError.UNKNOWN_MESSAGE,
+            requestError || responseError || lang.error.UNKNOWN_MESSAGE,
           );
           closeMenu();
           return;
         }
 
         if (!response.access) {
-          notify.show.error(langMembersNotification.KICK_NO_RIGHT);
+          notify.show.error(lang.membersNotification.KICK_NO_RIGHT);
           closeMenu();
           return;
         }
         if (!response.success) {
-          notify.show.error(langMembersNotification.KICK_FAIL(username));
+          notify.show.error(lang.membersNotification.KICK_FAIL(username));
           closeMenu();
           return;
         }
         if (response.success) {
-          notify.show.info(langMembersNotification.KICK_SUCCESS(username));
+          notify.show.info(lang.membersNotification.KICK_SUCCESS(username));
           getMembers();
           closeMenu();
           return;
@@ -176,22 +179,22 @@ export function useMember({
           });
         if (!success) {
           notify.show.error(
-            requestError || responseError || langError.UNKNOWN_MESSAGE,
+            requestError || responseError || lang.error.UNKNOWN_MESSAGE,
           );
           closeMenu();
           return;
         }
         if (!response.access) {
-          notify.show.error(langMembersNotification.BAN_NO_RIGHT);
+          notify.show.error(lang.membersNotification.BAN_NO_RIGHT);
           closeMenu();
           return;
         }
         if (!response.success) {
-          notify.show.error(langMembersNotification.BAN_FAIL(username));
+          notify.show.error(lang.membersNotification.BAN_FAIL(username));
           closeMenu();
           return;
         }
-        notify.show.info(langMembersNotification.BAN_SUCCESS(username));
+        notify.show.info(lang.membersNotification.BAN_SUCCESS(username));
         getMembers();
         closeMenu();
         return;

@@ -6,7 +6,7 @@ import { Paper } from "../../shared/ui/Paper/Paper";
 import { InputField } from "../../shared/ui/InputField/InputField";
 import { Button } from "../../shared/ui/Button/Button";
 import { useCode, useLogin, useMain, useRegister } from "./useAuth";
-import { langAuth } from "../../locales/en";
+import { useLang } from "../../shared/features/LangProvider/LangProvider";
 
 const inputIconProps = {
   size: 28,
@@ -30,7 +30,9 @@ export function Auth({ type }: { type: "login" | "register" }) {
 }
 
 function AuthContainer({ type }: { type: "login" | "register" }) {
-  const { showItem, switchForm, handleCodeRequired, email } = useMain({ type });
+  const { showItem, switchForm, handleCodeRequired, email, lang } = useMain({
+    type,
+  });
 
   return (
     <div className="overflow-hidden relative w-full h-full flex flex-row items-end md:justify-center md:items-center select-none">
@@ -38,12 +40,18 @@ function AuthContainer({ type }: { type: "login" | "register" }) {
         isShow={showItem === "login"}
         handleCodeRequired={handleCodeRequired}
         switchForm={switchForm}
+        lang={lang}
       />
-      <RegisterForm isShow={showItem === "register"} switchForm={switchForm} />
+      <RegisterForm
+        isShow={showItem === "register"}
+        switchForm={switchForm}
+        lang={lang}
+      />
       <CodeForm
         isShow={showItem === "code"}
         email={email}
         switchForm={switchForm}
+        lang={lang}
       />
     </div>
   );
@@ -53,6 +61,7 @@ function LoginForm({
   isShow,
   handleCodeRequired,
   switchForm,
+  lang,
 }: {
   isShow: boolean;
   handleCodeRequired: ReturnType<typeof Function>;
@@ -60,6 +69,7 @@ function LoginForm({
     toLogin: () => void;
     toRegister: () => void;
   };
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
   const { form, setEmail, setPassword, run, reset, isLoading } = useLogin({
     handleCodeRequired,
@@ -77,12 +87,12 @@ function LoginForm({
     >
       <div className="flex justify-between items-center">
         <Text size="xl" font="light" letterSpacing>
-          {langAuth.SIGNIN_TITLE}
+          {lang.auth.SIGNIN_TITLE}
         </Text>
         {isLoading && <Spinner size={32} />}
       </div>
       <InputField
-        label={langAuth.EMAIL_LABEL}
+        label={lang.auth.EMAIL_LABEL}
         size="md"
         disabled={!isShow || isLoading}
         value={form.email.value}
@@ -91,7 +101,7 @@ function LoginForm({
         rightSection={<IconMail {...inputIconProps} />}
       />
       <InputField
-        label={langAuth.PASSWORD_LABEL}
+        label={lang.auth.PASSWORD_LABEL}
         sensitive
         size="md"
         disabled={!isShow || isLoading}
@@ -102,7 +112,7 @@ function LoginForm({
       <div className="pt-2 flex justify-between items-center">
         <div className="flex flex-col">
           <Text size="sm" font="light">
-            {langAuth.GO_TO_SIGN_UP_TITLE}
+            {lang.auth.GO_TO_SIGN_UP_TITLE}
           </Text>
           <Text
             size="sm"
@@ -113,18 +123,18 @@ function LoginForm({
             underline
             className="cursor-pointer"
           >
-            {langAuth.GO_TO_SIGN_UP_TEXT}
+            {lang.auth.GO_TO_SIGN_UP_TEXT}
           </Text>
         </div>
         <Button
-          title={langAuth.SIGN_IN_ACTION}
+          title={lang.auth.SIGN_IN_ACTION}
           size="md"
           onClick={run}
           disabled={!isShow || isLoading}
         >
           <IconKey {...buttonIconProps} />
           <Text size="md" font="light">
-            {langAuth.SIGN_IN_ACTION}
+            {lang.auth.SIGN_IN_ACTION}
           </Text>
         </Button>
       </div>
@@ -136,6 +146,7 @@ function CodeForm({
   isShow,
   email,
   switchForm,
+  lang,
 }: {
   isShow: boolean;
   email: string;
@@ -143,6 +154,7 @@ function CodeForm({
     toLogin: () => void;
     toRegister: () => void;
   };
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
   const { code, setCode, run, reset, isLoading } = useCode({ email });
 
@@ -158,16 +170,16 @@ function CodeForm({
     >
       <div className="flex justify-between items-center">
         <Text size="xl" font="light" letterSpacing>
-          {langAuth.CODE_TITLE}
+          {lang.auth.CODE_TITLE}
         </Text>
         {isLoading && <Spinner size={32} />}
       </div>
       <Text size="sm" font="light" className="text-justify">
-        {langAuth.CODE_MESSAGE}
+        {lang.auth.CODE_MESSAGE}
         <b className="text-green-600">{email}</b>
       </Text>
       <InputField
-        label={langAuth.CODE_LABEL}
+        label={lang.auth.CODE_LABEL}
         sensitive
         size="md"
         disabled={!isShow || isLoading}
@@ -178,7 +190,7 @@ function CodeForm({
       <div className="pt-2 flex justify-between items-center">
         <div className="flex flex-col items-start">
           <Text size="sm" font="light">
-            {langAuth.BACK_FROM_CODE_TITLE}
+            {lang.auth.BACK_FROM_CODE_TITLE}
           </Text>
           <Text
             size="sm"
@@ -189,18 +201,18 @@ function CodeForm({
             underline
             className="cursor-pointer"
           >
-            {langAuth.BACK_FROM_CODE_TEXT}
+            {lang.auth.BACK_FROM_CODE_TEXT}
           </Text>
         </div>
         <Button
-          title={langAuth.CODE_ACTION}
+          title={lang.auth.CODE_ACTION}
           size="md"
           onClick={run}
           disabled={!isShow || isLoading}
         >
           <IconSend2 {...buttonIconProps} />
           <Text size="md" font="light">
-            {langAuth.CODE_ACTION}
+            {lang.auth.CODE_ACTION}
           </Text>
         </Button>
       </div>
@@ -211,12 +223,14 @@ function CodeForm({
 function RegisterForm({
   isShow,
   switchForm,
+  lang,
 }: {
   isShow: boolean;
   switchForm: {
     toLogin: () => void;
     toRegister: () => void;
   };
+  lang: ReturnType<typeof useLang>["lang"];
 }) {
   const { form, setEmail, setUsername, setPassword, run, reset, isLoading } =
     useRegister({ switchForm });
@@ -233,12 +247,12 @@ function RegisterForm({
     >
       <div className="flex justify-between items-center">
         <Text size="xl" font="light" letterSpacing>
-          {langAuth.SIGNUP_TITLE}
+          {lang.auth.SIGNUP_TITLE}
         </Text>
         {isLoading && <Spinner size={32} />}
       </div>
       <InputField
-        label={langAuth.EMAIL_LABEL}
+        label={lang.auth.EMAIL_LABEL}
         size="md"
         disabled={!isShow || isLoading}
         value={form.email.value}
@@ -247,7 +261,7 @@ function RegisterForm({
         rightSection={<IconMail {...inputIconProps} />}
       />
       <InputField
-        label={langAuth.USERNAME_LABEL}
+        label={lang.auth.USERNAME_LABEL}
         size="md"
         disabled={!isShow || isLoading}
         value={form.username.value}
@@ -256,7 +270,7 @@ function RegisterForm({
         rightSection={<IconUser {...inputIconProps} />}
       />
       <InputField
-        label={langAuth.PASSWORD_LABEL}
+        label={lang.auth.PASSWORD_LABEL}
         sensitive
         size="md"
         disabled={!isShow || isLoading}
@@ -267,7 +281,7 @@ function RegisterForm({
       <div className="pt-2 flex justify-between items-center">
         <div className="flex flex-col items-start">
           <Text size="sm" font="light">
-            {langAuth.GO_TO_SIGN_IN_TITLE}
+            {lang.auth.GO_TO_SIGN_IN_TITLE}
           </Text>
           <Text
             size="sm"
@@ -278,18 +292,18 @@ function RegisterForm({
             underline
             className="cursor-pointer"
           >
-            {langAuth.GO_TO_SIGN_IN_TEXT}
+            {lang.auth.GO_TO_SIGN_IN_TEXT}
           </Text>
         </div>
         <Button
-          title={langAuth.SIGN_UP_ACTION}
+          title={lang.auth.SIGN_UP_ACTION}
           size="md"
           onClick={run}
           disabled={!isShow || isLoading}
         >
           <IconKey {...buttonIconProps} />
           <Text size="md" font="light">
-            {langAuth.SIGN_UP_ACTION}
+            {lang.auth.SIGN_UP_ACTION}
           </Text>
         </Button>
       </div>

@@ -11,24 +11,21 @@ import {
 } from "@tabler/icons-react";
 import { useSettings } from "./useSettings";
 import { useConfirmPopup } from "../../../shared/features/ConfirmPopup/ConfirmPopup";
-import { useNotify } from "../../../shared/features/Notification/Notification";
-import { langSettings } from "../../../locales/en";
 
 export function Settings() {
-  const { onClickHandler } = useSettings();
+  const { onClickHandler, lang } = useSettings();
   const confirmPopup = useConfirmPopup();
-  const notify = useNotify();
 
   const iconProps = {
     strokeWidth: "1",
     className: "ml-1 text-slate-600",
-    size: 32,
+    size: 28,
   };
 
   return (
     <Wrapper>
       <Button
-        title={langSettings.ITEM_PROFILE}
+        title={lang.settings.ITEM_PROFILE}
         size="xl"
         unstyled
         onClick={onClickHandler().profile}
@@ -36,17 +33,17 @@ export function Settings() {
       >
         <IconUser {...iconProps} />
         <Text
-          size="xl"
+          size="md"
           font="light"
           uppercase
           letterSpacing
           className="select-none"
         >
-          {langSettings.ITEM_PROFILE}
+          {lang.settings.ITEM_PROFILE}
         </Text>
       </Button>
       <Button
-        title="Privacy"
+        title={lang.settings.ITEM_PRIVACY}
         size="xl"
         unstyled
         onClick={onClickHandler().privacy}
@@ -54,17 +51,17 @@ export function Settings() {
       >
         <IconLock {...iconProps} />
         <Text
-          size="xl"
+          size="md"
           font="light"
           uppercase
           letterSpacing
           className="select-none"
         >
-          {langSettings.ITEM_PRIVACY}
+          {lang.settings.ITEM_PRIVACY}
         </Text>
       </Button>
       <Button
-        title={langSettings.ITEM_SESSIONS}
+        title={lang.settings.ITEM_SESSIONS}
         size="xl"
         unstyled
         onClick={onClickHandler().sessions}
@@ -72,37 +69,35 @@ export function Settings() {
       >
         <IconDeviceDesktop {...iconProps} />
         <Text
-          size="xl"
+          size="md"
           font="light"
           uppercase
           letterSpacing
           className="select-none"
         >
-          {langSettings.ITEM_SESSIONS}
+          {lang.settings.ITEM_SESSIONS}
         </Text>
       </Button>
       <Button
-        title={langSettings.ITEM_LANG}
+        title={lang.settings.ITEM_LANG}
         size="xl"
         unstyled
-        onClick={() => {
-          notify.show.info("This content is still in development");
-        }}
+        onClick={onClickHandler().language}
         className="gap-4 hover:bg-slate-200 border-b-2 md:border-0 border-slate-100"
       >
         <IconLanguage {...iconProps} />
         <Text
-          size="xl"
+          size="md"
           font="light"
           uppercase
           letterSpacing
           className="select-none"
         >
-          {langSettings.ITEM_LANG}
+          {lang.settings.ITEM_LANG}
         </Text>
       </Button>
       <Button
-        title={langSettings.ITEM_LOGOUT}
+        title={lang.settings.ITEM_LOGOUT}
         size="xl"
         unstyled
         onClick={() => {
@@ -110,23 +105,24 @@ export function Settings() {
             onAgree: onClickHandler().logout,
             onClose: confirmPopup.hide,
             text: {
-              question: langSettings.LOGOUT_POPUP_QUESTION,
-              confirm: langSettings.LOGOUT_POPUP_CONFIRM,
-              cancel: langSettings.LOGOUT_POPUP_CANCEL,
+              title: lang.settings.LOGOUT_POPUP_TITLE,
+              question: lang.settings.LOGOUT_POPUP_QUESTION,
+              confirm: lang.settings.LOGOUT_POPUP_CONFIRM,
+              cancel: lang.settings.LOGOUT_POPUP_CANCEL,
             },
           });
         }}
         className="gap-4 hover:bg-slate-200 md:rounded-b-lg"
       >
-        <IconDoorExit strokeWidth="1" className="text-red-600 ml-1" size={32} />
+        <IconDoorExit {...iconProps} className="text-red-600 ml-1" />
         <Text
-          size="xl"
+          size="md"
           font="light"
           uppercase
           letterSpacing
           className="select-none text-red-600"
         >
-          {langSettings.ITEM_LOGOUT}
+          {lang.settings.ITEM_LOGOUT}
         </Text>
       </Button>
     </Wrapper>
@@ -136,7 +132,7 @@ export function Settings() {
 function Wrapper({ children }: { children: ReactNode }) {
   return (
     <div className="w-full md:w-full h-full md:h-fit self-center flex items-center justify-center border-t-2 border-slate-100 md:border-0">
-      <Paper className="h-full w-full md:w-72 md:p-4 flex flex-col justify-center md:rounded-xl shadow-md bg-slate-50">
+      <Paper className="h-full w-full md:w-fit md:p-4 flex flex-col justify-center md:rounded-xl shadow-md bg-slate-50">
         {children}
       </Paper>
     </div>

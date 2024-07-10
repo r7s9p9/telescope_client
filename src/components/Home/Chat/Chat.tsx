@@ -11,13 +11,7 @@ import {
   MessagesSkeleton,
 } from "./Messages/Messages";
 import { BottomBarWrapper } from "./BottomBar/BottomBar";
-import { langMessages } from "../../../locales/en";
-
-const noMessagesElement = (
-  <li className="flex flex-col h-fit p-2 mt-4 self-center bg-slate-50 rounded-xl ring-2 ring-slate-200 select-none">
-    <p className="text-sm text-justify">{langMessages.NO_MESSAGES_TEXT}</p>
-  </li>
-);
+import { useLang } from "../../../shared/features/LangProvider/LangProvider";
 
 function messageParser(
   items: ReturnType<typeof useChat>["messages"],
@@ -47,7 +41,7 @@ function messageParser(
 function Wrapper({ children }: { children: ReactNode }) {
   return (
     <>
-      <div className="absolute top-0 left-0 md:relative flex grow h-full flex-col bg-slate-200">
+      <div className="absolute top-0 left-0 md:relative flex grow w-screen md:w-fit h-full flex-col bg-slate-200">
         {children}
       </div>
       <Outlet />
@@ -56,8 +50,15 @@ function Wrapper({ children }: { children: ReactNode }) {
 }
 
 export function Chat() {
+  const { lang } = useLang();
   const chat = useChat();
   const info = useInfo();
+
+  const noMessagesElement = (
+    <li className="flex flex-col h-fit p-2 mt-4 self-center bg-slate-50 rounded-xl ring-2 ring-slate-200 select-none">
+      <p className="text-sm text-justify">{lang.messages.NO_MESSAGES_TEXT}</p>
+    </li>
+  );
 
   if (chat?.isInitialLoading) {
     return (

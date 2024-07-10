@@ -16,11 +16,12 @@ import {
   RELOAD_INTERVAL,
 } from "./constants";
 import { useNotify } from "../../../shared/features/Notification/Notification";
-import { langError } from "../../../locales/en";
 import { SearchRoomsResponseType } from "../../../shared/api/api.schema";
+import { useLang } from "../../../shared/features/LangProvider/LangProvider";
 
 // Load for the first time and refresh
 export function useLoadRooms() {
+  const { lang } = useLang();
   const query = useQueryRooms();
   const notify = useNotify();
   const storeAction = useStore().rooms();
@@ -38,7 +39,7 @@ export function useLoadRooms() {
 
     if (!success) {
       notify.show.error(
-        requestError || responseError || langError.UNKNOWN_MESSAGE,
+        requestError || responseError || lang.error.UNKNOWN_MESSAGE,
       );
       return;
     }
@@ -52,6 +53,7 @@ export function useLoadRooms() {
 
 // On scroll
 export function useLoadMoreRooms() {
+  const { lang } = useLang();
   const query = useQueryRooms();
   const notify = useNotify();
   const storeAction = useStore().rooms();
@@ -64,7 +66,7 @@ export function useLoadMoreRooms() {
 
       if (!success) {
         notify.show.error(
-          requestError || responseError || langError.UNKNOWN_MESSAGE,
+          requestError || responseError || lang.error.UNKNOWN_MESSAGE,
         );
         return;
       }
@@ -81,7 +83,7 @@ export function useLoadMoreRooms() {
           allCount: response.allCount,
         });
       } else {
-        notify.show.error(langError.RESPONSE_COMMON_MESSAGE);
+        notify.show.error(lang.error.RESPONSE_COMMON_MESSAGE);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,6 +94,7 @@ export function useLoadMoreRooms() {
 }
 
 export function useRooms() {
+  const { lang } = useLang();
   const { roomId } = useParams();
 
   const storedData = useStore().rooms().read();
@@ -124,7 +127,7 @@ export function useRooms() {
       if (!success) {
         setSearch((prevState) => ({
           ...prevState,
-          error: requestError?.q || responseError || langError.UNKNOWN_MESSAGE,
+          error: requestError?.q || responseError || lang.error.UNKNOWN_MESSAGE,
         }));
         return;
       }
@@ -202,6 +205,7 @@ export function useRooms() {
       setSearch((prevState) => ({ ...prevState, value })),
     isSearch,
     isLoadingSearch: querySearch.isLoading,
+    lang,
   };
 }
 

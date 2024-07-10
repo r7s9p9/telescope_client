@@ -1,30 +1,48 @@
 import { useInfo } from "../useChat";
 import { useLocation, useNavigate } from "react-router-dom";
 import { routes } from "../../../../constants";
-import { langTopBar } from "../../../../locales/en";
+import { useLang } from "../../../../shared/features/LangProvider/LangProvider";
 
 export function useTopBar(data: ReturnType<typeof useInfo>) {
+  const { lang } = useLang();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
   let userCountStr = "";
   if (data.info.userCount === 0) {
-    userCountStr = langTopBar.NO_MEMBERS_TEXT;
+    userCountStr = lang.topBar.NO_MEMBERS_TEXT;
   }
   if (data.info.userCount === 1) {
-    userCountStr = langTopBar.ONE_MEMBER_TEXT;
+    userCountStr = lang.topBar.ONE_MEMBER_TEXT;
   }
   if (data.info.userCount && data.info.userCount > 1) {
-    userCountStr = `${data.info.userCount} ${langTopBar.MEMBERS_TEXT}`;
+    userCountStr = `${data.info.userCount} ${lang.topBar.MEMBERS_TEXT}`;
   }
+
+  let description = "";
+  switch (data.info.type) {
+    case "private":
+      description = lang.topBar.PRIVATE_TYPE;
+      break;
+    case "public":
+      description = lang.topBar.PUBLIC_TYPE;
+      break;
+    case "single":
+      description = lang.topBar.SINGLE_TYPE;
+      break;
+    case "service":
+      description = lang.topBar.SERVICE_TYPE;
+      break;
+  }
+
+  description = `${description} ${lang.topBar.ROOM_TEXT}, ${userCountStr}`;
 
   const content = {
     isInitialLoading: data.info.isInitialLoading,
     isMember: data.info.isMember,
     name: data.info.name,
-    description: `${data.info?.type} ${langTopBar.ROOM_TEXT}, ${userCountStr}`,
+    description,
   };
-
-  const navigate = useNavigate();
-
-  const { pathname } = useLocation();
 
   const openSideBar = () => {
     navigate({ pathname: `${routes.rooms.path}/${data.roomId}/info` });

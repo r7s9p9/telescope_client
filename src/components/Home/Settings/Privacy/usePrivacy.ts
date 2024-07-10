@@ -4,11 +4,12 @@ import {
   useQueryUpdateAccount,
 } from "../../../../shared/api/api.model";
 import { useNotify } from "../../../../shared/features/Notification/Notification";
-import { langError, langPrivacyNotification } from "../../../../locales/en";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ReadAccountResponseType } from "../../../../shared/api/api.schema";
+import { useLang } from "../../../../shared/features/LangProvider/LangProvider";
 
 export function usePrivacy() {
+  const { lang } = useLang();
   const location = useLocation();
   const navigate = useNavigate();
   const notify = useNotify();
@@ -37,7 +38,7 @@ export function usePrivacy() {
 
     if (!success) {
       notify.show.error(
-        requestError || responseError || langError.UNKNOWN_MESSAGE,
+        requestError || responseError || lang.error.UNKNOWN_MESSAGE,
       );
       return;
     }
@@ -45,7 +46,7 @@ export function usePrivacy() {
     if (response?.privacy) {
       setData(response?.privacy as typeof data);
     } else {
-      notify.show.error(langError.UNKNOWN_MESSAGE);
+      notify.show.error(lang.error.UNKNOWN_MESSAGE);
     }
     setIsLoaded(true);
   };
@@ -56,15 +57,15 @@ export function usePrivacy() {
     });
 
     if (!success) {
-      notify.show.error(responseError || langError.UNKNOWN_MESSAGE);
+      notify.show.error(responseError || lang.error.UNKNOWN_MESSAGE);
       return;
     }
 
     if (response?.privacy?.success) {
-      notify.show.info(langPrivacyNotification.SUCCESS);
+      notify.show.info(lang.privacyNotification.SUCCESS);
       read();
     } else {
-      notify.show.error(langError.RESPONSE_COMMON_MESSAGE);
+      notify.show.error(lang.error.RESPONSE_COMMON_MESSAGE);
     }
   };
 
@@ -86,5 +87,6 @@ export function usePrivacy() {
     returnBack,
     isLoaded,
     isUploading: queryUpdate.isLoading,
+    lang,
   };
 }

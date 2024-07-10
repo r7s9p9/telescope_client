@@ -111,7 +111,7 @@ import {
 import { useQuery } from "./api";
 import { serverRoute } from "./api.constants";
 import { ZodError } from "zod";
-import { langError } from "../../locales/en";
+import { useLang } from "../features/LangProvider/LangProvider";
 
 function parseZodError(error: ZodError<unknown>) {
   // Returns the name of the last path variable as a key
@@ -220,6 +220,7 @@ export function useQueryRegister() {
 }
 
 export function useQueryReadSessions() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: sessionReadRequestSchema,
     responseSchema: sessionReadResponseSchema,
@@ -235,7 +236,7 @@ export function useQueryReadSessions() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -251,6 +252,7 @@ export function useQueryReadSessions() {
 }
 
 export function useQueryDeleteSession() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: sessionDeleteRequestSchema,
     responseSchema: sessionDeleteResponseSchema,
@@ -266,7 +268,7 @@ export function useQueryDeleteSession() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -282,6 +284,7 @@ export function useQueryDeleteSession() {
 }
 
 export function useQueryAccount() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: readAccountRequestSchema,
     responseSchema: readAccountResponseSchema,
@@ -297,7 +300,7 @@ export function useQueryAccount() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -345,6 +348,7 @@ export function useQueryUpdateAccount() {
 }
 
 export function useQueryRooms() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: readRoomsRequestSchema,
     responseSchema: readRoomsResponseSchema,
@@ -360,7 +364,7 @@ export function useQueryRooms() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -376,6 +380,7 @@ export function useQueryRooms() {
 }
 
 export function useQueryRoomInfo() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: readRoomInfoRequestSchema,
     responseSchema: readRoomInfoResponseSchema,
@@ -391,7 +396,7 @@ export function useQueryRoomInfo() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -503,6 +508,7 @@ export function useQueryUpdateRoom() {
 }
 
 export function useQueryDeleteRoom() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: deleteRoomRequestSchema,
     responseSchema: deleteRoomResponseSchema,
@@ -518,7 +524,7 @@ export function useQueryDeleteRoom() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -534,6 +540,7 @@ export function useQueryDeleteRoom() {
 }
 
 export function useQueryLeaveRoom() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: leaveRoomRequestSchema,
     responseSchema: leaveRoomResponseSchema,
@@ -549,7 +556,7 @@ export function useQueryLeaveRoom() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -565,6 +572,7 @@ export function useQueryLeaveRoom() {
 }
 
 export function useQueryJoinRoom() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: joinRoomRequestSchema,
     responseSchema: joinRoomResponseSchema,
@@ -580,7 +588,7 @@ export function useQueryJoinRoom() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -596,6 +604,7 @@ export function useQueryJoinRoom() {
 }
 
 export function useQueryGetMembers() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: getRoomMembersRequestSchema,
     responseSchema: getRoomMembersResponseSchema,
@@ -611,7 +620,7 @@ export function useQueryGetMembers() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -627,6 +636,7 @@ export function useQueryGetMembers() {
 }
 
 export function useQueryKickMember() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: roomKickMemberRequestSchema,
     responseSchema: roomKickMemberResponseSchema,
@@ -642,7 +652,7 @@ export function useQueryKickMember() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -658,6 +668,7 @@ export function useQueryKickMember() {
 }
 
 export function useQueryBanMember() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: roomBanMemberRequestSchema,
     responseSchema: roomBanMemberResponseSchema,
@@ -673,7 +684,7 @@ export function useQueryBanMember() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -689,6 +700,7 @@ export function useQueryBanMember() {
 }
 
 export function useQueryUnbanUserInRoom() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: roomUnbanMemberRequestSchema,
     responseSchema: roomUnbanMemberResponseSchema,
@@ -704,7 +716,7 @@ export function useQueryUnbanUserInRoom() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -720,6 +732,7 @@ export function useQueryUnbanUserInRoom() {
 }
 
 export function useQueryGetBlockedUsersInRoom() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: getRoomBlockedUsersRequestSchema,
     responseSchema: getRoomBlockedUsersResponseSchema,
@@ -735,7 +748,7 @@ export function useQueryGetBlockedUsersInRoom() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -783,6 +796,7 @@ export function useQuerySearchUsersToInvite() {
 }
 
 export function useQueryInviteUser() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: roomInviteUserRequestSchema,
     responseSchema: roomInviteUserResponseSchema,
@@ -798,7 +812,7 @@ export function useQueryInviteUser() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -814,6 +828,7 @@ export function useQueryInviteUser() {
 }
 
 export function useQueryReadMessages() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: getMessagesRequestSchema,
     responseSchema: getMessagesResponseSchema,
@@ -829,7 +844,7 @@ export function useQueryReadMessages() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -844,6 +859,7 @@ export function useQueryReadMessages() {
 }
 
 export function useQueryCompareMessages() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: compareMessagesRequestSchema,
     responseSchema: compareMessagesResponseSchema,
@@ -859,7 +875,7 @@ export function useQueryCompareMessages() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
@@ -938,6 +954,7 @@ export function useQueryUpdateMessage() {
 }
 
 export function useQueryDeleteMessage() {
+  const { lang } = useLang();
   const query = useQuery({
     requestSchema: deleteMessageRequestSchema,
     responseSchema: deleteMessageResponseSchema,
@@ -953,7 +970,7 @@ export function useQueryDeleteMessage() {
       return {
         success: false as const,
         requestError: requestError
-          ? langError.REQUEST_COMMON_MESSAGE
+          ? lang.error.REQUEST_COMMON_MESSAGE
           : undefined,
         responseError,
       };
