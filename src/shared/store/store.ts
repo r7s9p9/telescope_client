@@ -3,8 +3,6 @@ import { useStoreProvider } from "./StoreProvider";
 import { MessageType, ReadRoomsResponseType } from "../api/api.schema";
 import { StoreType } from "./types";
 
-export type StoreActionType = ReturnType<typeof useStore>;
-
 export const useStore = () => {
   const { store, setStore } = useStoreProvider();
 
@@ -68,20 +66,7 @@ export const useStore = () => {
       return { editable, data, scrollPosition };
     };
 
-    const flagAsBad = () => {
-      setStore((store) => ({
-        ...store,
-        chats: {
-          ...store.chats,
-          [roomId]: {
-            ...store?.chats?.[roomId],
-            success: false as const,
-          },
-        },
-      }));
-    };
-
-    return { read, create, update, flagAsBad };
+    return { read, create, update };
   };
 
   const rooms = () => {

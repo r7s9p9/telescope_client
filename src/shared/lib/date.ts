@@ -23,15 +23,6 @@ function dateVerifier(value: string | number | Date) {
   return { success: true as const, date };
 }
 
-export function isSameDay(
-  firstValue: string | number | Date,
-  secondValue: string | number | Date,
-) {
-  return (
-    toDate(firstValue).toDateString() === toDate(secondValue).toDateString()
-  );
-}
-
 function isSameMonth(
   firstValue: string | number | Date,
   secondValue: string | number | Date,
@@ -101,6 +92,15 @@ function relativeTimeFormatter(date: Date) {
       range: "days" as const,
     };
   }
+}
+
+export function isSameDay(
+  firstValue: string | number | Date,
+  secondValue: string | number | Date,
+) {
+  return (
+    toDate(firstValue).toDateString() === toDate(secondValue).toDateString()
+  );
 }
 
 export const formatDate = () => {

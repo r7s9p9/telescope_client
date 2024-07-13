@@ -216,13 +216,15 @@ function MemberContextMenu({
   const iconProps = {
     size: 18,
     strokeWidth: "1.5",
-    className: "text-slate-600",
+    className: "text-slate-600 shrink-0",
   };
 
   const textProps = {
     size: "md" as const,
     font: "default" as const,
-    className: "text-slate-600",
+    // text-nowrap <- needed to prevent incorrect rendering of the context menu
+    // due to incorrect calculation of the width before displaying the menu
+    className: "text-slate-600 text-nowrap",
   };
 
   return (
